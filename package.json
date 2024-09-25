@@ -7,11 +7,15 @@
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
+    "@base/http": "^0.1.13",
     "@lark-base-open/js-sdk": "^0.3.0",
+    "@lark-base-open/node-sdk": "^1.0.1",
     "element-plus": "^2.3.6",
+    "mitt": "^3.0.1",
     "reset-css": "^5.0.1",
     "vue": "^3.2.37",
-    "vue-i18n": "^9.4.1"
+    "vue-i18n": "^9.4.1",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.1",
