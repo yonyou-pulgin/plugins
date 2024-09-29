@@ -21,14 +21,14 @@ module.exports = defineConfig({
     },
     output: {
       // 此处省略1万字...
-      crossOriginLoading: 'anonymous',
+      // crossOriginLoading: 'anonymous',
     },
     plugins: [
       // 此处省略1万字...
-      new SriPlugin({
-        hashFuncNames: ['sha256', 'sha384'],
-        enabled: process.env.NODE_ENV === 'production',
-      }),
+      // new SriPlugin({
+      //   hashFuncNames: ['sha256', 'sha384'],
+      //   enabled: process.env.NODE_ENV === 'production',
+      // }),
     ],
   },
   chainWebpack: config => {
