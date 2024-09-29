@@ -5,17 +5,13 @@
     :footer="null">
     <div class="modal-container">
       <div class="modal-head">
-        <div class="modal-head-title">多维表格多维表格多维表格多维表格多维表格</div>
+        <div class="modal-head-title">{{ data && data.confirmName }}</div>
         <span>未确认</span>
       </div>
       <div class="modal-cotent">
-        <div class="modal-content-item">
-            <div class="modal-content-item-label">员工序号</div>
-            <div class="modal-content-item-content">YY---123</div>
-        </div>
-        <div class="modal-content-item">
-            <div class="modal-content-item-label">员工序号</div>
-            <div class="modal-content-item-content">YY---123</div>
+        <div class="modal-content-item" v-for="item in previewInfo" :key="item.id">
+            <div class="modal-content-item-label">{{ item.name }}</div>
+            <div class="modal-content-item-content">{{ item.value }}</div>
         </div>
       </div>
 
@@ -33,9 +29,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
+import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
 
+const props = defineProps({
+  data: {
+    default: () => ({ }),
+  },
+})
+
+const previewInfo = ref([])
 const visilbe = ref(false);
+
+watchEffect((val) => {
+  if(props.data && props.data.fields){
+    previewInfo.value = props.data.fields || []
+  }
+
+})
+const open = () =>{
+  visilbe.value = true
+}
+
+defineExpose({ open })
 </script>
 
 <style lang="scss" scoped>

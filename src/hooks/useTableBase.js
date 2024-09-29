@@ -1,5 +1,7 @@
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
+import { confirmImgDown } from '@/api/api.js'
+import { urltoBlob } from 'image-conversion' 
 
 const FieldType = {
   Text: 1, // 多行文本
@@ -41,6 +43,16 @@ const getFile = (dataurl, filename) => {
   })
 }
 
+const dataURLtoFile = (dataurl, filename) =>{
+  //将base64转换为文件
+  var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, {type:mime});
+}
+
 const loading = ref(false)
 const tableInstance = null // table 实例
 const tableInfo = ref(null) // 获取基本信息
@@ -56,25 +68,54 @@ const pageToken = ref(null) // 分页token
 
 const base = bitable.base;
 const baseUi = bitable.ui;
+const bridge = bitable.bridge;
+
+// 数据变化
+// base.onTableAdd((event) => {
+//   console.log(event)
+// })
 // 获取表格实例
 const getTableInstance = (tableId) => {
   if(tableInstance) return Promise.resolve(tableInstance)
   else return base.getTable(tableId)
 }
 // 设置表格信息
-const setTableInfo = (selection) => {
+const setTableInfo = async(selection) => {
     tableInfo.value = selection
     // 获取表格实例
-    getTableInstance(selection.tableId)
+    const table = await getTableInstance(selection.tableId)
     // 获取当前多维表格下所有的数据表
-    // getTalbeList(selection.tableId)
     getTableName(selection.tableId)
     getTableSheetList(selection.tableId)
     getTableFieldList(selection.tableId)
+    // 获取当前多维表格下所有的数据表
     getCellList(selection.tableId)
     getTenantKey()
     getUserId()
-    // addField(selection.tableId)
+    // 上传附件
+    // addImgField(selection.tableId,'1840262218240450562')
+    // 监听 field 变化
+    table.onFieldAdd((event) => {
+      console.log('table:', event);
+      getTableFieldList(selection.tableId)
+      getCellList(selection.tableId)
+    })
+     table.onFieldDelete((event) => {
+      console.log('table:', event);
+      getTableFieldList(selection.tableId)
+      getCellList(selection.tableId)
+    })
+    // 监听数据变化
+    bitable.base.onSelectionChange((event) => {
+      console.log('event:', event);
+      nextTick(() => {    
+        tableData.value = []
+        getTableName(selection.tableId)
+        getTableSheetList(selection.tableId)
+        getTableFieldList(selection.tableId)
+        getCellList(selection.tableId)
+      })
+    })
 }
 // 获取当前多维表格下所有的数据表
 const getTableSheetList = async (tableId) => {
@@ -101,13 +142,13 @@ const getTableName = async (tableId) => {
 }
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {
-    const table = await getTableInstance(tableId);
-    const fieldListData = await table.getFieldMetaList();
-    fieldList.value = fieldListData.map(item => {
-        item.label = item.name
-        item.value = item.id
-        return item
-    })
+  const table = await getTableInstance(tableId);
+  const fieldListData = await table.getFieldMetaList();
+  fieldList.value = fieldListData.map(item => {
+      item.label = item.name
+      item.value = item.id
+      return item
+  })
 }
 // const getTalbeList = async (tableId) => {
 //     const table = await base.getTable(tableId);
@@ -138,7 +179,6 @@ const getCellList = async (tableId) => {
     pageToken.value = null
   }
   tableData.value = tableData.value.concat(data.records)
-  console.log(tableData.value)
 }
 
 // 获取附件地址
@@ -159,9 +199,8 @@ const getUserId = async () => {
   userId.value = Id
 }
 // 新增字段
-const addField = async (tableId) => {
+const addField = async (tableId, content) => {
   // const result = await getFile('https://uat.yygongzi.com/salary/wx/pc/Payroll/img/bg_1.32906926.png')
-
   // console.log(result)
   const setRecords = []
   const table = await getTableInstance(tableId);
@@ -169,6 +208,7 @@ const addField = async (tableId) => {
   const fieldId = await table.addField({type: FieldType.Url});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
+  console.log(field)
   // 获取所有列
   const recordIdList = await table.getRecordIdList();
 
@@ -176,12 +216,53 @@ const addField = async (tableId) => {
     setRecords.push({
       recordId: item,
       fields: {
-        [field.id]: 'https://salary-1307799014.cos.ap-beijing.myqcloud.com/TENCENT/salarybill/image/2020/202008/system_chat_logo.png'
+        [field.id]: content+item
       }
     })
   })
-  
   // 批量赋值
+  await table.setRecords(setRecords)
+}
+
+// 新增附件字段
+const addImgField = async (tableId, confirmId) => {
+  const base64String = await confirmImgDown({confirm_id: confirmId})
+  // console.log(base64String)
+  // const blob = new Blob([base64String], { type: "image/jpeg" });
+  // var byteCharacters = atob(base64String);
+  // var byteNumbers = new Array(byteCharacters.length);
+  // for (var i = 0; i < byteCharacters.length; i++) {
+  //   byteNumbers[i] = byteCharacters.charCodeAt(i);
+  // }
+  // var byteArray = new Uint8Array(byteNumbers);
+  // var blob = new Blob([byteArray], { type: "image/jpeg" });
+  // console.log(blob)
+  const result = await urltoBlob('https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840262218240450562', 'imgage.png')
+  const file = new File([result], 'imgage.png', { type: 'image/png'});
+  console.log(file)
+  
+
+
+  const setRecords = []
+  const table = await getTableInstance(tableId);
+  console.log(table)
+  // // 创建字段~获取字段 id
+  const fieldId = await table.addField({type: FieldType.Attachment});
+  // 通过字段 id 获取字段实例
+  const field = await table.getField(fieldId);
+  console.log(field)
+  // 获取所有列
+  const recordIdList = await table.getRecordIdList();
+
+  recordIdList.forEach(item => {
+    setRecords.push({
+      recordId: item,
+      fields: {
+        [field.id]: file
+      }
+    })
+  })
+ // 批量赋值
   await table.setRecords(setRecords)
 }
 export default function useTableBase() {
@@ -193,8 +274,10 @@ export default function useTableBase() {
         fieldList,
         recordList,
         tenantKey,
+        tableData,
         getTableSheetList,
-        setTableInfo
+        setTableInfo,
+        addField
     }
 
 }

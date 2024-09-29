@@ -1,7 +1,7 @@
 const path = require('path')
 const { defineConfig } = require('@vue/cli-service')
 
-
+const host = 'dev'
 const SriPlugin = require('webpack-subresource-integrity')
 require('events').EventEmitter.defaultMaxListeners = 0 // 解除限制 node报错
 
@@ -54,21 +54,50 @@ module.exports = defineConfig({
       },
     }))
   },
-  devServer: {
+  // devServer: {
+  //   host: '127.0.0.1',
+  //   port: 8089,
+  //   https: false,
+  //   headers: {
+  //     'Access-Control-Allow-Origin': '*',
+  //     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+  //     'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
+  //   },
+  //   proxy: {
+  //     '/gw': {
+  //       target: `https://dev.yygongzi.com/gw`,
+  //       secure: false,
+  //       changeOrigin: false,
+  //       ws: false,
+  //       pathRewrite: {
+  //         '^/gw': '',
+  //       },
+  //       cookieDomainRewrite: {
+  //         '*': '',
+  //       },
+  //     },
+  //   }
+  // },
+    devServer: {
     host: '127.0.0.1',
     port: 8089,
     https: true,
+    hot: true,
+    compress: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
     },
+    client: {
+      overlay: false,
+    },
     proxy: {
       '/gw': {
-        target: `https://dev.yygongzi.com/gw`,
+        target: `https://${host}.yygongzi.com/gw`,
         secure: false,
-        changeOrigin: false,
-        ws: false,
+        changeOrigin: true,
+        ws: true,
         pathRewrite: {
           '^/gw': '',
         },
@@ -76,6 +105,6 @@ module.exports = defineConfig({
           '*': '',
         },
       },
-    }
+    },
   },
 })

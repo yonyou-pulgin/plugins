@@ -1,0 +1,94 @@
+.yy-modal {
+    .yy-modal-entity {
+        //background: rgba(0, 0, 0, 0.5);
+        box-sizing: border-box;
+        padding: 0px;
+        border-radius: 6px;
+
+        .ant-modal-content {
+            padding: 0px !important;
+            border-radius: 6px !important;
+
+            .ant-modal-header {
+                padding: 0px 16px;
+                border-radius: 6px 6px 0px 0px;
+                margin: 0px;
+
+                .ant-modal-title {
+                    height: 48px;
+                    line-height: 48px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: #31343A;
+                    line-height: 48px;
+                }
+            }
+
+            .ant-modal-close {
+                color: #AAADB4;
+                right: 16px;
+                width: unset;
+
+                &:hover {
+                    background-color: transparent;
+                    color: #333;
+                }
+
+                .ant-modal-close-x {
+                    font-size: 19px;
+                    line-height: 14px;
+                    width: unset;
+
+                    .anticon {
+                        margin-inline-end: unset !important;
+                    }
+                }
+            }
+
+            .ant-modal-body {
+                padding: 0px 16px;
+                font-size: 14px;
+                font-family: PingFangSC, PingFang SC;
+                font-weight: 400;
+                color: #333333;
+                line-height: 24px;
+            }
+
+            .ant-modal-footer {
+                padding: 12px 16px;
+                margin-top: 0px;
+
+                .yy-modal-footer-entity {
+                    padding: 12px 0px;
+                    text-align: right;
+
+                    &>* {
+                        text-align: center;
+                        margin-left: 12px;
+
+                        &:first-of-type {
+                            margin-left: 0px;
+                        }
+                    }
+                }
+
+                .ant-btn:first-of-type {
+                    margin-right: 12px;
+                }
+            }
+
+        }
+
+        &.is-footer-top-border {
+            .ant-modal-footer {
+                border-top: 1px solid #E4E7ED;
+            }
+        }
+
+        &.is-header-bottom-border {
+            .ant-modal-header {
+                border-bottom: 1px solid #E4E7ED;
+            }
+        }
+    }
+}

@@ -40,23 +40,34 @@
         </template>  
       </div>
     </div>
+
+    <input type="file" @change="handleFile">
     <div class="form-footer">
-      <yy-button :disabled="saveDisabled" class="yy-custom-btn-operate">预览</yy-button>
+      <yy-button :disabled="saveDisabled" class="yy-custom-btn-operate" @click="handlePreview">预览</yy-button>
       <yy-button :disabled="saveDisabled" type="primary" @click="handleSave">创建确认单</yy-button>
     </div>
   </div>
   <!-- 预览--->
-  <fromPreview ref="fromPreviewInstance"></fromPreview>
+  <fromPreview :data="previewData" ref="fromPreviewInstance"></fromPreview>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
+import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
+import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
+import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { tableInfo, tableName, sheetList, fieldList, tenantKey, userId } = useTableBase();
+const { tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField } = useTableBase();
 import fromPreview from './fromPreview.vue';
-import { createConfirm } from '@/api/api.js';
+import { createConfirm, confirmPreview } from '@/api/api.js';
+import { useRouter } from 'vue-router';
+import bus from '@/eventBus/bus.js'
+import useConfirmInfo from '@/hooks/useConfirmInfo.js';
+const { setConfrimInfo } = useConfirmInfo();
 
+const router = useRouter()
 const fromData = ref({
   baseId: '',
   tableId: '',
@@ -66,6 +77,8 @@ const fromData = ref({
   fields: null,
   fieldSort: []
 })
+const previewData = ref(null) // 预览数据
+const fromPreviewInstance = ref(null)
 // 使用句柄操作
 const draggripper = '.draggripper'
 // 鼠标必须离边缘多近才能开始滚动，单位 px
@@ -81,7 +94,7 @@ const plainOptions = [
 
 // 禁止提交
 const saveDisabled = computed(() => {
-  return !fromData.value.fields || !fromData.value.mdnFieldId || !fieldsSortList.value.length
+  return !fromData.value || !fromData.value.fields || !fromData.value.mdnFieldId || !fieldsSortList.value.length
 })
 // 数据表选项
 const tableSheetDatas = computed(() => {
@@ -99,15 +112,36 @@ const fieldTitle = computed(() => {
 const handleDataSheet = (val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
-  fieldsSortList.value = [...fieldList.value].map(item => {
+  // 选择字段 17 附件
+  fieldsSortList.value = [...fieldList.value].filter(item => ![17].includes(item.type)).map(item => {
     item.checked = true
     return item
   })
 }
 
-console.log(tableInfo.value)
+const handleFile = (event) => {
+  console.log(event.target.files[0])
+}
 
-const handleSave = () => {
+
+// 监听fields 变化
+watch(() => fieldList.value, (val) => {
+  if(fieldsSortList.value.length){
+    handleDataSheet(fromData.value.dataSheet)
+  }
+}, {
+  deep: true
+})
+
+// onMounted(() => {
+//   // createConfirm().then(res => {
+//   //   console.log(res)
+//   // })
+
+//   console.log(tableInfo.value.tableId)
+// })
+
+const getParams = () => {
   const params = Object.assign({}, fromData.value)
   params.baseId = tableInfo.value.baseId
   params.tableId = tableInfo.value.tableId
@@ -118,20 +152,38 @@ const handleSave = () => {
   params.confirmName = tableName.value || '签字确认单'
   // 全部字段
   params.fields = fieldList.value
-  console.log(fieldList.value)
   // 排序字段～选中字段
   params.fieldSort = fieldsSortList.value.filter(item => item.checked).map(item => item.id)
-  console.log(params)
-  // createConfirm(params).then(res => {
-  //   console.log(res)
-  // })
+  // 表格数据
+  params.records = tableData.value
+  return params
+}
+const handleSave = () => {
+  const params = getParams()
+  createConfirm(params).then(res => {
+    if(res.success){
+       router.push({
+         name: 'success',
+       })
+      setConfrimInfo(res.data)
+      addField(tableInfo.value.tableId, res.data.viewUrl)
+    }
+  })
 }
 
-
-console.log(fieldList.value)
-
-
-
+const handlePreview = () => {
+  const params = getParams()
+  delete params.records
+  params.record = tableData.value[0]
+  confirmPreview(params).then(res => {
+    console.log(res.data)
+    if(res.success){
+      previewData.value = res.data
+      console.log(previewData.value)
+      fromPreviewInstance.value.open()
+    }
+  })
+}
 
 </script>
 

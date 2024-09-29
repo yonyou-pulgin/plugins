@@ -7,7 +7,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "@base/http": "^0.1.13",
+    "@base/tool": "^1.0.4",
     "@lark-base-open/js-sdk": "^0.3.0",
     "@lark-base-open/node-sdk": "^1.0.1",
     "@vueuse/core": "^10.5.0",
@@ -16,9 +18,11 @@
     "componentsV3": "^0.1.0",
     "core-js": "^3.8.3",
     "image-conversion": "^2.1.1",
+    "lodash": "^4.17.21",
     "mitt": "^3.0.1",
     "reset-css": "^5.0.1",
     "vue": "^3.2.37",
+    "vue-clipboard3": "^2.0.0",
     "vue-draggable-plus": "^0.5.3",
     "vue-i18n": "^9.4.1",
     "vue-router": "^4.4.5"

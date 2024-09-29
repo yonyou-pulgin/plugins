@@ -5,23 +5,52 @@
       创建完成</div>
       <div class="success-desc">发送二维码/链接，邀请成员签字确认</div>
       <div class="success-qr">
-        <img src="" alt="">
+        <img :src="qrUrl" alt="" width="280px" height="296px">
       </div>
 
       <div class="success-btn">
-        <yy-button  class="yy-custom-btn-operate">复制链接</yy-button>
-        <yy-button type="primary">下载二维码</yy-button>  
+        <yy-button class="yy-custom-btn-operate" @click="handleCopy">复制链接</yy-button>
+        <yy-button type="primary" @click="handleDown">下载二维码</yy-button>  
       </div>
     </div>
 </template>
 
-<script>
-export default {
-    setup () {
-        
+<script setup>
+import { ref,onMounted } from 'vue';
+import bus from '@/eventBus/bus.js'
+import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
+import useConfirmInfo from '../hooks/useConfirmInfo';
+const { confrimInfo } = useConfirmInfo();
+import useClipboard from 'vue-clipboard3'
+import { bitable } from '@lark-base-open/js-sdk';
+import { message } from 'ant-design-vue';
+import { confirmImgDown } from '@/api/api.js'
 
-        return {}
-    }
+const { toClipboard } = useClipboard()
+
+const qrUrl = ref(null)
+onMounted(() => {
+  if(confrimInfo.value){
+    qrUrl.value = confrimInfo.value.qrUrl
+  }
+})
+
+
+const handleCopy = async() => {
+  try {
+    await toClipboard(qrUrl.value)
+    message.success({
+      content: '复制成功！',
+      class: 'yy-message-success',
+    })
+  } catch (e) {
+  }
+
+}
+const handleDown = async () => {
+  // const result = await confirmImgDown({confirm_id:  confrimInfo.value.confirmId})
+  // console.log(result)
+  window.open(`${confrimInfo.value.domain}/feishuapi/bitable/confirm/qrcode/${confrimInfo.value.confirmId}`)
 }
 </script>
 
@@ -62,6 +91,7 @@ export default {
     border-radius: 6px;
     border: 1px solid #E4E7ED;
     margin: 0 auto;
+    overflow: hidden;
   }
 
   &-btn{
@@ -69,6 +99,10 @@ export default {
     align-items: center;
     justify-content: center;
     margin-top: 24px;
+
+    .ant-button{
+      height: 32px!important;
+    }
   }
 }
 </style>
