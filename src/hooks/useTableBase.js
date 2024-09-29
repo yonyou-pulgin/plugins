@@ -93,7 +93,7 @@ const setTableInfo = async(selection) => {
     getTenantKey()
     getUserId()
     // 上传附件
-    // addImgField(selection.tableId,'1840262218240450562')
+    // addImgField(selection.tableId,'1840294913194229762')
     // 监听 field 变化
     table.onFieldAdd((event) => {
       console.log('table:', event);
@@ -208,7 +208,6 @@ const addField = async (tableId, content) => {
   const fieldId = await table.addField({type: FieldType.Url});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
-  console.log(field)
   // 获取所有列
   const recordIdList = await table.getRecordIdList();
 
@@ -222,35 +221,36 @@ const addField = async (tableId, content) => {
   })
   // 批量赋值
   await table.setRecords(setRecords)
+  return Promise.resolve({
+    viewFieldId: fieldId,
+  })
 }
 
 // 新增附件字段
 const addImgField = async (tableId, confirmId) => {
-  const base64String = await confirmImgDown({confirm_id: confirmId})
-  // console.log(base64String)
-  // const blob = new Blob([base64String], { type: "image/jpeg" });
-  // var byteCharacters = atob(base64String);
-  // var byteNumbers = new Array(byteCharacters.length);
-  // for (var i = 0; i < byteCharacters.length; i++) {
-  //   byteNumbers[i] = byteCharacters.charCodeAt(i);
-  // }
-  // var byteArray = new Uint8Array(byteNumbers);
-  // var blob = new Blob([byteArray], { type: "image/jpeg" });
-  // console.log(blob)
-  const result = await urltoBlob('https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840262218240450562', 'imgage.png')
-  const file = new File([result], 'imgage.png', { type: 'image/png'});
-  console.log(file)
-  
+  //  const base64String = await confirmImgDown({confirm_id: confirmId})
 
+  // 光标选中数据表中的单元格
+  // const { fieldId, recordId } = await bitable.base.getSelection();
+  // const table = await bitable.base.getActiveTable();
+  // console.log(table)
+  // const cellValue = await table.getCellValue('fldhGymgbk', 'recnMFfTBs');
+  // console.log(cellValue)
+
+  const result = await urltoBlob('https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762')
+  const file = new File([result], 'imgage.png', { type: result.type});
+  // 设置单个值
+  // const table = await bitable.base.getActiveTable();
+  // const attachmentField = await table.getField("fld5ESct1p");
+  // const recordIdList = await table.getRecordIdList();
+  // await attachmentField.setValue(recordIdList[0], file);
 
   const setRecords = []
-  const table = await getTableInstance(tableId);
-  console.log(table)
-  // // 创建字段~获取字段 id
+  const table = await bitable.base.getActiveTable();
+  // 创建字段~获取字段 id
   const fieldId = await table.addField({type: FieldType.Attachment});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
-  console.log(field)
   // 获取所有列
   const recordIdList = await table.getRecordIdList();
 
@@ -258,12 +258,21 @@ const addImgField = async (tableId, confirmId) => {
     setRecords.push({
       recordId: item,
       fields: {
-        [field.id]: file
+        [field.id]: {
+          url: 'https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762'
+        }
       }
     })
   })
- // 批量赋值
-  await table.setRecords(setRecords)
+  // 批量赋值
+  // try {
+  //   await table.setRecords(setRecords)
+  // } catch (error) {
+  //   console.log(error)
+  // }
+  return Promise.resolve({
+    qrFieldId: fieldId,
+  })
 }
 export default function useTableBase() {
     return {
@@ -277,7 +286,8 @@ export default function useTableBase() {
         tableData,
         getTableSheetList,
         setTableInfo,
-        addField
+        addField,
+        addImgField
     }
 
 }

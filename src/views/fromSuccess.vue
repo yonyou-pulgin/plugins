@@ -38,7 +38,7 @@ onMounted(() => {
 
 const handleCopy = async() => {
   try {
-    await toClipboard(qrUrl.value)
+    await toClipboard(confrimInfo.value.userViewUrl)
     message.success({
       content: '复制成功！',
       class: 'yy-message-success',

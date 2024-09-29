@@ -41,7 +41,6 @@
       </div>
     </div>
 
-    <input type="file" @change="handleFile">
     <div class="form-footer">
       <yy-button :disabled="saveDisabled" class="yy-custom-btn-operate" @click="handlePreview">预览</yy-button>
       <yy-button :disabled="saveDisabled" type="primary" @click="handleSave">创建确认单</yy-button>
@@ -59,9 +58,9 @@ import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField } = useTableBase();
+const { tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField } = useTableBase();
 import fromPreview from './fromPreview.vue';
-import { createConfirm, confirmPreview } from '@/api/api.js';
+import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
@@ -83,7 +82,6 @@ const fromPreviewInstance = ref(null)
 const draggripper = '.draggripper'
 // 鼠标必须离边缘多近才能开始滚动，单位 px
 const scrollSensitivity = ref(150)
-const selectFields = ref([]) //选择的字段
 const fieldsSortList = ref([]) //排序数组
 // 隐藏项
 const hiddenCheckedList = ref([])
@@ -91,6 +89,7 @@ const plainOptions = [
   { label: '隐藏为空数据项', value: 'isHiddenEmpty' },
   { label: '隐藏为0数据项', value: 'isHiddenZero' },
 ];
+const fieldsSortListLenth = ref(0)
 
 // 禁止提交
 const saveDisabled = computed(() => {
@@ -106,28 +105,29 @@ const phoneFields = computed(() => {
 })
 // 确认单选择文案
 const fieldTitle = computed(() => {
-  return `(共计：${fieldList.value.length}个，已选中：${selectFields.value.length}个)`
+  return `(共计：${fieldsSortListLenth.value}个，已选中：${selectFields.value.length}个)`
+})
+
+const selectFields = computed(() => {
+  return fieldsSortList.value.filter(item => item.checked)
 })
 
 const handleDataSheet = (val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
   // 选择字段 17 附件
-  fieldsSortList.value = [...fieldList.value].filter(item => ![17].includes(item.type)).map(item => {
+  fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
+  fieldsSortList.value = fieldsSortList.value.filter(item => ![17].includes(item.type)).map(item => {
     item.checked = true
     return item
   })
+  fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
 }
-
-const handleFile = (event) => {
-  console.log(event.target.files[0])
-}
-
 
 // 监听fields 变化
 watch(() => fieldList.value, (val) => {
   if(fieldsSortList.value.length){
-    handleDataSheet(fromData.value.dataSheet)
+   handleDataSheet(fromData.value.dataSheet)
   }
 }, {
   deep: true
@@ -140,6 +140,16 @@ watch(() => fieldList.value, (val) => {
 
 //   console.log(tableInfo.value.tableId)
 // })
+
+// const handleChecked = (val) => {
+//   fieldsSortList.value.map(item => {
+//     if(item.id == val.id){
+//       item.checked = !item.checked
+//     }
+//     return item
+//   })
+//   console.log(fieldsSortList.value)
+// }
 
 const getParams = () => {
   const params = Object.assign({}, fromData.value)
@@ -158,15 +168,35 @@ const getParams = () => {
   params.records = tableData.value
   return params
 }
+const onStart = () => {}
+const onEnd = () => {}
 const handleSave = () => {
   const params = getParams()
-  createConfirm(params).then(res => {
+  createConfirm(params).then(async (res) => {
     if(res.success){
        router.push({
          name: 'success',
        })
       setConfrimInfo(res.data)
-      addField(tableInfo.value.tableId, res.data.viewUrl)
+      let confirmId = res.data.confirmId
+      let url =`${res.data.domain}/feishuapi/bitable/confirm/qrcode/${res.data.confirmId}`
+      Promise.all([addField(tableInfo.value.tableId, res.data.createUserViewUrl), addImgField(tableInfo.value.tableId, url)]).then(res => {
+        console.log(res)
+        if(res.length){
+          let updateParams = {
+            confirmId: confirmId,
+          }
+          res.map(item => {
+            updateParams = Object.assign(updateParams,item)
+            return item
+          })
+          
+          console.log(updateParams)
+          confirmUpdate(updateParams).then(res => {
+            console.log(res)
+          })
+        }
+      })
     }
   })
 }

@@ -14,3 +14,5 @@ export const createConfirm = (params) =>  http.post('feishuapi/bitable/confirm/c
 export const confirmPreview = (params) =>  http.post('feishuapi/bitable/confirm/preview', params)
 // 确认单图片下载
 export const confirmImgDown = (params) =>  http.get('feishuapi/bitable/confirm/qrcode/'+ params.confirm_id)
+// 确认单更新
+export const confirmUpdate = (params) =>  http.post('feishuapi/bitable/confirm/update', params)
