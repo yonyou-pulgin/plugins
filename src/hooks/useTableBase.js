@@ -2,6 +2,7 @@ import { ref, nextTick } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 import { confirmImgDown } from '@/api/api.js'
 import { urltoBlob } from 'image-conversion' 
+import { timestamp } from '@vueuse/core';
 
 const FieldType = {
   Text: 1, // 多行文本
@@ -238,16 +239,14 @@ const addField = async (tableId, content, successRecords) => {
   })
 }
 
+// 获取附件token
+const getAttachmentToken = async(file) => {
+  const tokens = await bitable.base.batchUploadFile([file]);
+  console.log(tokens)
+  return tokens
+}
 // 新增附件字段
 const addImgField = async (tableId, confirmId, successRecords) => {
-  //  const base64String = await confirmImgDown({confirm_id: confirmId})
-
-  // 光标选中数据表中的单元格
-  // const { fieldId, recordId } = await bitable.base.getSelection();
-  // const table = await bitable.base.getActiveTable();
-  // console.log(table)
-  // const cellValue = await table.getCellValue('fldhGymgbk', 'recnMFfTBs');
-  // console.log(cellValue)
 
   const result = await urltoBlob('https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762')
   const file = new File([result], 'imgage.png', { type: result.type});
@@ -256,34 +255,38 @@ const addImgField = async (tableId, confirmId, successRecords) => {
   // const attachmentField = await table.getField("fld5ESct1p");
   // const recordIdList = await table.getRecordIdList();
   // await attachmentField.setValue(recordIdList[0], file);
-
+  const token = await getAttachmentToken(file)
   const setRecords = []
   const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
   const fieldId = await table.addField({type: FieldType.Attachment});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
+
   // 获取所有列
   const recordIdList = await table.getRecordIdList();
 
   recordIdList.forEach(item => {
-    if(successRecords.includes(item)) {    
+    if(successRecords.includes(item)) {
       setRecords.push({
         recordId: item,
         fields: {
-          [field.id]: {
-            url: 'https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762'
-          }
+          [field.id]: [{
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            token: token[0],
+            timeStamp: file.lastModified,
+            permission: {
+            
+            }
+          }]
         }
       })
     }
   })
   // 批量赋值
-  // try {
-  //   await table.setRecords(setRecords)
-  // } catch (error) {
-  //   console.log(error)
-  // }
+  table.setRecords(setRecords)
   return Promise.resolve({
     qrFieldId: fieldId,
   })
