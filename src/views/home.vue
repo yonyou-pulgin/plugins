@@ -14,7 +14,7 @@
       </div>
       <div class="form-item">
         <span class="form-item-label required">手机号（用于成员身份校验）</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
+        <yy-select class="yy-fs-from-item" :class="{'yy-fs-from-item-error': checkPhoneFieldFlag }" placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
       </div>
       <div class="form-item">
         <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
@@ -66,6 +66,7 @@ import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
 const { setConfrimInfo } = useConfirmInfo();
+import { message } from 'ant-design-vue';
 
 const router = useRouter()
 const fromData = ref({
@@ -91,6 +92,7 @@ const plainOptions = [
   { label: '隐藏为0数据项', value: 'isHiddenZero' },
 ];
 const fieldsSortListLenth = ref(0)
+const checkPhoneFieldFlag = ref(false) // 手机号校验
 
 // 禁止提交
 const saveDisabled = computed(() => {
@@ -150,14 +152,24 @@ watch(() => fieldList.value, (val) => {
   deep: true
 })
 
-// onMounted(() => {
-//   // createConfirm().then(res => {
-//   //   console.log(res)
-//   // })
+watch(() =>fromData.value.mdnFieldId, (val) => { 
+  checkPhoneFieldFlag.value = false
+})
 
-//   console.log(tableInfo.value.tableId)
-// })
-
+const checkPhoneField = async() => {
+  const table = await bitable.base.getTableById(tableInfo.value.tableId || tableInfo.value.id)
+  const recordList = await table.getRecordList();
+  let phoneFieldVal = []
+  for (const record of recordList) {
+    const cell = await record.getCellByField(fromData.value.mdnFieldId);
+    const val = await cell.getValue();
+    // 只处理文本 非文本类型 return 空
+    if(val && Array.isArray(val) && val[0].text){
+      phoneFieldVal.push(Promise.resolve(val[0].text))
+    } 
+  }
+  return phoneFieldVal
+}
 // const handleChecked = (val) => {
 //   fieldsSortList.value.map(item => {
 //     if(item.id == val.id){
@@ -169,6 +181,7 @@ watch(() => fieldList.value, (val) => {
 // }
 
 const getParams = () => {
+  console.log(tableData.value)
   const params = Object.assign({}, fromData.value)
   params.baseId = tableInfo.value.baseId
   params.tableId = tableInfo.value.tableId
@@ -187,7 +200,31 @@ const getParams = () => {
 }
 const onStart = () => {}
 const onEnd = () => {}
-const handleSave = () => {
+
+const isPhoneNumber = (phoneNumber) => {
+ // 定义一个正则表达式来匹配手机号
+  var regex = /^1[3456789]\d{9}$/;
+  // 使用 test 方法来检查字符串是否匹配正则表达式
+  return regex.test(phoneNumber);
+}
+const checkPhoneNumbersInArray = (phoneNumbers) => {
+  for (var i = 0; i < phoneNumbers.length; i++) {
+    if (isPhoneNumber(phoneNumbers[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+const handleSave = async() => {
+  // 获取手机号字段 
+  const resut = await checkPhoneField()
+  const checkedPone = await Promise.all(resut)
+  if(checkedPone.length){
+   const result = checkPhoneNumbersInArray(checkedPone)
+   if(!result) return checkPhoneFieldFlag.value = true
+  } else {
+    return checkPhoneFieldFlag.value = true
+  }
   const params = getParams()
   createConfirm(params).then(async (res) => {
     if(res.success){
@@ -197,8 +234,9 @@ const handleSave = () => {
       setConfrimInfo(res.data)
       let confirmId = res.data.confirmId
       let url =`${res.data.domain}/feishuapi/bitable/confirm/qrcode/${res.data.confirmId}`
-      Promise.all([addField(tableInfo.value.tableId, res.data.createUserViewUrl), addImgField(tableInfo.value.tableId, url)]).then(res => {
-        console.log(res)
+      const currentTableId = tableInfo.value.tableId || tableInfo.value.id
+      const successRecords = res.data.successRecords || []
+      Promise.all([addField(currentTableId, res.data.createUserViewUrl, successRecords), addImgField(currentTableId, url, successRecords)]).then(res => {
         if(res.length){
           let updateParams = {
             confirmId: confirmId,
@@ -213,6 +251,11 @@ const handleSave = () => {
             console.log(res)
           })
         }
+      })
+    } else {
+      message.error({
+        content: res.msg,
+        class: 'yy-message-error',
       })
     }
   })
@@ -264,6 +307,21 @@ const handlePreview = () => {
 
     .yy-fs-from-item{
       width: 100%!important;
+    }
+    .yy-fs-from-item-error{
+      width: 100%!important;
+      position: relative;
+      .ant-select-selector{
+        border-color: #FD3B3A!important;
+      }
+      &::after{
+        content: '请选择正确的手机号列';
+        position: absolute;
+        left: 4px;
+        top: 32px;
+        font-size: 12px;
+        color: #FD3B3A;
+      }
     }
 
     &-label{
@@ -342,4 +400,10 @@ const handlePreview = () => {
   }
 }
 
+</style>
+
+<style>
+.yy-fs-from-item-error .ant-select-selector{
+  border-color: #FD3B3A!important;
+}
 </style>

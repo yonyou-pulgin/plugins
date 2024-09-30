@@ -167,7 +167,7 @@ const getCellList = async (tableId) => {
   if(loading.value) return
   loading.value = true
   // const table = await getTableInstance(tableId)
-  const table = await base.getActiveTable();
+  const table = await base.getTableById(tableId);
   // 获取所有记录 id 列表。
   let params = {
     pageSize: 5000,
@@ -209,7 +209,7 @@ const getUserId = async () => {
   userId.value = Id
 }
 // 新增字段
-const addField = async (tableId, content) => {
+const addField = async (tableId, content, successRecords) => {
   // const result = await getFile('https://uat.yygongzi.com/salary/wx/pc/Payroll/img/bg_1.32906926.png')
   // console.log(result)
   const setRecords = []
@@ -222,12 +222,14 @@ const addField = async (tableId, content) => {
   const recordIdList = await table.getRecordIdList();
 
   recordIdList.forEach(item => {
-    setRecords.push({
-      recordId: item,
-      fields: {
-        [field.id]: `${content}?recordId=${item}`
-      }
-    })
+    if(successRecords.includes(item)) {    
+      setRecords.push({
+        recordId: item,
+        fields: {
+          [field.id]: `${content}?recordId=${item}`
+        }
+      })
+    }
   })
   // 批量赋值
   await table.setRecords(setRecords)
@@ -237,7 +239,7 @@ const addField = async (tableId, content) => {
 }
 
 // 新增附件字段
-const addImgField = async (tableId, confirmId) => {
+const addImgField = async (tableId, confirmId, successRecords) => {
   //  const base64String = await confirmImgDown({confirm_id: confirmId})
 
   // 光标选中数据表中的单元格
@@ -256,7 +258,7 @@ const addImgField = async (tableId, confirmId) => {
   // await attachmentField.setValue(recordIdList[0], file);
 
   const setRecords = []
-  const table = await bitable.base.getActiveTable();
+  const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
   const fieldId = await table.addField({type: FieldType.Attachment});
   // 通过字段 id 获取字段实例
@@ -265,14 +267,16 @@ const addImgField = async (tableId, confirmId) => {
   const recordIdList = await table.getRecordIdList();
 
   recordIdList.forEach(item => {
-    setRecords.push({
-      recordId: item,
-      fields: {
-        [field.id]: {
-          url: 'https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762'
+    if(successRecords.includes(item)) {    
+      setRecords.push({
+        recordId: item,
+        fields: {
+          [field.id]: {
+            url: 'https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762'
+          }
         }
-      }
-    })
+      })
+    }
   })
   // 批量赋值
   // try {
