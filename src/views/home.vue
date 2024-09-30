@@ -10,11 +10,11 @@
       </div>
       <div class="form-item">
         <span class="form-item-label required">数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :options="sheetList" v-model:value="fromData.dataSheet" @change="handleDataSheet"></yy-select>
+        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="fromData.dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
         <span class="form-item-label required">手机号（用于成员身份校验）</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择手机号列" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
+        <yy-select class="yy-fs-from-item" placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
       </div>
       <div class="form-item">
         <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
@@ -336,7 +336,7 @@ const handlePreview = () => {
     align-items: center;
 
     &-icon{
-      cursor: pointer;
+      cursor: move;
       margin-right: 12px;
     }
   }

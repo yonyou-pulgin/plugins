@@ -1,8 +1,14 @@
 <template>
-  <RouterView />
+  <a-config-provider :theme="theme.theme" :locale="theme.locale">
+    <a-style-provider hash-priority="high" :transformers="[legacyLogicalPropertiesTransformer]">
+      <RouterView />
+    </a-style-provider>
+  </a-config-provider>
 </template>
 
 <script setup>
+import theme from '../theme.js';
+import { legacyLogicalPropertiesTransformer } from 'ant-design-vue'
 import { RouterView } from 'vue-router'
 import { ref } from 'vue';
 import { bitable } from '@lark-base-open/js-sdk'; 

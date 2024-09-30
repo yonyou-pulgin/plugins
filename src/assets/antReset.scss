@@ -76,7 +76,7 @@
   font-size: 14px;
   list-style: none;
   position: fixed;
-  top: 40px!important;
+  top: 0px!important;
   left: 50%;
   transform: translateX(-50%);
   width: auto;
@@ -298,4 +298,11 @@
 //picke-range
 .ant-picker-range.ant-picker-focused .ant-picker-active-bar{
   display: none!important;
+}
+
+//select 
+.ant-select-dropdown {
+  .ant-select-item {
+    border-radius: 0!important;
+  }
 }

@@ -52,9 +52,16 @@ const open = () =>{
   nextTick(() => {  
     const boxWidth = document.querySelector('.modal-container').getBoundingClientRect().width;
     hasTitleLen.value = parseInt(boxWidth/ 30) || 10
+
+    const clientHeight = document.querySelector('body').clientHeight
+    const clientWidth = document.querySelector('body').clientWidth
+    const ele = document.querySelector('.modal-container')
+    if(ele){
+      document.querySelector('.modal-container').style.maxHeight = clientHeight - 80 + 'px'
+      document.querySelector('.modal-container').style.maxWidth = clientWidth - 40 + 'px'
+    }
   })
 }
-
 
 defineExpose({ open })
 </script>
@@ -64,7 +71,13 @@ defineExpose({ open })
   &-container {
     max-width: 375px;
     min-height: 300px;
+    max-height: 700px;
+    overflow-y: scroll;
     background: #fff;
+    &::-webkit-scrollbar {
+      width: 0!important;
+      height: 0!important;
+    }
   }
 
   &-head {

@@ -8,6 +8,7 @@
     @dropdownVisibleChange="dropdownVisibleChangeHandle"
     :dropdownClassName="yyDropdownClassName"
     :field-names="fieldNames"
+    :showArrow="true"
     @focus="handleFocus"
     @blur="handleBlur"
   >
@@ -45,6 +46,7 @@ export default defineComponent({
 })
 </script>
 <script setup>
+import iconDraw from '../icon/icon-draw.vue';
 defineOptions({
   inheritAttrs: true,
 })

@@ -5,7 +5,7 @@
       创建完成</div>
       <div class="success-desc">发送二维码/链接，邀请成员签字确认</div>
       <div class="success-qr">
-        <img :src="qrUrl" alt="" width="280px" height="296px">
+        <img :src="qrUrl" alt="" width="280px">
       </div>
 
       <div class="success-btn">
@@ -86,12 +86,15 @@ const handleDown = async () => {
 
   &-qr{
     width: 280px;
-    height: 296px;
+    height: auto;
     background: #FFFFFF;
     border-radius: 6px;
     border: 1px solid #E4E7ED;
     margin: 0 auto;
     overflow: hidden;
+    img{
+      width: 278px;
+    }
   }
 
   &-btn{
