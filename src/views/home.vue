@@ -181,7 +181,6 @@ const checkPhoneField = async() => {
 // }
 
 const getParams = () => {
-  console.log(tableData.value)
   const params = Object.assign({}, fromData.value)
   params.baseId = tableInfo.value.baseId
   params.tableId = tableInfo.value.tableId
@@ -236,7 +235,7 @@ const handleSave = async() => {
       let url =`${res.data.domain}/feishuapi/bitable/confirm/qrcode/${res.data.confirmId}`
       const currentTableId = tableInfo.value.tableId || tableInfo.value.id
       const successRecords = res.data.successRecords || []
-      Promise.all([addField(currentTableId, res.data.createUserViewUrl, successRecords), addImgField(currentTableId, url, successRecords)]).then(res => {
+      Promise.all([addImgField(currentTableId, url, successRecords), addField(currentTableId, res.data.createUserViewUrl, successRecords),]).then(res => {
         if(res.length){
           let updateParams = {
             confirmId: confirmId,
@@ -245,10 +244,7 @@ const handleSave = async() => {
             updateParams = Object.assign(updateParams,item)
             return item
           })
-          
-          console.log(updateParams)
           confirmUpdate(updateParams).then(res => {
-            console.log(res)
           })
         }
       })
@@ -266,10 +262,8 @@ const handlePreview = () => {
   delete params.records
   params.record = tableData.value[0]
   confirmPreview(params).then(res => {
-    console.log(res.data)
     if(res.success){
       previewData.value = res.data
-      console.log(previewData.value)
       fromPreviewInstance.value.open()
     }
   })

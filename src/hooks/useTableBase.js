@@ -216,7 +216,7 @@ const addField = async (tableId, content, successRecords) => {
   const setRecords = []
   const table = await getTableInstance(tableId);
   // 创建字段~获取字段 id
-  const fieldId = await table.addField({type: FieldType.Url});
+  const fieldId = await table.addField({type: FieldType.Url, name: '签字确认结果'});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
   // 获取所有列
@@ -227,7 +227,11 @@ const addField = async (tableId, content, successRecords) => {
       setRecords.push({
         recordId: item,
         fields: {
-          [field.id]: `${content}?recordId=${item}`
+          [field.id]: [{
+            "type": "url",
+            "text": "查看签字结果",
+            "link": `${content}?recordId=${item}`
+          }]
         }
       })
     }
@@ -259,7 +263,7 @@ const addImgField = async (tableId, confirmId, successRecords) => {
   const setRecords = []
   const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
-  const fieldId = await table.addField({type: FieldType.Attachment});
+  const fieldId = await table.addField({type: FieldType.Attachment, name: '签字二维码【发给签字人员】'});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
 
