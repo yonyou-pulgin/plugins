@@ -114,8 +114,10 @@ const handleDataSheet = async(val) => {
   fromData.value.fields = currentSheetObj
 
   // 获取数据表
+  const selection = await bitable.base.getSelection();
   const tableMeta = await bitable.base.getTableMetaById(val);
   const table = await bitable.base.getTable(tableMeta.id);
+  table.baseId = selection.baseId // baseId
   setTableInfo(table)
 
 
