@@ -311,14 +311,15 @@ const handlePreview = () => {
     .yy-fs-from-item-error{
       width: 100%!important;
       position: relative;
+      margin-bottom: 16px;
       .ant-select-selector{
         border-color: #FD3B3A!important;
       }
       &::after{
         content: '请选择正确的手机号列';
         position: absolute;
-        left: 4px;
-        top: 32px;
+        left: 1px;
+        top: 36px;
         font-size: 12px;
         color: #FD3B3A;
       }
