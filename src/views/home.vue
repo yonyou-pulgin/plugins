@@ -10,7 +10,7 @@
       </div>
       <div class="form-item">
         <span class="form-item-label required">数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :options="tableSheetDatas" v-model:value="fromData.dataSheet" @change="handleDataSheet"></yy-select>
+        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :options="sheetList" v-model:value="fromData.dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
         <span class="form-item-label required">手机号（用于成员身份校验）</span>
@@ -51,6 +51,7 @@
 </template>
 
 <script setup>
+import { bitable } from '@lark-base-open/js-sdk';
 import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
@@ -58,7 +59,7 @@ import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField } = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
@@ -95,10 +96,6 @@ const fieldsSortListLenth = ref(0)
 const saveDisabled = computed(() => {
   return !fromData.value || !fromData.value.fields || !fromData.value.mdnFieldId || !fieldsSortList.value.length
 })
-// 数据表选项
-const tableSheetDatas = computed(() => {
-  return sheetList.value.filter(item => item.type ==1) || []
-})
 // 手机号列
 const phoneFields = computed(() => {
   return fieldList.value.filter(item => item.name.indexOf('手机') > -1) || []
@@ -112,23 +109,35 @@ const selectFields = computed(() => {
   return fieldsSortList.value.filter(item => item.checked)
 })
 
-const handleDataSheet = (val) => {
+const handleDataSheet = async(val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
+
+  // 获取数据表
+  const tableMeta = await bitable.base.getTableMetaById(val);
+  const table = await bitable.base.getTable(tableMeta.id);
+  setTableInfo(table)
+
+
+  // const sheetListArr = await table.getViewMetaList();
+  // if(sheetListArr.length && sheetListArr[0].type!= 1){
+  //   const findTableData = sheetListArr.find(item => item.type == 1)
+  //   const viewId =  findTableData[0].id
+  //   await baseUi.switchToView(val, viewId);
+  // }
   // 选择字段 17 附件
-  fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-  fieldsSortList.value = fieldsSortList.value.filter(item => ![17].includes(item.type)).map(item => {
-    item.checked = true
-    return item
-  })
-  fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
+
 }
 
 // 监听fields 变化
 watch(() => fieldList.value, (val) => {
-  if(fieldsSortList.value.length){
-   handleDataSheet(fromData.value.dataSheet)
-  }
+   // handleDataSheet(fromData.value.dataSheet)
+    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![17].includes(item.type)).map(item => {
+      item.checked = true
+      return item
+    })
+    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
 }, {
   deep: true
 })

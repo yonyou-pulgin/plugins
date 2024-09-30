@@ -76,16 +76,21 @@ const bridge = bitable.bridge;
 // })
 // 获取表格实例
 const getTableInstance = (tableId) => {
-  if(tableInstance) return Promise.resolve(tableInstance)
-  else return base.getTable(tableId)
+  return base.getTable(tableId)
+  // if(tableInstance) return Promise.resolve(tableInstance)
+  // else return base.getTable(tableId)
 }
 // 设置表格信息
 const setTableInfo = async(selection) => {
+    if(!selection.tableId){
+      selection.tableId = selection.id
+    }
     tableInfo.value = selection
     // 获取表格实例
     const table = await getTableInstance(selection.tableId)
     // 获取当前多维表格下所有的数据表
     getTableName(selection.tableId)
+    
     getTableSheetList(selection.tableId)
     getTableFieldList(selection.tableId)
     // 获取当前多维表格下所有的数据表
@@ -120,25 +125,27 @@ const setTableInfo = async(selection) => {
 }
 // 获取当前多维表格下所有的数据表
 const getTableSheetList = async (tableId) => {
-  const table = await getTableInstance(tableId);
-  const sheetListArr = await table.getViewMetaList();
-  sheetListArr.map(item => {
+  const tableList = await base.getTableMetaList();
+  // const table = await getTableInstance(tableId);
+  // const sheetListArr = await table.getViewMetaList();
+  tableList.map(item => {
     item.label = item.name
     item.value = item.id
     return item
   })
-  sheetList.value = sheetListArr
-  // 第一个视图不是数据表，切换视图
-  if(sheetListArr.length && sheetListArr[0].type!= 1){
-    const findTableData = sheetListArr.find(item => item.type == 1)
-    const viewId =  findTableData[0].id
-    await baseUi.switchToView(tableId, viewId);
-  }
+  sheetList.value = tableList
+  // // 第一个视图不是数据表，切换视图
+  // if(sheetListArr.length && sheetListArr[0].type!= 1){
+  //   const findTableData = sheetListArr.find(item => item.type == 1)
+  //   const viewId =  findTableData[0].id
+  //   await baseUi.switchToView(tableId, viewId);
+  // }
 }
 // 获取当前表格名称
 const getTableName = async (tableId) => {
     const table = await getTableInstance(tableId);
     const name = await table.getName()
+    console.log(name)
     tableName.value = name
 }
 // 获取表格字段列表
