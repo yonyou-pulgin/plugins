@@ -92,8 +92,9 @@ const setTableInfo = async(selection) => {
     getCellList(selection.tableId)
     getTenantKey()
     getUserId()
-    // 上传附件
-    // addImgField(selection.tableId,'1840294913194229762')
+    // 获取所有列
+    // const recordIdList = await table.getRecordIdList();
+    // console.log(recordIdList)
     // 监听 field 变化
     table.onFieldAdd((event) => {
       console.log('table:', event);
@@ -162,12 +163,14 @@ const getCellList = async (tableId) => {
   const table = await base.getActiveTable();
   // 获取所有记录 id 列表。
   let params = {
-    pageSize: 4,
+    pageSize: 5000,
   }
   if(pageToken.value) {
     params.pageToken = pageToken.value
   }
   const data = await table.getRecords(params);
+
+  console.log(data)
   // 分页参数
   loading.value = false
   if(data.pageToken) {

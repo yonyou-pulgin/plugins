@@ -9,7 +9,7 @@
         <span>未确认</span>
       </div>
       <div class="modal-cotent">
-        <div class="modal-content-item" v-for="item in previewInfo" :key="item.id">
+        <div class="modal-content-item" :class="{'modal-content-item-row': (item.value && item.value.length > hasTitleLen) || item.name.length > hasTitleLen}" v-for="item in previewInfo" :key="item.id">
             <div class="modal-content-item-label">{{ item.name }}</div>
             <div class="modal-content-item-content">{{ item.value }}</div>
         </div>
@@ -29,9 +29,10 @@
 </template>
 
 <script setup>
-import { ref, watchEffect } from 'vue';
+import { ref, watchEffect, onMounted, nextTick } from 'vue';
 import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
 
+const hasTitleLen = ref(10) // 标题最大长度
 const props = defineProps({
   data: {
     default: () => ({ }),
@@ -45,11 +46,15 @@ watchEffect((val) => {
   if(props.data && props.data.fields){
     previewInfo.value = props.data.fields || []
   }
-
 })
 const open = () =>{
   visilbe.value = true
+  nextTick(() => {  
+    const boxWidth = document.querySelector('.modal-container').getBoundingClientRect().width;
+    hasTitleLen.value = parseInt(boxWidth/ 30) || 10
+  })
 }
+
 
 defineExpose({ open })
 </script>
@@ -135,6 +140,15 @@ defineExpose({ open })
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+  }
+  &-content-item-row {
+    flex-direction: column;
+    justify-content: flex-start;
+    .modal-content-item-content{
+      line-height: 20px;
+      text-align: left;
+      margin-bottom: 10px;
     }
   }
 }
