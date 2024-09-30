@@ -98,7 +98,7 @@ const saveDisabled = computed(() => {
 })
 // 手机号列
 const phoneFields = computed(() => {
-  return fieldList.value.filter(item => item.name.indexOf('手机') > -1) || []
+  return fieldList.value.filter(item => item.type!=17) || []
 })
 // 确认单选择文案
 const fieldTitle = computed(() => {
@@ -134,6 +134,12 @@ const handleDataSheet = async(val) => {
 // 监听fields 变化
 watch(() => fieldList.value, (val) => {
    // handleDataSheet(fromData.value.dataSheet)
+    const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1)
+    if(phoneField.length && fromData.value.fields){
+      fromData.value.mdnFieldId = phoneField[0].id || null
+    } else {
+     fromData.value.mdnFieldId = null
+    }
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
     fieldsSortList.value = fieldsSortList.value.filter(item => ![17].includes(item.type)).map(item => {
       item.checked = true

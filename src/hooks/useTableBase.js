@@ -225,7 +225,7 @@ const addField = async (tableId, content) => {
     setRecords.push({
       recordId: item,
       fields: {
-        [field.id]: content+item
+        [field.id]: `${content}?recordId=${item}`
       }
     })
   })
