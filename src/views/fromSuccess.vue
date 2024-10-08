@@ -4,7 +4,7 @@
         <img src="@/assets/img/success.png" width="16px" alt="">
       创建完成</div>
       <div class="success-desc">发送二维码/链接，邀请成员签字确认</div>
-      <div class="success-qr">
+      <div class="success-qr" v-if="qrUrl">
         <img :src="qrUrl" alt="" width="280px">
       </div>
 

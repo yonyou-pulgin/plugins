@@ -189,7 +189,12 @@ const getCellList = async (tableId) => {
   } else {
     pageToken.value = null
   }
-  tableData.value = tableData.value.concat(data.records)
+  // 分页请求
+  if(data.pageToken){
+    tableData.value = tableData.value.concat(data.records)
+  } else {
+    tableData.value = data.records
+  }
 }
 
 // 获取附件地址
@@ -223,7 +228,7 @@ const addField = async (tableId, content, successRecords) => {
   const recordIdList = await table.getRecordIdList();
 
   recordIdList.forEach(item => {
-    if(successRecords.includes(item)) {    
+    if(successRecords.includes(item)) {
       setRecords.push({
         recordId: item,
         fields: {
@@ -246,7 +251,6 @@ const addField = async (tableId, content, successRecords) => {
 // 获取附件token
 const getAttachmentToken = async(file) => {
   const tokens = await bitable.base.batchUploadFile([file]);
-  console.log(tokens)
   return tokens
 }
 // 新增附件字段
@@ -312,5 +316,3 @@ export default function useTableBase() {
     }
 
 }
-
-    
