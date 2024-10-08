@@ -214,10 +214,9 @@ const addField = async (tableId, content, successRecords) => {
   const setRecords = []
   const table = await getTableInstance(tableId);
   // 创建字段~获取字段 id
-  let addIndex = Number(window.sessionStorage.getItem('addIndex') || 0) 
-  let name = addIndex ? `签字确认结果${addIndex}` : '签字确认结果'
-  addIndex++
-  window.sessionStorage.setItem('addIndex', addIndex)
+  // 查找签字字段
+  const findField = fieldList.value.filter(item => item.name.includes('签字确认结果'))
+  let name = findField.length ? `签字确认结果${findField.length}` : '签字确认结果'
   // 创建字段~获取字段 id
   const fieldId = await table.addField({type: FieldType.Url, name});
   // 通过字段 id 获取字段实例
@@ -265,10 +264,8 @@ const addImgField = async (tableId, url, successRecords) => {
   const setRecords = []
   const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
-  let addIndex1 = Number(window.sessionStorage.getItem('addIndex1') || 0)
-  let name = addIndex1 ? `签字二维码【发给签字人员】${addIndex1}` : '签字二维码【发给签字人员】'
-  addIndex1++
-  window.sessionStorage.setItem('addIndex1', addIndex1)
+  const findField = fieldList.value.filter(item => item.name.includes('签字二维码【发给签字人员】'))
+  let name = addIndex1 ? `签字二维码【发给签字人员】${findField.length}` : '签字二维码【发给签字人员】'
   const fieldId = await table.addField({type: FieldType.Attachment, name});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);

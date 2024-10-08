@@ -20,7 +20,7 @@
         <div class="sign-content-desc">请在下方灰色区域内签字</div>
         <div class="sign-content-box"></div>
         <div class="sign-content-btn">
-          <div class="btn-reset">清除重新</div>
+          <div class="btn-reset">清除重写</div>
           <div class="btn-sign">签好了，提交</div>
         </div>
       </div>

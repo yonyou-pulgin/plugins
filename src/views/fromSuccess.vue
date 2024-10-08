@@ -40,7 +40,7 @@ const handleCopy = async() => {
   try {
     await toClipboard(confrimInfo.value.userViewUrl)
     message.success({
-      content: '复制成功！',
+      content: '链接已复制，点击链接后可签字确认',
       class: 'yy-message-success',
     })
   } catch (e) {
@@ -48,9 +48,13 @@ const handleCopy = async() => {
 
 }
 const handleDown = async () => {
-  // const result = await confirmImgDown({confirm_id:  confrimInfo.value.confirmId})
-  // console.log(result)
-  window.open(`${confrimInfo.value.domain}/feishuapi/bitable/confirm/qrcode/${confrimInfo.value.confirmId}`)
+  message.success({
+    content: '二维码已下载，扫码后可签字确认',
+    class: 'yy-message-success',
+  })
+  setTimeout(() => {
+    window.open(`${confrimInfo.value.domain}/feishuapi/bitable/confirm/qrcode/${confrimInfo.value.confirmId}`)
+  })
 }
 </script>
 
