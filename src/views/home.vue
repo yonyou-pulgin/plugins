@@ -115,7 +115,7 @@ const selectFields = computed(() => {
 const handleDataSheet = async(val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
-
+  fromData.value.dataSheet = val
   // 获取数据表
   const selection = await bitable.base.getSelection();
   const tableMeta = await bitable.base.getTableMetaById(val);
