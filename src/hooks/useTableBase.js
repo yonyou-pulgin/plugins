@@ -103,18 +103,15 @@ const setTableInfo = async(selection) => {
     // console.log(recordIdList)
     // 监听 field 变化
     table.onFieldAdd((event) => {
-      console.log('table:', event);
       getTableFieldList(selection.tableId)
       getCellList(selection.tableId)
     })
      table.onFieldDelete((event) => {
-      console.log('table:', event);
       getTableFieldList(selection.tableId)
       getCellList(selection.tableId)
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      console.log('event:', event);
       nextTick(() => {    
         tableData.value = []
         getTableName(selection.tableId)
@@ -145,9 +142,10 @@ const getTableSheetList = async (tableId) => {
 // 获取当前表格名称
 const getTableName = async (tableId) => {
     const table = await getTableInstance(tableId);
-    const name = await table.getName()
-    console.log(name)
-    tableName.value = name
+    //const sheetListArr = await table.getViewMetaList();
+    const view = await table.getActiveView();
+    const viewMeta = await table.getViewMetaById(view.id);
+    tableName.value = viewMeta.name || ''
 }
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {

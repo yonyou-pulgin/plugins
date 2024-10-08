@@ -10,7 +10,7 @@
       </div>
       <div class="form-item">
         <span class="form-item-label required">数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="fromData.dataSheet" @change="handleDataSheet"></yy-select>
+        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
         <span class="form-item-label required">手机号（用于成员身份校验）</span>
@@ -78,6 +78,7 @@ const fromData = ref({
   fields: null,
   fieldSort: []
 })
+const dataSheet = ref(null)
 const previewData = ref(null) // 预览数据
 const fromPreviewInstance = ref(null)
 // 使用句柄操作
@@ -155,6 +156,15 @@ watch(() => fieldList.value, (val) => {
 watch(() =>fromData.value.mdnFieldId, (val) => { 
   checkPhoneFieldFlag.value = false
 })
+
+// watch(() => sheetList.value, (val) => { 
+//   setTimeout(() => {
+//     dataSheet.value = val[0].value
+//     // handleDataSheet(dataSheet.value)
+//   }, 300)
+// }, {
+//    deep: true
+//  })
 
 const checkPhoneField = async() => {
   const table = await bitable.base.getTableById(tableInfo.value.tableId || tableInfo.value.id)
