@@ -157,14 +157,12 @@ watch(() =>fromData.value.mdnFieldId, (val) => {
   checkPhoneFieldFlag.value = false
 })
 
-// watch(() => sheetList.value, (val) => { 
-//   setTimeout(() => {
-//     dataSheet.value = val[0].value
-//     // handleDataSheet(dataSheet.value)
-//   }, 300)
-// }, {
-//    deep: true
-//  })
+onMounted(()=>{
+  setTimeout(() => {
+    dataSheet.value = sheetList.value[0].value
+    handleDataSheet(dataSheet.value)
+  }, 200)
+})
 
 const checkPhoneField = async() => {
   const table = await bitable.base.getTableById(tableInfo.value.tableId || tableInfo.value.id)

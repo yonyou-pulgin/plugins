@@ -252,9 +252,9 @@ const getAttachmentToken = async(file) => {
   return tokens
 }
 // 新增附件字段
-const addImgField = async (tableId, confirmId, successRecords) => {
+const addImgField = async (tableId, url, successRecords) => {
 
-  const result = await urltoBlob('https://dev.yygongzi.com/gw/feishuapi/bitable/confirm/qrcode/1840294913194229762')
+  const result = await urltoBlob(url)
   const file = new File([result], 'imgage.png', { type: result.type});
   // 设置单个值
   // const table = await bitable.base.getActiveTable();
