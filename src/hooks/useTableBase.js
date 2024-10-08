@@ -257,10 +257,7 @@ const getAttachmentToken = async(file) => {
 }
 // 新增附件字段
 const addImgField = async (tableId, url, successRecords) => {
-  console.log(url)
   const result = await urltoBlob(url)
-
-  console.log(result)
   const file = new File([result], 'imgage.png', { type: result.type});
   // 设置单个值
   // const table = await bitable.base.getActiveTable();
@@ -272,7 +269,7 @@ const addImgField = async (tableId, url, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
   const findField = fieldList.value.filter(item => item.name.includes('签字二维码【发给签字人员】'))
-  let name = addIndex1 ? `签字二维码【发给签字人员】${findField.length}` : '签字二维码【发给签字人员】'
+  let name = findField.length ? `签字二维码【发给签字人员】${findField.length}` : '签字二维码【发给签字人员】'
   const fieldId = await table.addField({type: FieldType.Attachment, name});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
