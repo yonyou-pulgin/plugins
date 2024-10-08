@@ -97,7 +97,7 @@ const checkPhoneFieldFlag = ref(false) // 手机号校验
 
 // 禁止提交
 const saveDisabled = computed(() => {
-  return !fromData.value || !fromData.value.fields || !fromData.value.mdnFieldId || !fieldsSortList.value.length
+  return !fromData.value || !fromData.value.fields || !fromData.value.mdnFieldId || !selectFields.value.length
 })
 // 手机号列
 const phoneFields = computed(() => {
@@ -125,7 +125,7 @@ const handleDataSheet = async(val) => {
      fromData.value.mdnFieldId = null
     }
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![17].includes(item.type)).map(item => {
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![7, 15, 17].includes(item.type)).map(item => {
       item.checked = true
       return item
     })

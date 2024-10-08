@@ -38,7 +38,7 @@ onMounted(() => {
 
 const handleCopy = async() => {
   try {
-    await toClipboard(confrimInfo.value.userViewUrl)
+    await toClipboard(`邀请您对【${confrimInfo.value.confirmName || '数据表'}】签字确认点击链接：`+confrimInfo.value.userViewUrl)
     message.success({
       content: '链接已复制，点击链接后可签字确认',
       class: 'yy-message-success',
