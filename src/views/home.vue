@@ -235,7 +235,7 @@ const handleSave = async() => {
       console.log(url)
       const currentTableId = tableInfo.value.tableId || tableInfo.value.id
       const successRecords = res.data.successRecords || []
-      Promise.all([addImgField(currentTableId, url, successRecords), addField(currentTableId, res.data.createUserViewUrl, successRecords),]).then(res => {
+      Promise.all([addImgField(currentTableId, res.data.qrUrl, successRecords), addField(currentTableId, res.data.createUserViewUrl, successRecords),]).then(res => {
         if(res.length){
           let updateParams = {
             confirmId: confirmId,
