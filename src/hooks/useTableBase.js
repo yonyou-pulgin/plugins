@@ -91,7 +91,6 @@ const setTableInfo = async(selection) => {
     const table = await getTableInstance(selection.tableId)
     // 获取当前多维表格下所有的数据表
     getTableName(selection.tableId)
-    
     getTableSheetList(selection.tableId)
     getTableFieldList(selection.tableId)
     // 获取当前多维表格下所有的数据表
@@ -141,11 +140,9 @@ const getTableSheetList = async (tableId) => {
 }
 // 获取当前表格名称
 const getTableName = async (tableId) => {
-    const table = await getTableInstance(tableId);
-    //const sheetListArr = await table.getViewMetaList();
-    const view = await table.getActiveView();
-    const viewMeta = await table.getViewMetaById(view.id);
-    tableName.value = viewMeta.name || ''
+  const table = await getTableInstance(tableId);
+  const name = await table.getName();
+  tableName.value = name || ''
 }
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {
@@ -175,8 +172,6 @@ const getCellList = async (tableId) => {
     params.pageToken = pageToken.value
   }
   const data = await table.getRecords(params);
-
-  console.log(data)
   // 分页参数
   loading.value = false
   if(data.pageToken) {
@@ -219,7 +214,12 @@ const addField = async (tableId, content, successRecords) => {
   const setRecords = []
   const table = await getTableInstance(tableId);
   // 创建字段~获取字段 id
-  const fieldId = await table.addField({type: FieldType.Url, name: '签字确认结果'});
+  let addIndex = Number(window.sessionStorage.getItem('addIndex') || 0) 
+  let name = addIndex ? `签字确认结果${addIndex}` : '签字确认结果'
+  addIndex++
+  window.sessionStorage.setItem('addIndex', addIndex)
+  // 创建字段~获取字段 id
+  const fieldId = await table.addField({type: FieldType.Url, name});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
   // 获取所有列
@@ -265,7 +265,11 @@ const addImgField = async (tableId, confirmId, successRecords) => {
   const setRecords = []
   const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
-  const fieldId = await table.addField({type: FieldType.Attachment, name: '签字二维码【发给签字人员】'});
+  let addIndex1 = Number(window.sessionStorage.getItem('addIndex1') || 0)
+  let name = addIndex1 ? `签字二维码【发给签字人员】${addIndex1}` : '签字二维码【发给签字人员】'
+  addIndex1++
+  window.sessionStorage.setItem('addIndex1', addIndex1)
+  const fieldId = await table.addField({type: FieldType.Attachment, name});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
 
@@ -284,7 +288,6 @@ const addImgField = async (tableId, confirmId, successRecords) => {
             token: token[0],
             timeStamp: file.lastModified,
             permission: {
-            
             }
           }]
         }
