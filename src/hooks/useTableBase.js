@@ -82,7 +82,7 @@ const getTableInstance = (tableId) => {
   // else return base.getTable(tableId)
 }
 // 设置表格信息
-const setTableInfo = async(selection) => {
+const setTableInfo = async(selection, type = '') => {
     if(!selection.tableId){
       selection.tableId = selection.id
     }
@@ -90,7 +90,7 @@ const setTableInfo = async(selection) => {
     // 获取表格实例
     const table = await getTableInstance(selection.tableId)
     // 获取当前多维表格下所有的数据表
-    getTableName(selection.tableId)
+    if(!type) getTableName(selection.tableId)
     getTableSheetList(selection.tableId)
     getTableFieldList(selection.tableId)
     // 获取当前多维表格下所有的数据表
@@ -102,31 +102,25 @@ const setTableInfo = async(selection) => {
     // console.log(recordIdList)
     // 监听 field 变化
     table.onFieldAdd((event) => {
-      if(selection.tableId!= event.data.data.tableId) return
+      if(selection.tableId!= event.data.tableId) return
       getTableFieldList(selection.tableId)
       getCellList(selection.tableId)
     })
     table.onFieldDelete((event) => {
-      if(delFieldFlag.value){
-        getTableFieldList(selection.tableId)
-        getCellList(selection.tableId)
-        delFieldFlag.value = false
-      }
+      getTableFieldList(selection.tableId)
+      getCellList(selection.tableId)
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      if(selection.tableId == event.data.tableId){
-        delFieldFlag.value = true
-        nextTick(async() => {
-          const selection = await bitable.base.getSelection();
-          tableData.value = []
-          tableInfo.value = selection
-          // getTableName(selection.tableId)
-          getTableSheetList(selection.tableId)
-          // getTableFieldList(selection.tableId)
-          getCellList(selection.tableId)
-        })
-      }
+      nextTick(async() => {
+        const selection = await bitable.base.getSelection();
+        tableData.value = []
+        tableInfo.value = selection
+        // getTableName(selection.tableId)
+        getTableSheetList(selection.tableId)
+        // getTableFieldList(selection.tableId)
+        getCellList(selection.tableId)
+      })
     })
 }
 // 获取当前多维表格下所有的数据表

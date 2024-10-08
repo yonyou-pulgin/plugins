@@ -122,7 +122,7 @@ const handleDataSheet = async(val) => {
   const table = await bitable.base.getTable(tableMeta.id);
   table.baseId = selection.baseId // baseId
   console.log(table)
-  setTableInfo(table)
+  setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
     const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1)
