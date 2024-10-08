@@ -154,11 +154,11 @@ watch(() =>fromData.value.mdnFieldId, (val) => {
   checkPhoneFieldFlag.value = false
 })
 
-watch(() => tableInfo.value, (val) => {
-  dataSheet.value = tableInfo.value.tableId
-  handleDataSheet(val.tableId)
-  // handleDataSheet(tableInfo.value.tableId)
-})
+//  监听数据表变化
+// watch(() => tableInfo.value, (val) => {
+//   dataSheet.value = tableInfo.value.tableId
+//   handleDataSheet(val.tableId)
+// })
 
 onMounted(async()=>{
   const selection = await bitable.base.getSelection();

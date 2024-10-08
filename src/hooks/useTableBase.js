@@ -115,9 +115,9 @@ const setTableInfo = async(selection) => {
         const selection = await bitable.base.getSelection();
         tableData.value = []
         tableInfo.value = selection
-        getTableName(selection.tableId)
+        // getTableName(selection.tableId)
         getTableSheetList(selection.tableId)
-        getTableFieldList(selection.tableId)
+        // getTableFieldList(selection.tableId)
         getCellList(selection.tableId)
       })
     })
