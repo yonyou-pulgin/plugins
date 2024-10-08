@@ -111,8 +111,10 @@ const setTableInfo = async(selection) => {
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      nextTick(() => {    
+      nextTick(async() => {
+        const selection = await bitable.base.getSelection();
         tableData.value = []
+        tableInfo.value = selection
         getTableName(selection.tableId)
         getTableSheetList(selection.tableId)
         getTableFieldList(selection.tableId)
@@ -147,7 +149,10 @@ const getTableName = async (tableId) => {
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {
   const table = await getTableInstance(tableId);
-  const fieldListData = await table.getFieldMetaList();
+  const selection = await bitable.base.getSelection();
+  const view = await table.getViewById(selection.viewId);
+  // 通过视图获取所有字段
+  const fieldListData = await view.getFieldMetaList();
   fieldList.value = fieldListData.map(item => {
       item.label = item.name
       item.value = item.id
@@ -252,8 +257,10 @@ const getAttachmentToken = async(file) => {
 }
 // 新增附件字段
 const addImgField = async (tableId, url, successRecords) => {
-
+  console.log(url)
   const result = await urltoBlob(url)
+
+  console.log(result)
   const file = new File([result], 'imgage.png', { type: result.type});
   // 设置单个值
   // const table = await bitable.base.getActiveTable();
@@ -298,19 +305,18 @@ const addImgField = async (tableId, url, successRecords) => {
   })
 }
 export default function useTableBase() {
-    return {
-        userId,
-        tableInfo,
-        tableName,
-        sheetList,
-        fieldList,
-        recordList,
-        tenantKey,
-        tableData,
-        getTableSheetList,
-        setTableInfo,
-        addField,
-        addImgField
-    }
-
+  return {
+    userId,
+    tableInfo,
+    tableName,
+    sheetList,
+    fieldList,
+    recordList,
+    tenantKey,
+    tableData,
+    getTableSheetList,
+    setTableInfo,
+    addField,
+    addImgField
+  }
 }

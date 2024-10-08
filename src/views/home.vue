@@ -116,27 +116,8 @@ const handleDataSheet = async(val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
   fromData.value.dataSheet = val
-  // 获取数据表
-  const selection = await bitable.base.getSelection();
-  const tableMeta = await bitable.base.getTableMetaById(val);
-  const table = await bitable.base.getTable(tableMeta.id);
-  table.baseId = selection.baseId // baseId
-  setTableInfo(table)
-
-
-  // const sheetListArr = await table.getViewMetaList();
-  // if(sheetListArr.length && sheetListArr[0].type!= 1){
-  //   const findTableData = sheetListArr.find(item => item.type == 1)
-  //   const viewId =  findTableData[0].id
-  //   await baseUi.switchToView(val, viewId);
-  // }
-  // 选择字段 17 附件
-
-}
-
-// 监听fields 变化
-watch(() => fieldList.value, (val) => {
-   // handleDataSheet(fromData.value.dataSheet)
+  // 获取手机字段 确认单内容
+  setTimeout(() => {
     const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1)
     if(phoneField.length && fromData.value.fields){
       fromData.value.mdnFieldId = phoneField[0].id || null
@@ -149,18 +130,28 @@ watch(() => fieldList.value, (val) => {
       return item
     })
     fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-}, {
-  deep: true
-})
+  }, 100)
+}
+
+
 
 watch(() =>fromData.value.mdnFieldId, (val) => { 
   checkPhoneFieldFlag.value = false
 })
 
-onMounted(()=>{
+watch(() => tableInfo.value, (val) => {
+  dataSheet.value = tableInfo.value.tableId
+  handleDataSheet(val.tableId)
+  // handleDataSheet(tableInfo.value.tableId)
+})
+
+onMounted(async()=>{
+  const selection = await bitable.base.getSelection();
   setTimeout(() => {
-    dataSheet.value = sheetList.value[0].value
-    handleDataSheet(dataSheet.value)
+    dataSheet.value = selection.tableId
+  //   const currentSheetObj = sheetList.value.find(item => item.id == election.tableId)
+  // fromData.value.fields = currentSheetObj
+    handleDataSheet(selection.tableId)
   }, 200)
 })
 
@@ -241,6 +232,7 @@ const handleSave = async() => {
       setConfrimInfo(res.data)
       let confirmId = res.data.confirmId
       let url =`${res.data.domain}/feishuapi/bitable/confirm/qrcode/${res.data.confirmId}`
+      console.log(url)
       const currentTableId = tableInfo.value.tableId || tableInfo.value.id
       const successRecords = res.data.successRecords || []
       Promise.all([addImgField(currentTableId, url, successRecords), addField(currentTableId, res.data.createUserViewUrl, successRecords),]).then(res => {
