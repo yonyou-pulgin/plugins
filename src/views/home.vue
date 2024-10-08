@@ -116,6 +116,13 @@ const handleDataSheet = async(val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
   fromData.value.dataSheet = val
+    // 获取数据表
+  const selection = await bitable.base.getSelection();
+  const tableMeta = await bitable.base.getTableMetaById(val);
+  const table = await bitable.base.getTable(tableMeta.id);
+  table.baseId = selection.baseId // baseId
+  console.log(table)
+  setTableInfo(table)
   // 获取手机字段 确认单内容
   setTimeout(() => {
     const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1)

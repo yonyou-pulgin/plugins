@@ -1,7 +1,7 @@
 import { ref, nextTick } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 import { confirmImgDown } from '@/api/api.js'
-import { urltoBlob } from 'image-conversion' 
+import { urltoBlob } from 'image-conversion'
 import { timestamp } from '@vueuse/core';
 
 const FieldType = {
@@ -65,7 +65,7 @@ const tenantKey = ref('') // 租户key
 const userId = ref('') // 用户id 创建人
 const tableData =ref([]) // 表格数据
 const pageToken = ref(null) // 分页token
-
+const delFieldFlag = ref(false) // 删除字段
 
 const base = bitable.base;
 const baseUi = bitable.ui;
@@ -102,24 +102,31 @@ const setTableInfo = async(selection) => {
     // console.log(recordIdList)
     // 监听 field 变化
     table.onFieldAdd((event) => {
+      if(selection.tableId!= event.data.data.tableId) return
       getTableFieldList(selection.tableId)
       getCellList(selection.tableId)
     })
-     table.onFieldDelete((event) => {
-      getTableFieldList(selection.tableId)
-      getCellList(selection.tableId)
+    table.onFieldDelete((event) => {
+      if(delFieldFlag.value){
+        getTableFieldList(selection.tableId)
+        getCellList(selection.tableId)
+        delFieldFlag.value = false
+      }
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      nextTick(async() => {
-        const selection = await bitable.base.getSelection();
-        tableData.value = []
-        tableInfo.value = selection
-        // getTableName(selection.tableId)
-        getTableSheetList(selection.tableId)
-        // getTableFieldList(selection.tableId)
-        getCellList(selection.tableId)
-      })
+      if(selection.tableId == event.data.tableId){
+        delFieldFlag.value = true
+        nextTick(async() => {
+          const selection = await bitable.base.getSelection();
+          tableData.value = []
+          tableInfo.value = selection
+          // getTableName(selection.tableId)
+          getTableSheetList(selection.tableId)
+          // getTableFieldList(selection.tableId)
+          getCellList(selection.tableId)
+        })
+      }
     })
 }
 // 获取当前多维表格下所有的数据表
