@@ -124,7 +124,7 @@ const handleDataSheet = async(val) => {
   setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
-    const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1)
+    const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
     if(phoneField.length && fromData.value.fields){
       fromData.value.mdnFieldId = phoneField[0].id || null
     } else {
