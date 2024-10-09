@@ -121,7 +121,6 @@ const handleDataSheet = async(val) => {
   const tableMeta = await bitable.base.getTableMetaById(val);
   const table = await bitable.base.getTable(tableMeta.id);
   table.baseId = selection.baseId // baseId
-  console.log(table)
   setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
@@ -254,7 +253,6 @@ const handleSave = async() => {
       setConfrimInfo(res.data)
       let confirmId = res.data.confirmId
       let url =`${res.data.domain}/feishuapi/bitable/confirm/qrcode/${res.data.confirmId}`
-      console.log(url)
       const currentTableId = tableInfo.value.tableId || tableInfo.value.id
       const successRecords = res.data.successRecords || []
       Promise.all([addImgField(currentTableId, res.data.qrUrl, successRecords), addField(currentTableId, res.data.createUserViewUrl, successRecords),]).then(res => {

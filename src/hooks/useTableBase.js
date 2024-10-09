@@ -97,37 +97,32 @@ const setTableInfo = async(selection, type = '') => {
     getCellList(selection.tableId)
     getTenantKey()
     getUserId()
-    // 获取所有列
-    // const recordIdList = await table.getRecordIdList();
-    // console.log(recordIdList)
+
+    console.log('tableId:' + selection.tableId)
     // 监听 field 变化
     table.onFieldAdd((event) => {
-      if(selection.tableId!= event.data.tableId) return
-      getTableFieldList(selection.tableId)
-      getCellList(selection.tableId)
+      console.log('add tableId:' + tableInfo.value.tableId)
+      getTableFieldList(tableInfo.value.tableId)
+      getCellList(tableInfo.value.tableId)
     })
     table.onFieldDelete((event) => {
-      getTableFieldList(selection.tableId)
-      getCellList(selection.tableId)
+      console.log('del tableId:' + tableInfo.value.tableId)
+      getTableFieldList(tableInfo.value.tableId)
+      getCellList(tableInfo.value.tableId)
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      nextTick(async() => {
-        const selection = await bitable.base.getSelection();
+      console.log('change tableId:' + tableInfo.value.tableId)
+      nextTick(() => {
         tableData.value = []
-        tableInfo.value = selection
-        // getTableName(selection.tableId)
-        getTableSheetList(selection.tableId)
-        // getTableFieldList(selection.tableId)
-        getCellList(selection.tableId)
+        getTableSheetList(tableInfo.value.tableId)
+        getCellList(tableInfo.value.tableId)
       })
     })
 }
 // 获取当前多维表格下所有的数据表
 const getTableSheetList = async (tableId) => {
   const tableList = await base.getTableMetaList();
-  // const table = await getTableInstance(tableId);
-  // const sheetListArr = await table.getViewMetaList();
   tableList.map(item => {
     item.label = item.name
     item.value = item.id
@@ -150,8 +145,8 @@ const getTableName = async (tableId) => {
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {
   const table = await getTableInstance(tableId);
-  const selection = await bitable.base.getSelection();
-  const view = await table.getViewById(selection.viewId);
+  const baseInfo = await bitable.base.getSelection();
+  const view = await table.getViewById(baseInfo.viewId);
   // 通过视图获取所有字段
   const fieldListData = await view.getFieldMetaList();
   fieldList.value = fieldListData.map(item => {
@@ -160,15 +155,11 @@ const getTableFieldList = async (tableId) => {
       return item
   })
 }
-// const getTalbeList = async (tableId) => {
-//     const table = await base.getTable(tableId);
-// }
 
 // 获取表格数据
 const getCellList = async (tableId) => {
   if(loading.value) return
   loading.value = true
-  // const table = await getTableInstance(tableId)
   const table = await base.getTableById(tableId);
   // 获取所有记录 id 列表。
   let params = {
@@ -215,8 +206,6 @@ const getUserId = async () => {
 }
 // 新增字段
 const addField = async (tableId, content, successRecords) => {
-  // const result = await getFile('https://uat.yygongzi.com/salary/wx/pc/Payroll/img/bg_1.32906926.png')
-  // console.log(result)
   const setRecords = []
   const table = await getTableInstance(tableId);
   // 创建字段~获取字段 id
