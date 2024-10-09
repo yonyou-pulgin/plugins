@@ -144,9 +144,12 @@ const getTableName = async (tableId) => {
 }
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {
-  const baseInfo = await bitable.base.getSelection();
-  const table = await getTableInstance(baseInfo.tableId);
-  const view = await table.getViewById(baseInfo.viewId);
+  // const baseInfo = await bitable.base.getSelection();
+  const table = await getTableInstance(tableId);
+  const viewList = await table.getViewList();
+  const viewId = viewList[0].id
+  // 通过视图 id 获取视图实例
+  const view = await table.getViewById(viewId);
   // 通过视图获取所有字段
   const fieldListData = await view.getFieldMetaList();
   fieldList.value = fieldListData.map(item => {
