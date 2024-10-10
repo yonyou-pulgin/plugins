@@ -141,7 +141,7 @@ const handleDataSheet = async(val) => {
 
 
 watch(() => fieldList.value.length, () => {
-  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1)
+  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
   if(phoneField.length && fromData.value.fields){
     fromData.value.mdnFieldId = phoneField[0].id || null
   } else {
