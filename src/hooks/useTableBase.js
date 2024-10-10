@@ -146,8 +146,12 @@ const getTableName = async (tableId) => {
 const getTableFieldList = async (tableId) => {
   // const baseInfo = await bitable.base.getSelection();
   const table = await getTableInstance(tableId);
-  const viewList = await table.getViewList();
-  const viewId = viewList[0].id
+  const viewList = await table.getViewMetaList();
+  // 获取表格视图
+  const findView = viewList.find(item => item.type == 1)
+  if(!findView) return
+  // 获取第一个视图 id
+  const viewId = findView.id
   // 通过视图 id 获取视图实例
   const view = await table.getViewById(viewId);
   // 通过视图获取所有字段
