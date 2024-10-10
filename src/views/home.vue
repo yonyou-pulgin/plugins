@@ -181,14 +181,19 @@ const checkPhoneField = async() => {
   const recordList = await table.getRecordList();
   let phoneFieldVal = []
   for (const record of recordList) {
-    const cell = await record.getCellByField(fromData.value.mdnFieldId);
-    const val = await cell.getValue();
-    // 只处理文本 非文本类型 return 空
-    if(val && Array.isArray(val) && val[0].text){
-      phoneFieldVal.push(Promise.resolve(val[0].text))
-    } 
+    phoneFieldVal.push(getFieldPromise(record))
   }
   return phoneFieldVal
+}
+const getFieldPromise = async(record) => {
+  const cell = await record.getCellByField(fromData.value.mdnFieldId);
+  const val = await cell.getValue();
+  // 只处理文本 非文本类型 return 空
+  if(val && Array.isArray(val) && val[0].text){
+    return Promise.resolve(val[0].text)
+  } else if(typeof val =='string'){
+    return Promise.resolve(val)
+  }
 }
 // const handleChecked = (val) => {
 //   fieldsSortList.value.map(item => {
