@@ -193,6 +193,10 @@ const getFieldPromise = async(record) => {
     return Promise.resolve(val[0].text)
   } else if(typeof val =='string'){
     return Promise.resolve(val)
+  } else if(typeof val == 'number'){
+    return Promise.resolve(val)
+  } else if(typeof val == 'object' && val && val.text){
+    return Promise.resolve(val.text)
   }
 }
 // const handleChecked = (val) => {
@@ -242,6 +246,7 @@ const checkPhoneNumbersInArray = (phoneNumbers) => {
 const handleSave = async() => {
   // 获取手机号字段 
   const resut = await checkPhoneField()
+  console.log(resut)
   const checkedPone = await Promise.all(resut)
   if(checkedPone.length){
    const result = checkPhoneNumbersInArray(checkedPone)
