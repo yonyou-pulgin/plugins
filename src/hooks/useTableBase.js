@@ -71,16 +71,10 @@ const base = bitable.base;
 const baseUi = bitable.ui;
 const bridge = bitable.bridge;
 
-// 数据变化
-// base.onTableAdd((event) => {
-//   console.log(event)
-// })
-// 获取表格实例
 const getTableInstance = (tableId) => {
   return base.getTable(tableId)
-  // if(tableInstance) return Promise.resolve(tableInstance)
-  // else return base.getTable(tableId)
 }
+let flag = true
 // 设置表格信息
 const setTableInfo = async(selection, type = '') => {
     if(!selection.tableId){
@@ -97,8 +91,6 @@ const setTableInfo = async(selection, type = '') => {
     getCellList(selection.tableId)
     getTenantKey()
     getUserId()
-
-    console.log('tableId:' + selection.tableId)
     // 监听 field 变化
     table.onFieldAdd((event) => {
       console.log('add tableId:' + tableInfo.value.tableId)
@@ -129,12 +121,6 @@ const getTableSheetList = async (tableId) => {
     return item
   })
   sheetList.value = tableList
-  // // 第一个视图不是数据表，切换视图
-  // if(sheetListArr.length && sheetListArr[0].type!= 1){
-  //   const findTableData = sheetListArr.find(item => item.type == 1)
-  //   const viewId =  findTableData[0].id
-  //   await baseUi.switchToView(tableId, viewId);
-  // }
 }
 // 获取当前表格名称
 const getTableName = async (tableId) => {
@@ -298,6 +284,51 @@ const addImgField = async (tableId, url, successRecords) => {
     qrFieldId: fieldId,
   })
 }
+const addFormulaField = async (tableId, content, successRecords) => {
+  const table = await bitable.base.getTableById(tableId);
+  const findField = fieldList.value.filter(item => item.name.includes('签字确认结果'))
+  let name = findField.length ? `签字确认结果${findField.length}` : '签字确认结果'
+  const fieldId = await table.addField({type: FieldType.Formula, name});
+  // 公式字段
+  const formulaField = await table.getField(fieldId);
+  let url = content || 'https://www.baidu.com/'
+  let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"签字确认结果")`
+  await formulaField.setFormula(contentUrl); 
+}
+// 新增单选
+const addSingleSelectField = async (tableId, url, successRecords) => {
+  const table = await bitable.base.getTableById(tableId);
+  const findField = fieldList.value.filter(item => item.name.includes('签字状态'))
+  let name = findField.length ? `签字状态${findField.length}` : '签字状态'
+  const fieldId = await table.addField({type: FieldType.SingleSelect, name,
+  description: { // 字段描述
+    content: url,
+    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+    disableSyncToFormDesc: false
+  }});
+  // 获取单选实力
+  const singleSelectField = await table.getField(fieldId);
+  // //0-未查看/未签字 1-已查看/已签字 2-已查看/未签字
+  await singleSelectField.addOptions([
+    {
+      name: '未查看/未签字',
+    },
+    {
+      name: '已查看/已签字',
+    },
+    {
+      name: '已查看/未签字',
+    },
+  ]);
+  const recordIdList = await table.getRecordIdList();
+  recordIdList.forEach(item => {
+    singleSelectField.setValue(item, '未查看/未签字'); // 传入选项 id   
+  })
+}
+
+const closePlugin = async () => {
+  bitable.ui.closeHostContainer()
+}
 export default function useTableBase() {
   return {
     userId,
@@ -311,6 +342,9 @@ export default function useTableBase() {
     getTableSheetList,
     setTableInfo,
     addField,
-    addImgField
+    addImgField,
+    addFormulaField,
+    addSingleSelectField,
+    closePlugin
   }
 }
