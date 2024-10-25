@@ -1,5 +1,6 @@
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
+
 
 const bridge = bitable.bridge;
 const formData = ref({
@@ -53,7 +54,17 @@ const getConfrimInfo = () => {
   return confrimInfo.value
 }
 
+
+
 const useConfirmInfo = () => {
+  onMounted(async() => {
+    const cacheBaseId = await bridge.getData('yy-baseId')
+    const { baseId:currentBaseId } =  await bitable.base.getSelection()
+    if(cacheBaseId && typeof cacheBaseId == 'string' && cacheBaseId != currentBaseId) {
+      await bridge.setData('yy-auth-code', {})
+      formData.value.personalBaseToken = ''
+    }
+  })
   return {
     formData,
     confrimInfo,
@@ -63,7 +74,7 @@ const useConfirmInfo = () => {
     getFormData,
     getCacheFormData,
     getCacheAuthCode,
-    resetFormData
+    resetFormData,
   }
 }
 export default useConfirmInfo
