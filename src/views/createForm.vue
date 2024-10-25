@@ -145,15 +145,15 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
         successRecords,
         qrUrl,
         formulaUrl,
+        userViewUrl,
         createUserViewUrl} = insertFieldParams.value
   let fieldArr = []
   // 无身份、无授权插入链接
-  //, res.data.createUserViewUrl, successRecords
   if(!isNewRecordConfirm && !isVerifyIdentity){
-    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords))
+    fieldArr.push(addField(currentTableId, userViewUrl, successRecords, '签字确认'))
   } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
-    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords))
+    fieldArr.push(addField(currentTableId, userViewUrl, successRecords, '签字确认'))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态

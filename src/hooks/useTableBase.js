@@ -198,20 +198,20 @@ const getUserId = async () => {
   userId.value = Id
 }
 // 新增字段
-const addField = async (tableId, content, successRecords) => {
+const addField = async (tableId, content, successRecords, fieldTitle='签字确认结果') => {
   const setRecords = []
   const table = await getTableInstance(tableId);
   // 创建字段~获取字段 id
   // 查找签字字段
-  const findField = fieldList.value.filter(item => item.name.includes('签字确认结果'))
-  let name = findField.length ? `签字确认结果${findField.length}` : '签字确认结果'
+  const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
+  let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
   // 创建字段~获取字段 id
   const fieldId = await table.addField({type: FieldType.Url, name});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
   // 获取所有列
   const recordIdList = await table.getRecordIdList();
-
+  let text = fieldTitle == 'fieldTitle' ? '查看签字结果' : '在线签字确认'
   recordIdList.forEach(item => {
     if(successRecords.includes(item)) {
       setRecords.push({
@@ -219,7 +219,7 @@ const addField = async (tableId, content, successRecords) => {
         fields: {
           [field.id]: [{
             "type": "url",
-            "text": "查看签字结果",
+            "text": text,
             "link": `${content}?recordId=${item}`
           }]
         }
@@ -333,7 +333,7 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
 }
 
 const closePlugin = async () => {
-  bitable.ui.closeHostContainer()
+  await bitable.ui.closeHostContainer()
 }
 export default function useTableBase() {
   return {
