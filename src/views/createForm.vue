@@ -109,7 +109,9 @@ const handleSubmit = async() => {
         qrUrl: res.data.qrUrl,
         userViewUrl: res.data.userViewUrl,
         createUserViewUrl: res.data.createUserViewUrl,
-        formulaUrl: `${confirmResult.value.domain}salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`
+        formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`,
+        formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}&recordId=`,
+
       }
       res.data.isVerifyIdentity = !!params.isVerifyIdentity
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
@@ -146,14 +148,15 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
         qrUrl,
         formulaUrl,
         userViewUrl,
+        formulaUrlEmp,
         createUserViewUrl} = insertFieldParams.value
   let fieldArr = []
   // 无身份、无授权插入链接
   if(!isNewRecordConfirm && !isVerifyIdentity){
-    fieldArr.push(addField(currentTableId, userViewUrl, successRecords, '签字确认'))
+    fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
   } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
-    fieldArr.push(addField(currentTableId, userViewUrl, successRecords, '签字确认'))
+    fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态
