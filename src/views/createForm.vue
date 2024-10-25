@@ -3,7 +3,7 @@
     <div class="create-container-title">
       <span>对多维表中数据进行签字确认</span>
     </div>
-    <yySteps :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
+    <yySteps class="plugins-steps" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
       <yy-button v-if="current && current < stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
       <yy-button v-if="current == 0" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
       <yy-button v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
@@ -211,9 +211,23 @@ onMounted(async() => {
       text-align: center;
     }
 
-    .yy-steps {
-      flex: 1;
-    }
+
   }
 }
+</style>
+<style lang="scss">
+::-webkit-scrollbar{
+  width: 0!important;
+  height: 0!important;
+}
+.plugins-steps {
+  height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  .steps-content{
+      flex: 1;
+      overflow-y: scroll;
+  }
+}
+
 </style>

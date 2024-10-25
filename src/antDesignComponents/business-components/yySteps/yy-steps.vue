@@ -238,7 +238,7 @@ watch(() => props.indes, (newVal) => {
     flex: 1;
     flex-direction: column;
     display: flex;
-    overflow-y: hidden;
+    overflow-y: scroll;
   }
 
   .steps-content {
