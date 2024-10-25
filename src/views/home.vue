@@ -61,6 +61,7 @@ const fromData = ref({
   baseId: '',
   tableId: '',
   confirmName: '',
+  tableName: '',
   dataSheet: null,
   mdnFieldId: null,
   fields: null,
@@ -69,6 +70,7 @@ const fromData = ref({
   isHiddenEmpty: false,
   currentStep: 0,
 })
+const initFlag = ref(false)
 const dataSheet = ref(null)
 const previewData = ref(null) // 预览数据
 const fromPreviewInstance = ref(null)
@@ -103,6 +105,7 @@ const handleDataSheet = async(val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
   fromData.value.dataSheet = val
+  fromData.value.tableName = currentSheetObj.name
     // 获取数据表
   const selection = await bitable.base.getSelection();
   const tableMeta = await bitable.base.getTableMetaById(val);
@@ -136,14 +139,12 @@ watch(() => fieldList.value.length, () => {
 })
 
 watch(() => fromData.value, (val) => {
-  setFormData(fromData.value)
+  // 延迟监听
+  if(initFlag.value) setFormData(fromData.value)
 }, { deep: true })
-//  监听数据表变化
-// watch(() => tableInfo.value, (val) => {
-//   dataSheet.value = tableInfo.value.tableId
-//   handleDataSheet(val.tableId)
-// })
+
 onMounted(async()=>{
+  initFlag.value = false
   const selection = await bitable.base.getSelection();
   fromData.value.baseId = cacheFormData.value.baseId || selection.baseId
   fromData.value.currentStep = 0
@@ -165,6 +166,7 @@ onMounted(async()=>{
     } else {
       handleDataSheet( dataSheet.value)
     }
+    initFlag.value = true
   }, 200)
 
   bus.on('preview', () => {
@@ -183,8 +185,6 @@ const getPhoneField = () => {
   } else {
     fromData.value.mdnFieldId = null
   }
-
-  console.log( fromData.value.mdnFieldId)
 }
 
 const checkPhoneField = async() => {
@@ -233,6 +233,10 @@ const getParams = () => {
   params.fields = fieldList.value
   // 排序字段～选中字段
   params.fieldSort = fieldsSortList.value.filter(item => item.checked).map(item => item.id)
+  params.isHiddenEmpty = +params.isHiddenEmpty
+  params.isHiddenZero = +params.isHiddenZero
+  params.isVerifyIdentity = +params.isVerifyIdentity
+  params.isNewRecordConfirm = +params.isNewRecordConfirm
   // 表格数据
   params.records = tableData.value
   return params

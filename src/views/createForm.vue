@@ -8,7 +8,7 @@
       <yy-button v-if="current == 0" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
       <yy-button v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
       <template v-if="current == 2">
-        <template v-if="formData.isVerifyIdentity">
+        <template v-if="confirmResult.isVerifyIdentity">
           <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
           <yy-button type="primary" @click="handleDownQr">下载二维码</yy-button>
         </template>
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+import { bitable } from '@lark-base-open/js-sdk';
 import { ref, reactive, onMounted, watch } from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
@@ -33,9 +34,9 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 
-
+const { toClipboard } = useClipboard()
 const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, addFormulaField, addSingleSelectField, closePlugin } = useTableBase();
-const { formData, setFormData, getCacheFormData } = useConfirmInfo()
+const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
 const current = ref(0)
 const confirmResult = ref(null)
@@ -48,13 +49,13 @@ const stepList = ref([
 ])
 
 const handleNext = () => {
-  current.value++
-  // if(current.value == stepList.value.length - 2){
-  //   // 提交
-  //   handleSubmit()
-  // } else {
-  //   current.value++
-  // }
+  //current.value++
+  if(current.value == stepList.value.length - 2){
+    // 提交
+    handleSubmit()
+  } else {
+    current.value++
+  }
 }
 
 const handlePrev = () => {
@@ -76,6 +77,11 @@ const getParams = () => {
   params.fields = fieldList.value
   // 表格数据
   params.records = tableData.value
+  params.isHiddenEmpty = +params.isHiddenEmpty
+  params.isHiddenZero = +params.isHiddenZero
+  params.isVerifyIdentity = +params.isVerifyIdentity
+  params.isNewRecordConfirm = +params.isNewRecordConfirm
+  params.fieldSort = params.fieldSort.filter(item => item.checked).map(item => item.id)
   if(params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
   return params
 }
@@ -89,6 +95,8 @@ const handleSubmit = async() => {
   }
   createConfirm(params).then(async (res) => {
     if(res.success){
+      // 创建成功 清楚缓存数据
+      resetFormData()
       current.value++
       confirmResult.value = res.data
       let confirmId = res.data.confirmId
@@ -100,10 +108,14 @@ const handleSubmit = async() => {
         successRecords,
         qrUrl: res.data.qrUrl,
         userViewUrl: res.data.userViewUrl,
-        createUserViewUrl,
+        createUserViewUrl: res.data.createUserViewUrl,
         formulaUrl: `${confirmResult.value.domain}salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`
       }
-      let fieldArr = insertField()
+      res.data.isVerifyIdentity = !!params.isVerifyIdentity
+      res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
+      confirmResult.value.isVerifyIdentity = !!params.isVerifyIdentity
+      setConfrimInfo(res.data)
+      let fieldArr = insertField(params.isNewRecordConfirm, params.isVerifyIdentity)
       Promise.all(fieldArr).then(res => {
         if(res.length){
           let updateParams = {
@@ -139,14 +151,14 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
   //, res.data.createUserViewUrl, successRecords
   if(!isNewRecordConfirm && !isVerifyIdentity){
     fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords))
-  } else if ( !isNewRecordConfirm && isVerifyIdentity) {
+  } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
     fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态
     fieldArr.push(addFormulaField(currentTableId, formulaUrl))
-    fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：#${qrUrl}#`))
+    fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
   }
 
   return fieldArr

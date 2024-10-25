@@ -5,7 +5,7 @@ import HTTP from '@base/http'
 const MockBase = 'https://yapi.yygongzi.cn/mock/79/gw/'
 
 const http = new HTTP({
-  baseURL: 'https://uat.yygongzi.com/',
+  baseURL: 'https://dev.yygongzi.com/',
   timeout: 1000 * 60 * 3,
 })
 // 创建确认单

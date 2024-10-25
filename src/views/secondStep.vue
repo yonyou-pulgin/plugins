@@ -24,7 +24,7 @@
       <span class="form-item-labelTitle">多维表授权码
         <div class="link-btn" @click="handleGetAuth">如何获得授权码？</div>
       </span>
-      <yy-input :maxlength="50" v-model:value="fromData.personalBaseToken" placeholder="请填写授权码"></yy-input>
+      <yy-input :maxlength="100" v-model:value="fromData.personalBaseToken" placeholder="请填写授权码"></yy-input>
     </div>
 
     <getAuthCode ref="getAuthCodeInstance" />
@@ -83,7 +83,6 @@ onMounted(async() => {
   fromData.value.tableName = currentTableName.value
   //  获取授权码
   const authCode = await getCacheAuthCode()
-  console.log('authCode', authCode)
   if(authCode){
     fromData.value.personalBaseToken = authCode
   }

@@ -294,6 +294,9 @@ const addFormulaField = async (tableId, content, successRecords) => {
   let url = content || 'https://www.baidu.com/'
   let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"签字确认结果")`
   await formulaField.setFormula(contentUrl); 
+  return Promise.resolve({
+    viewFieldId: fieldId,
+  })
 }
 // 新增单选
 const addSingleSelectField = async (tableId, url, successRecords) => {
@@ -323,6 +326,9 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
   const recordIdList = await table.getRecordIdList();
   recordIdList.forEach(item => {
     singleSelectField.setValue(item, '未查看/未签字'); // 传入选项 id   
+  })
+  return Promise.resolve({
+    statusFieldId: fieldId,
   })
 }
 

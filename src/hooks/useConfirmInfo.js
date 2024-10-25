@@ -9,7 +9,7 @@ const formData = ref({
 // 获取缓存的表单数据
 const getCacheFormData = async () => {
   const data = await bridge.getData('yy-form-data')
-  if(data && Object.values(data).length){
+  if(data && Object.values(data).length && data !=1){
     formData.value = Object.assign(formData.value, JSON.parse(data))
     return Promise.resolve(formData.value)
   }
@@ -25,17 +25,7 @@ const getCacheAuthCode = async () => {
   return Promise.resolve(null)
 }
 // 确认信息
-const confrimInfo = ref({
-    "confirmId": "1849279010542968834",
-    "confirmName": "数据表 3",
-    "qrUrl": "https://salary-1307799014.cos.ap-beijing.myqcloud.com/images/micro-salaryfeishu-server/qrCode/2024/10/24/897076cabf0746a9bc418134878b92294768813334207917075.png",
-    "createUserViewUrl": "https://www.yygongzi.com/gw/feishuapi/bitable/confirm/route/1/1849279010542968834",
-    "userViewUrl": "https://www.yygongzi.com/gw/feishuapi/bitable/confirm/route/0/1849279010542968834",
-    "domain": "https://www.yygongzi.com",
-    "successRecords": [
-      "recus1216Ak4wm"
-    ]
-})
+const confrimInfo = ref({})
 
 const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
@@ -54,7 +44,7 @@ const getFormData = () => {
 }
 const resetFormData = async() => {
   formData.value = {}
-  await bridge.setData('yy-form-data', '')
+  await bridge.setData('yy-form-data', 1)
 }
 const setConfrimInfo = (info) => {
   confrimInfo.value = info
@@ -72,7 +62,8 @@ const useConfirmInfo = () => {
     setFormData,
     getFormData,
     getCacheFormData,
-    getCacheAuthCode
+    getCacheAuthCode,
+    resetFormData
   }
 }
 export default useConfirmInfo
