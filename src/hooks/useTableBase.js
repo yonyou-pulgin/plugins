@@ -329,6 +329,7 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
   })
   return Promise.resolve({
     statusFieldId: fieldId,
+    statusFieldName: name
   })
 }
 

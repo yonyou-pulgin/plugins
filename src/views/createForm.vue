@@ -3,16 +3,16 @@
     <div class="create-container-title">
       <span>对多维表中数据进行签字确认</span>
     </div>
-    <yySteps class="plugins-steps" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
-      <yy-button v-if="current && current < stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
-      <yy-button v-if="current == 0" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
+    <yySteps class="plugins-steps" :class="{'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck}" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
+      <yy-button v-if="current && current < stepList.length -1 && current != stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
+      <yy-button v-if="current == 0 && current != stepList.length -1" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
       <yy-button v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
           <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
           <yy-button type="primary" @click="handleDownQr">下载二维码</yy-button>
         </template>
-        <yy-button v-else type="primary" @click="closePlugin">完成</yy-button>
+        <!-- <yy-button v-else type="primary" @click="closePlugin">完成</yy-button> -->
       </template>
     </yySteps>
   </div>
@@ -20,7 +20,7 @@
 
 <script setup>
 import { bitable } from '@lark-base-open/js-sdk';
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
 import { createConfirm, confirmUpdate } from '@/api/api.js';
@@ -47,6 +47,10 @@ const stepList = ref([
   { key: 1, title: '设置确认单', content: secondStep },
   { key: 2, title: '创建完成', content: threeStep },
 ])
+
+const isVerifyIdentityCheck = computed( () => {
+  return current.value == 2 && confirmResult.value && !confirmResult.value.isVerifyIdentity
+})
 
 const handleNext = () => {
   //current.value++
@@ -234,6 +238,14 @@ onMounted(async() => {
   .steps-content{
       flex: 1;
       overflow-y: scroll;
+  }
+}
+.plugins-steps-isVerifyIdentity .yy-steps-container{
+  .steps-content{
+    border-bottom: none;
+  }
+  .steps-action{
+    display: none;
   }
 }
 
