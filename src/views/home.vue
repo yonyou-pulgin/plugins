@@ -158,9 +158,11 @@ onMounted(async()=>{
       fromData.value.fieldSort = fieldsSortList.value 
       if(cacheFormData.value.isHiddenZero){
         hiddenCheckedList.value.push('isHiddenZero')
+        fromData.value.isHiddenZero =  1
       }
       if(cacheFormData.value.isHiddenEmpty){
         hiddenCheckedList.value.push('isHiddenEmpty')
+        fromData.value.isHiddenEmpty = 1
       }
       getPhoneField()
     } else {
@@ -180,7 +182,7 @@ onBeforeUnmount(()=> {
 // 获取手机号字段
 const getPhoneField = () => {
   const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
-  if(phoneField.length && fromData.value.fields){
+  if(phoneField.length){
     fromData.value.mdnFieldId = phoneField[0].id || null
   } else {
     fromData.value.mdnFieldId = null
