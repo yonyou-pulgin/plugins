@@ -112,7 +112,7 @@ const handleSubmit = async() => {
         successRecords,
         qrUrl: res.data.qrUrl,
         userViewUrl: res.data.userViewUrl,
-        createUserViewUrl: res.data.createUserViewUrl,
+        createUserViewUrl: res.data.createUserViewUrl + '?recordId=',
         formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`,
         formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}&recordId=`,
 
