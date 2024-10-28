@@ -165,11 +165,13 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
   } else {
     // 有授权  插入公式、状态
     if(isVerifyIdentity){
+      fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
       fieldArr.push(addFormulaField(currentTableId, formulaUrl))
     } else {
+      fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
       fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
     }
-    fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
+    console.log(fieldArr)
   }
 
   return fieldArr
