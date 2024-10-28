@@ -170,7 +170,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
     } else {
       fieldArr.push(addSingleSelectField(currentTableId))
       //fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
-      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认'))
+      fieldArr.push(addFormulaField(currentTableId, formulaUrlEmp, '签字确认'))
     }
   }
 
