@@ -127,7 +127,6 @@ const handleDataSheet = async(val) => {
   }, 100)
 }
 
-
 watch(() => fieldList.value.length, () => {
   getPhoneField()
   fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
@@ -136,6 +135,8 @@ watch(() => fieldList.value.length, () => {
     return item
   })
   fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
+  fromData.value.fieldSort = fieldsSortList.value
+  setFormData(fromData.value)
 })
 
 watch(() => fromData.value, (val) => {

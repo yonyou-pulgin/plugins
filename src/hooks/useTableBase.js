@@ -333,7 +333,7 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
 }
 
 const closePlugin = async () => {
-  bitable.ui.closeHostContainer()
+  await bitable.ui.closeHostContainer()
 }
 export default function useTableBase() {
   return {
