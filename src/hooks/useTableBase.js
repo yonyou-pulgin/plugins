@@ -198,7 +198,7 @@ const getUserId = async () => {
   userId.value = Id
 }
 // 新增字段
-const addField = async (tableId, content, successRecords, fieldTitle='签字确认结果') => {
+const addField = async (tableId, content, successRecords, fieldTitle='签字确认结果', isDesc = '') => {
   const setRecords = []
   const table = await getTableInstance(tableId);
   // 创建字段~获取字段 id
@@ -206,7 +206,12 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
   const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
   let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
   // 创建字段~获取字段 id
-  const fieldId = await table.addField({type: FieldType.Url, name});
+  const fieldId = await table.addField({type: FieldType.Url, name,
+  description: { // 字段描述
+    content: isDesc,
+    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+    disableSyncToFormDesc: false
+  }});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
   // 获取所有列
@@ -284,16 +289,21 @@ const addImgField = async (tableId, url, successRecords) => {
     qrFieldId: fieldId,
   })
 }
-const addFormulaField = async (tableId, content, successRecords) => {
+const addFormulaField = async (tableId, content, fieldTitle = '签字确认结果', isDesc = '') => {
   const table = await bitable.base.getTableById(tableId);
-  const findField = fieldList.value.filter(item => item.name.includes('签字确认结果'))
-  let name = findField.length ? `签字确认结果${findField.length}` : '签字确认结果'
-  const fieldId = await table.addField({type: FieldType.Formula, name});
+  const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
+  let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
+  const fieldId = await table.addField({type: FieldType.Formula, name, description: { // 字段描述
+    content: isDesc,
+    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+    disableSyncToFormDesc: false
+  }});
   // 公式字段
   const formulaField = await table.getField(fieldId);
   let url = content || 'https://www.baidu.com/'
-  let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"签字确认结果")`
-  await formulaField.setFormula(contentUrl); 
+  let  titleVal = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
+  let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
+  await formulaField.setFormula(contentUrl);
   return Promise.resolve({
     viewFieldId: fieldId,
   })
@@ -303,12 +313,7 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes('签字状态'))
   let name = findField.length ? `签字状态${findField.length}` : '签字状态'
-  const fieldId = await table.addField({type: FieldType.SingleSelect, name,
-  description: { // 字段描述
-    content: url,
-    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
-    disableSyncToFormDesc: false
-  }});
+  const fieldId = await table.addField({type: FieldType.SingleSelect, name});
   // 获取单选实力
   const singleSelectField = await table.getField(fieldId);
   // //0-未查看/未签字 1-已查看/已签字 2-已查看/未签字

@@ -160,18 +160,18 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
     fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
   } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
-    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果'))
+    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果', `请把链接发给签字人员：${qrUrl}`))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态
     if(isVerifyIdentity){
-      fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
-      fieldArr.push(addFormulaField(currentTableId, formulaUrl))
+      fieldArr.push(addSingleSelectField(currentTableId))
+      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认结果', `请把链接发给签字人员：${qrUrl}`))
     } else {
-      fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
-      fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
+      fieldArr.push(addSingleSelectField(currentTableId))
+      //fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
+      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认'))
     }
-    console.log(fieldArr)
   }
 
   return fieldArr
