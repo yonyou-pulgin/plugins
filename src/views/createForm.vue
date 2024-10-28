@@ -156,7 +156,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
     fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
   } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
-    fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
+    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果'))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态
@@ -165,7 +165,6 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
     } else {
       fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
     }
-  
     fieldArr.push(addSingleSelectField(currentTableId, `请把链接发给签字人员：${qrUrl}`))
   }
 

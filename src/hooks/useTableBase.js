@@ -211,7 +211,7 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
   const field = await table.getField(fieldId);
   // 获取所有列
   const recordIdList = await table.getRecordIdList();
-  let text = fieldTitle == 'fieldTitle' ? '查看签字结果' : '在线签字确认'
+  let text = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
   recordIdList.forEach(item => {
     if(successRecords.includes(item)) {
       setRecords.push({
