@@ -5,7 +5,7 @@
     "serve": "vue-cli-service serve --mode dev",
     "serve:uat": "vue-cli-service serve --mode uat",
     "serve:demo": "vue-cli-service serve --mode demo",
-    "build": "vue-cli-service build --mode -dev",
+    "build": "vue-cli-service build --mode dev",
     "build:dev": "vue-cli-service build --mode dev",
     "build:uat": "vue-cli-service build --mode uat",
     "build:demo": "vue-cli-service build --mode demo",
