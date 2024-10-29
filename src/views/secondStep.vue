@@ -6,7 +6,7 @@
     </div>
     <div class="form-item form-item-row">
       <span class="form-item-label">签字确认是否验证身份&nbsp;
-        <yy-tooltip content="开启后，成员需要手机号验证才能签字。"></yy-tooltip>
+        <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，成员需要手机号验证才能签字。"></yy-tooltip>
       </span>
       <yy-switch v-model:checked="fromData.isVerifyIdentity"></yy-switch>
     </div>
@@ -16,7 +16,7 @@
     </div>
     <div class="form-item form-item-row">
       <span class="form-item-label">表中新增数据是否同步创建确认单&nbsp;
-        <yy-tooltip content="开启后，当数据表新增一行记录时，自动创建一个确认单。"></yy-tooltip>
+        <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，当数据表新增一行记录时，自动创建一个确认单。"></yy-tooltip>
       </span>
       <yy-switch v-model:checked="fromData.isNewRecordConfirm"></yy-switch>
     </div>
@@ -119,7 +119,7 @@ onMounted(async() => {
     justify-content: flex-start;
     align-items: flex-start;
     margin-bottom: 16px;
-    padding: 0 16px;
+    padding: 0 20px;
 
     &-row{
       flex-direction: row;

@@ -1,12 +1,12 @@
 <template>
-    <div class="success">
+    <div class="success" :class="{'success-isVerifyIdentity': !confrimInfo.isVerifyIdentity}">
       <div class="success-head">
         <img src="@/assets/img/success.png" width="16px" alt="">
       创建完成</div>
       <div class="success-desc" v-if="confrimInfo.isVerifyIdentity">您当前创建的是「有校验身份」确认表
-请将二维码/链接发给对方进行签字确认</div>
-  <div class="success-desc" v-else>您当前创建的是「无校验身份」确认表
-可以直接打开数据表中链接进行签字确认</div>
+        请将二维码/链接发给对方进行签字确认</div>
+      <div class="success-desc" v-else>您当前创建的是「无校验身份」确认表
+       可以直接打开数据表中链接进行签字确认</div>
       <div class="success-qr" v-if="qrUrl && confrimInfo.isVerifyIdentity">
         <img :src="qrUrl" alt="" width="280px">
       </div>
@@ -38,7 +38,6 @@ onMounted(() => {
   max-width: 375px;
   margin: 0 auto;
   &-head{
-    margin-top: 16px;
     font-weight: 600;
     font-size: 16px;
     color: #1F2329;
@@ -48,6 +47,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 16px;
     img{
       margin-right: 6px;
     }
@@ -57,7 +57,7 @@ onMounted(() => {
     margin-top: 8px;
     text-align: center;
     font-size: 14px;
-    color: #8F959E;
+    color: #333333;
     line-height: 20px;
     font-style: normal;
     margin-bottom: 24px;
@@ -86,5 +86,9 @@ onMounted(() => {
       height: 32px!important;
     }
   }
+}
+
+.success-isVerifyIdentity{
+  padding-top: 54px;
 }
 </style>

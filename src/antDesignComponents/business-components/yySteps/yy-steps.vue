@@ -146,16 +146,16 @@ watch(() => props.indes, (newVal) => {
   flex-direction: column;
   .header {
     width: 100%;
-    padding: 18px 0px;
+    padding: 16px 0px;
     margin: auto;
   }
   :deep(.ant-steps-item) {
     .ant-steps-item-icon {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       margin-right: 6px;
       background: #d6dae4;
-      line-height: 18px;
+      line-height: 16px;
       border: 0px;
 
       span {
@@ -244,7 +244,7 @@ watch(() => props.indes, (newVal) => {
   .steps-content {
     flex: 1;
     // max-height: calc(100% - 56px - 56px);
-    padding-top: 20px;
+    // padding-top: 20px;
     border-bottom: 1px solid #e4e7ed;
     &.one {
       height: 100%;

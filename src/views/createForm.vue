@@ -241,6 +241,13 @@ onMounted(async() => {
       flex: 1;
       overflow-y: scroll;
   }
+  .steps-action{
+    padding: 12px 20px!important;
+  }
+  .steps{
+    .steps-item{
+    }
+  }
 }
 .plugins-steps-isVerifyIdentity .yy-steps-container{
   .steps-content{

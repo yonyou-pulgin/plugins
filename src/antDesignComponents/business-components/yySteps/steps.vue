@@ -43,19 +43,31 @@ const props = defineProps({
   }
   .steps-item {
     position: relative;
+
+    &:first-child{
+      .steps-item-title{
+        padding-left: 20px;
+      }
+    }
+
+    &:last-child{
+      .steps-item-title{
+        padding-right: 20px;
+      }
+    }
     .steps-item-title {
       display: inline-block;
       height: 20px;
       background: #fff;
-      padding: 0px 12px;
+      padding: 0px 10px;
       position: relative;
       z-index: 1;
       display: inline-flex;
       align-items: center;
       .steps-serial-number {
         display: inline-block;
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
         background: #d6dae4;
         font-size: 12px;
@@ -63,7 +75,7 @@ const props = defineProps({
         font-weight: 600;
         color: #f7f8fa;
         text-align: center;
-        line-height: 20px;
+        line-height: 18px;
 
       }
       .steps-title {
