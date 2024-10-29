@@ -1,26 +1,15 @@
 <template>
   <div class="form-container">
     <div class="form-content">
-      <div class="form-head">
-        自动在表格最后插入「签字确认」列，可查看详情
-      </div>
-      <div class="form-item">
-        <span class="form-item-label">确认单名称</span>
-        <yy-input :maxlength="50" v-model:value="tableName" placeholder="请输入确认单名称"></yy-input>
-      </div>
       <div class="form-item">
         <span class="form-item-label required">数据表</span>
         <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
-        <span class="form-item-label required">手机号（用于成员身份校验）</span>
-        <yy-select class="yy-fs-from-item" :class="{'yy-fs-from-item-error': checkPhoneFieldFlag }" placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
-      </div>
-      <div class="form-item">
         <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
         <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
         <template v-else>
-          <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" />
+          <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
           <VueDraggable
             class="drag-container"
             :animation="150"
@@ -40,11 +29,10 @@
         </template>  
       </div>
     </div>
-
-    <div class="form-footer">
+    <!-- <div class="form-footer">
       <yy-button :disabled="saveDisabled" class="yy-custom-btn-operate" @click="handlePreview">预览</yy-button>
       <yy-button :disabled="saveDisabled" type="primary" @click="handleSave">创建确认单</yy-button>
-    </div>
+    </div> -->
   </div>
   <!-- 预览--->
   <fromPreview :data="previewData" ref="fromPreviewInstance"></fromPreview>
@@ -56,16 +44,16 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
-const { setConfrimInfo } = useConfirmInfo();
+const { formData:cacheFormData, setFormData } = useConfirmInfo();
 import { message } from 'ant-design-vue';
 
 const router = useRouter()
@@ -73,11 +61,16 @@ const fromData = ref({
   baseId: '',
   tableId: '',
   confirmName: '',
+  tableName: '',
   dataSheet: null,
   mdnFieldId: null,
   fields: null,
-  fieldSort: []
+  fieldSort: [],
+  isHiddenZero: false,
+  isHiddenEmpty: false,
+  currentStep: 0,
 })
+const initFlag = ref(false)
 const dataSheet = ref(null)
 const previewData = ref(null) // 预览数据
 const fromPreviewInstance = ref(null)
@@ -93,16 +86,7 @@ const plainOptions = [
   { label: '隐藏为0数据项', value: 'isHiddenZero' },
 ];
 const fieldsSortListLenth = ref(0)
-const checkPhoneFieldFlag = ref(false) // 手机号校验
 
-// 禁止提交
-const saveDisabled = computed(() => {
-  return !fromData.value || !fromData.value.fields || !fromData.value.mdnFieldId || !selectFields.value.length
-})
-// 手机号列
-const phoneFields = computed(() => {
-  return fieldList.value.filter(item => item.type!=17) || []
-})
 // 确认单选择文案
 const fieldTitle = computed(() => {
   return `(共计：${fieldsSortListLenth.value}个，已选中：${selectFields.value.length}个)`
@@ -112,69 +96,99 @@ const selectFields = computed(() => {
   return fieldsSortList.value.filter(item => item.checked)
 })
 
+const handleGroupChange = (val) => {
+  fromData.value.isHiddenZero = + hiddenCheckedList.value.includes('isHiddenZero')
+  fromData.value.isHiddenEmpty = + hiddenCheckedList.value.includes('isHiddenEmpty')
+}
+
 const handleDataSheet = async(val) => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
   fromData.value.dataSheet = val
+  fromData.value.tableName = currentSheetObj.name
     // 获取数据表
   const selection = await bitable.base.getSelection();
   const tableMeta = await bitable.base.getTableMetaById(val);
   const table = await bitable.base.getTable(tableMeta.id);
   table.baseId = selection.baseId // baseId
+  fromData.value.baseId = selection.baseId
   setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
-    const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
-    if(phoneField.length && fromData.value.fields){
-      fromData.value.mdnFieldId = phoneField[0].id || null
-    } else {
-     fromData.value.mdnFieldId = null
-    }
+    //获取手机号字段
+    getPhoneField()
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
     fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15, 17].includes(item.type)).map(item => {
       item.checked = true
       return item
     })
+    fromData.value.fieldSort = fieldsSortList.value
     fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
   }, 100)
 }
 
-
 watch(() => fieldList.value.length, () => {
-  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
-  if(phoneField.length && fromData.value.fields){
-    fromData.value.mdnFieldId = phoneField[0].id || null
-  } else {
-    fromData.value.mdnFieldId = null
-  }
+  getPhoneField()
   fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
   fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15, 17].includes(item.type)).map(item => {
     item.checked = true
     return item
   })
   fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
+  fromData.value.fieldSort = fieldsSortList.value
+  setFormData(fromData.value)
 })
 
-
-watch(() =>fromData.value.mdnFieldId, (val) => { 
-  checkPhoneFieldFlag.value = false
-})
-
-//  监听数据表变化
-// watch(() => tableInfo.value, (val) => {
-//   dataSheet.value = tableInfo.value.tableId
-//   handleDataSheet(val.tableId)
-// })
+watch(() => fromData.value, (val) => {
+  // 延迟监听
+  if(initFlag.value) setFormData(fromData.value)
+}, { deep: true })
 
 onMounted(async()=>{
+  initFlag.value = false
   const selection = await bitable.base.getSelection();
+  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId
+  fromData.value.currentStep = 0
   setTimeout(() => {
-    dataSheet.value = selection.tableId
-  //   const currentSheetObj = sheetList.value.find(item => item.id == election.tableId)
-  // fromData.value.fields = currentSheetObj
-    handleDataSheet(selection.tableId)
+    dataSheet.value = cacheFormData.value.dataSheet || selection.tableId
+    fromData.value.dataSheet = dataSheet.value
+    // 读取缓存数据
+    if(cacheFormData.value.dataSheet){
+      fieldsSortList.value = cacheFormData.value.fieldSort || []
+      fieldsSortListLenth.value = fieldsSortList.value.length
+      fromData.value.fieldSort = fieldsSortList.value 
+      if(cacheFormData.value.isHiddenZero){
+        hiddenCheckedList.value.push('isHiddenZero')
+        fromData.value.isHiddenZero =  1
+      }
+      if(cacheFormData.value.isHiddenEmpty){
+        hiddenCheckedList.value.push('isHiddenEmpty')
+        fromData.value.isHiddenEmpty = 1
+      }
+      getPhoneField()
+    } else {
+      handleDataSheet( dataSheet.value)
+    }
+    initFlag.value = true
   }, 200)
+
+  bus.on('preview', () => {
+    handlePreview()
+  })
 })
+onBeforeUnmount(()=> {
+  bus.off('preview')
+})
+
+// 获取手机号字段
+const getPhoneField = () => {
+  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
+  if(phoneField.length){
+    fromData.value.mdnFieldId = phoneField[0].id || null
+  } else {
+    fromData.value.mdnFieldId = null
+  }
+}
 
 const checkPhoneField = async() => {
   const table = await bitable.base.getTableById(tableInfo.value.tableId || tableInfo.value.id)
@@ -222,12 +236,18 @@ const getParams = () => {
   params.fields = fieldList.value
   // 排序字段～选中字段
   params.fieldSort = fieldsSortList.value.filter(item => item.checked).map(item => item.id)
+  params.isHiddenEmpty = +params.isHiddenEmpty
+  params.isHiddenZero = +params.isHiddenZero
+  params.isVerifyIdentity = +params.isVerifyIdentity
+  params.isNewRecordConfirm = +params.isNewRecordConfirm
   // 表格数据
   params.records = tableData.value
   return params
 }
 const onStart = () => {}
-const onEnd = () => {}
+const onEnd = (val) => {
+  fromData.value.fieldSort = fieldsSortList.value
+}
 
 const isPhoneNumber = (phoneNumber) => {
  // 定义一个正则表达式来匹配手机号
@@ -242,49 +262,6 @@ const checkPhoneNumbersInArray = (phoneNumbers) => {
     }
   }
   return false;
-}
-const handleSave = async() => {
-  // 获取手机号字段 
-  const resut = await checkPhoneField()
-  console.log(resut)
-  const checkedPone = await Promise.all(resut)
-  if(checkedPone.length){
-   const result = checkPhoneNumbersInArray(checkedPone)
-   if(!result) return checkPhoneFieldFlag.value = true
-  } else {
-    return checkPhoneFieldFlag.value = true
-  }
-  const params = getParams()
-  createConfirm(params).then(async (res) => {
-    if(res.success){
-       router.push({
-         name: 'success',
-       })
-      setConfrimInfo(res.data)
-      let confirmId = res.data.confirmId
-      let url =`${res.data.domain}/feishuapi/bitable/confirm/qrcode/${res.data.confirmId}`
-      const currentTableId = tableInfo.value.tableId || tableInfo.value.id
-      const successRecords = res.data.successRecords || []
-      Promise.all([addImgField(currentTableId, res.data.qrUrl, successRecords), addField(currentTableId, res.data.createUserViewUrl, successRecords),]).then(res => {
-        if(res.length){
-          let updateParams = {
-            confirmId: confirmId,
-          }
-          res.map(item => {
-            updateParams = Object.assign(updateParams,item)
-            return item
-          })
-          confirmUpdate(updateParams).then(res => {
-          })
-        }
-      })
-    } else {
-      message.error({
-        content: res.msg,
-        class: 'yy-message-error',
-      })
-    }
-  })
 }
 
 const handlePreview = () => {
@@ -310,16 +287,6 @@ const handlePreview = () => {
     height: 100%;
     display: flex;
     flex-direction: column;
-  }
- 
-  &-head{
-    font-weight: 600;
-    font-size: 14px;
-    color: #1F2329;
-    line-height: 20px;
-    text-align: left;
-    font-style: normal;
-    margin: 16px 0;
   }
 
   &-item{

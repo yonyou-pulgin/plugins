@@ -2,8 +2,14 @@
   "name": "plugins",
   "version": "1.0.0",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build  --no-clean",
+    "serve": "vue-cli-service serve --mode dev",
+    "serve:uat": "vue-cli-service serve --mode uat",
+    "serve:demo": "vue-cli-service serve --mode demo",
+    "build": "vue-cli-service build",
+    "build:dev": "vue-cli-service build --mode dev",
+    "build:uat": "vue-cli-service build --mode uat",
+    "build:demo": "vue-cli-service build --mode demo",
+    "build:prod": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

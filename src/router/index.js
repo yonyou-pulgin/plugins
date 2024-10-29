@@ -6,8 +6,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name:'home',
-      component: () => import('../views/home.vue'),
+      name:'createForm',
+      component: () => import('../views/createForm.vue'),
     },
     {
       path: '/success',
