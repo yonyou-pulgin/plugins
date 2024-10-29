@@ -4,8 +4,9 @@
         <img src="@/assets/img/success.png" width="16px" alt="">
       创建完成</div>
       <div class="success-desc" v-if="confrimInfo.isVerifyIdentity">您当前创建的是「有校验身份」确认表
+        <br/>
         请将二维码/链接发给对方进行签字确认</div>
-      <div class="success-desc" v-else>您当前创建的是「无校验身份」确认表
+      <div class="success-desc" v-else>您当前创建的是「无校验身份」确认表<br/>
        可以直接打开数据表中链接进行签字确认</div>
       <div class="success-qr" v-if="qrUrl && confrimInfo.isVerifyIdentity">
         <img :src="qrUrl" alt="" width="280px">
