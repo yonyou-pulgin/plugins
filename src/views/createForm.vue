@@ -76,7 +76,7 @@ const getParams = () => {
   params.tableId = tableInfo.value.tableId
   params.tenantId = tableInfo.value.tenantId || tenantKey.value
   params.userId = tableInfo.value.userId || userId.value
-  params.confirmName = tableName.value || '签字确认单'
+  params.confirmName = params.tableName || tableName.value || '签字确认单'
   // 全部字段
   params.fields = fieldList.value
   // 表格数据
