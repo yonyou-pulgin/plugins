@@ -59,7 +59,7 @@ const props = defineProps({
       display: inline-block;
       height: 20px;
       background: #fff;
-      padding: 0px 10px;
+      padding: 0px 6px;
       position: relative;
       z-index: 1;
       display: inline-flex;

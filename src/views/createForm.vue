@@ -211,7 +211,7 @@ onMounted(async() => {
 <style lang="scss" scoped>
 .create {
   &-container {
-    min-width: 400px;
+    min-width: 350px;
     height: 100%;
     display: flex;
     flex-direction: column;
