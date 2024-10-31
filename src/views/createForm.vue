@@ -157,7 +157,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
         confirmId,
         createUserViewUrl} = insertFieldParams.value
   let fieldArr = []
-  let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=1&confirmId=${confirmId}`
+  let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=0&confirmId=${confirmId}`
   // 无身份、无授权插入链接
   if(!isNewRecordConfirm && !isVerifyIdentity){
     fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
