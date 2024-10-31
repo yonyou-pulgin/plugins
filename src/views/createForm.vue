@@ -146,7 +146,7 @@ const handleSubmit = async() => {
 
 // 插入字段
 const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
-
+  let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=1&confirmId=${confirmId}`
   const { currentTableId,
         successRecords,
         qrUrl,
@@ -160,13 +160,13 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
     fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
   } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
-    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果', `请把链接发给签字人员：${qrUrl}`))
+    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态
     if(isVerifyIdentity){
       fieldArr.push(addSingleSelectField(currentTableId))
-      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认结果', `请把链接发给签字人员：${qrUrl}`))
+      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
     } else {
       fieldArr.push(addSingleSelectField(currentTableId))
       //fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
