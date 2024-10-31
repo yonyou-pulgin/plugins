@@ -108,6 +108,7 @@ const handleSubmit = async() => {
       const currentTableId = tableInfo.value.tableId || tableInfo.value.id
       const successRecords = res.data.successRecords || []
       insertFieldParams.value = {
+        confirmId,
         currentTableId,
         successRecords,
         qrUrl: res.data.qrUrl,
@@ -153,6 +154,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
         formulaUrl,
         userViewUrl,
         formulaUrlEmp,
+        confirmId,
         createUserViewUrl} = insertFieldParams.value
   let fieldArr = []
   let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=1&confirmId=${confirmId}`
