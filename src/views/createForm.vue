@@ -146,7 +146,7 @@ const handleSubmit = async() => {
 
 // 插入字段
 const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
-  let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=1&confirmId=${confirmId}`
+
   const { currentTableId,
         successRecords,
         qrUrl,
@@ -155,6 +155,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
         formulaUrlEmp,
         createUserViewUrl} = insertFieldParams.value
   let fieldArr = []
+  let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=1&confirmId=${confirmId}`
   // 无身份、无授权插入链接
   if(!isNewRecordConfirm && !isVerifyIdentity){
     fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
