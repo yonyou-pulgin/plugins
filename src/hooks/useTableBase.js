@@ -308,6 +308,27 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
     viewFieldId: fieldId,
   })
 }
+
+const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签字链接') => {
+  let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
+  const table = await bitable.base.getTableById(tableId);
+  const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
+  let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
+  const fieldId = await table.addField({type: FieldType.Formula, name, 
+  description: { // 字段描述
+    content: isDesc,
+    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+    disableSyncToFormDesc: false
+  }});
+  // 公式字段
+  const formulaField = await table.getField(fieldId);
+  let url = content || 'https://www.baidu.com/'
+  let contentUrl = `CONCATENATE("${url}",RECORD_ID())`
+  await formulaField.setFormula(contentUrl);
+  return Promise.resolve({
+    viewFieldId: fieldId,
+  })
+}
 // 新增单选
 const addSingleSelectField = async (tableId, url, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
@@ -357,6 +378,7 @@ export default function useTableBase() {
     addImgField,
     addFormulaField,
     addSingleSelectField,
-    closePlugin
+    closePlugin,
+    addFormulaLinkField
   }
 }
