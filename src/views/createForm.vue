@@ -35,7 +35,7 @@ import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
-const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, addFormulaField, addSingleSelectField, closePlugin } = useTableBase();
+const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
 const current = ref(0)
@@ -108,8 +108,10 @@ const handleSubmit = async() => {
       const currentTableId = tableInfo.value.tableId || tableInfo.value.id
       const successRecords = res.data.successRecords || []
       insertFieldParams.value = {
+        confirmId,
         currentTableId,
         successRecords,
+        formulaLink: params.formulaLink,
         qrUrl: res.data.qrUrl,
         userViewUrl: res.data.userViewUrl,
         createUserViewUrl: res.data.createUserViewUrl + '?recordId=',
@@ -147,30 +149,36 @@ const handleSubmit = async() => {
 // 插入字段
 const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
 
-  const { currentTableId,
+  const { 
+        formulaLink,
+        currentTableId,
         successRecords,
         qrUrl,
         formulaUrl,
         userViewUrl,
         formulaUrlEmp,
+        confirmId,
         createUserViewUrl} = insertFieldParams.value
   let fieldArr = []
+  let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=0&confirmId=${confirmId}`
   // 无身份、无授权插入链接
   if(!isNewRecordConfirm && !isVerifyIdentity){
     fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
   } else if (!isNewRecordConfirm && isVerifyIdentity) {
     // 有身份 、无授权 插入链接、二维码
-    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果', `请把链接发给签字人员：${qrUrl}`))
+    fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
     fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
   } else {
     // 有授权  插入公式、状态
     if(isVerifyIdentity){
       fieldArr.push(addSingleSelectField(currentTableId))
-      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认结果', `请把链接发给签字人员：${qrUrl}`))
+      fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
+      if(formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, formulaUrl))
     } else {
       fieldArr.push(addSingleSelectField(currentTableId))
       //fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
       fieldArr.push(addFormulaField(currentTableId, formulaUrlEmp, '签字确认'))
+      if(formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, formulaUrl))
     }
   }
 
@@ -211,7 +219,7 @@ onMounted(async() => {
 <style lang="scss" scoped>
 .create {
   &-container {
-    min-width: 400px;
+    min-width: 350px;
     height: 100%;
     display: flex;
     flex-direction: column;

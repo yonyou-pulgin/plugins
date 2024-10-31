@@ -27,6 +27,11 @@
       <yy-input :maxlength="100" v-model:value="fromData.personalBaseToken" placeholder="请填写授权码"></yy-input>
     </div>
 
+    <div class="form-item form-item-row" style="justify-content: flex-start;" v-if="fromData.isNewRecordConfirm">
+      <a-checkbox v-model:checked="fromData.formulaLink">增加自动化签字链接列</a-checkbox>
+      <yy-tooltip :overlayStyle="{'width': '200px'}" content="勾选后创建多维表自动化流程，可以实现飞书推送签字消息"></yy-tooltip>
+    </div>
+
     <getAuthCode ref="getAuthCodeInstance" />
   </div>
 </template>
@@ -51,7 +56,8 @@ const fromData = ref({
   personalBaseToken: null, // 授权码
   isVerifyIdentity: true, // 是否验证身份
   isNewRecordConfirm: true, // 是否新增数据同步创建确认单
-  currentStep: 1
+  currentStep: 1,
+  formulaLink: true
 })
 
 const currentTableName = ref('')
@@ -81,6 +87,7 @@ onMounted(async() => {
     personalBaseToken, mdnFieldId, isVerifyIdentity, isNewRecordConfirm
   })
   fromData.value.tableName = currentTableName.value
+  if(cacheFormData.value.hasOwnProperty('formulaLink'))fromData.value.formulaLink = cacheFormData.value.formulaLink
   //  获取授权码
   const authCode = await getCacheAuthCode()
   if(authCode){
@@ -209,6 +216,11 @@ onMounted(async() => {
   }
 
 }
+</style>
 
-
+<style>
+.ant-checkbox+span {
+padding-left: 8px!important;
+    padding-right: 6px!important;
+}
 </style>

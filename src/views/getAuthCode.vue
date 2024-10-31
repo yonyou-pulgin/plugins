@@ -1,7 +1,7 @@
 <template>
   <yy-modal title="如何获取授权码？" :footer="null" :isHeaderBorderBottom="false" :width="360" v-model:open="visible">
     <div class="auth-container">
-      <img src="@/assets/img/authTips.png" width="330px" alt="">
+      <img src="@/assets/img/authTips.png" width="310px" alt="">
     </div>
   </yy-modal>
 </template>
