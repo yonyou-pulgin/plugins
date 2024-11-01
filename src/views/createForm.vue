@@ -173,7 +173,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
     if(isVerifyIdentity){
       fieldArr.push(addSingleSelectField(currentTableId))
       fieldArr.push(addFormulaField(currentTableId, formulaUrl, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
-      if(formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, loginUrl))
+      if(formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, loginUrl, '自动化签字链接', false))
     } else {
       fieldArr.push(addSingleSelectField(currentTableId))
       //fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))

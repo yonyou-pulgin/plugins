@@ -309,7 +309,7 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
   })
 }
 
-const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签字链接') => {
+const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签字链接', isRecord = true) => {
   let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
@@ -323,7 +323,9 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
   // 公式字段
   const formulaField = await table.getField(fieldId);
   let url = content || 'https://www.baidu.com/'
-  let contentUrl = `CONCATENATE("${url}",RECORD_ID())`
+  let  contentUrl = ''
+  if(isRecord) contentUrl = `CONCATENATE("${url}", RECORD_ID())`
+  else contentUrl = `CONCATENATE("${url}&rowId=", RECORD_ID())`
   await formulaField.setFormula(contentUrl);
   return Promise.resolve({
     viewFieldId: fieldId,
