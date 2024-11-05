@@ -2,7 +2,6 @@ import { ref, nextTick } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 import { confirmImgDown } from '@/api/api.js'
 import { urltoBlob } from 'image-conversion'
-import { timestamp } from '@vueuse/core';
 
 const FieldType = {
   Text: 1, // 多行文本
@@ -104,7 +103,6 @@ const setTableInfo = async(selection, type = '') => {
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      console.log('change tableId:' + tableInfo.value.tableId)
       nextTick(() => {
         tableData.value = []
         getTableSheetList(tableInfo.value.tableId)
@@ -161,8 +159,12 @@ const getCellList = async (tableId) => {
   if(pageToken.value) {
     params.pageToken = pageToken.value
   }
-  const data = await table.getRecords(params);
-  // 分页参数
+  const reqData = await table.getRecords(params);
+  // 处理附件数据
+  const dataSource = await getAttachmentUrlSync(table, reqData)  
+  const data = await getAttachmentUrl(table, dataSource)
+  
+   // 分页参数
   loading.value = false
   if(data.pageToken) {
     pageToken.value = data.pageToken
@@ -180,13 +182,49 @@ const getCellList = async (tableId) => {
   }
 }
 
-// 获取附件地址
-// const getAttachmentUrl = async (tableId) => {
-//     const table = await base.getTable(tableId);
-//     const attachment = await table.getCellAttachmentUrls([]);
-//     const url = await attachment.getUrl();
-//     return url
-// }
+const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
+  const attachmentField = await tableInstance.getField(fieldId);
+  const attachmentUrls = await attachmentField.getAttachmentUrls(recordId);
+  if(attachmentUrls){
+    recordInfo[fieldId] = attachmentUrls
+    return Promise.resolve(recordInfo)
+  } else {
+    return Promise.resolve(recordInfo)
+  }
+}
+
+// 获取附件地址Promise
+const getAttachmentUrlSync = async(tableInstance, data) => {
+  // 获取 table 下所有的附件字段
+  const attachmentFieldList = await tableInstance.getFieldListByType(FieldType.Attachment);
+  data.records.forEach(item => {
+    item.PromiseFun = []
+    // 拿到行 recordId
+    const recordId = item.recordId
+    //处理每个附件的url
+    attachmentFieldList.forEach(field => {
+      item.PromiseFun.push(getFieldSync(tableInstance, field.id, recordId, item))
+    })
+  })
+  return Promise.resolve(data)
+}
+
+const getAttachmentUrl = async(tableInstance, data) => {
+  data.records.map(async item => {
+    const urlArr = await Promise.all(item.PromiseFun)
+    delete item.PromiseFun
+    let urlArrKey = Object.keys(urlArr[0])
+    for (let fieldIKey in item.fields){
+      if(urlArrKey.includes(fieldIKey)){
+       // 附件是数组
+       item.fields[fieldIKey].map((attachAttr,index) => {
+         attachAttr.attachmentUrl = urlArr[0][fieldIKey][0] || ''
+       })
+      }
+    }
+  })
+  return Promise.resolve(data)
+}
 
 const getTenantKey = async () => {
   const Id = await bitable.bridge.getTenantKey();

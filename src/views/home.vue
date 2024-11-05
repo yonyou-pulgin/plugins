@@ -50,7 +50,7 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
-import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();

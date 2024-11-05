@@ -1,4 +1,8 @@
 <template>
+  <div class="loading-container" v-if="loading && current == 2">
+    <div class="loading-gif"></div>
+    <span>创建中，请稍等</span>
+  </div>
   <div class="create-container">
     <div class="create-container-title">
       <span>对多维表中数据进行签字确认</span>
@@ -20,7 +24,7 @@
 
 <script setup>
 import { bitable } from '@lark-base-open/js-sdk';
-import { ref, reactive, onMounted, watch, computed } from 'vue'
+import { ref, reactive, onMounted, watch, computed, nextTick } from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
 import { createConfirm, confirmUpdate } from '@/api/api.js';
@@ -38,6 +42,7 @@ const { toClipboard } = useClipboard()
 const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
+const loading = ref(false)
 const current = ref(0)
 const confirmResult = ref(null)
 const errorMessages = ref('')
@@ -99,6 +104,7 @@ const handleSubmit = async() => {
   }
   createConfirm(params).then(async (res) => {
     if(res.success){
+      loading.value = true
       // 创建成功 清楚缓存数据
       resetFormData()
       current.value++
@@ -135,6 +141,9 @@ const handleSubmit = async() => {
           })
           confirmUpdate(updateParams).then(res => {
           })
+          setTimeout(() => {
+            loading.value = false
+          },2000)
         }
       })
     } else {
@@ -266,4 +275,37 @@ onMounted(async() => {
   }
 }
 
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.loading-container{
+  position: absolute;
+  top: -100px;
+  bottom: -100px;
+  z-index: 120;
+  background: #fff;
+  width: 100%;
+  padding-top: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .loading-gif{
+    width: 28px;
+    height: 28px;
+    border: 3px solid #3A75FF;
+    animation: rotate 1s linear infinite;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    border-top: 3px solid #EBF1FF;
+  }
+  span{
+    font-size: 14px;
+    color: #333333;
+  }
+}
 </style>
