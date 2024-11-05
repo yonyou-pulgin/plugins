@@ -165,21 +165,21 @@ const getCellList = async (tableId) => {
   const data = await getAttachmentUrl(table, dataSource)
   
    // 分页参数
-  // loading.value = false
-  // if(data.pageToken) {
-  //   pageToken.value = data.pageToken
-  //   setTimeout(() => {
-  //     getCellList(tableId)
-  //   }, 1000);
-  // } else {
-  //   pageToken.value = null
-  // }
-  // // 分页请求
-  // if(data.pageToken){
-  //   tableData.value = tableData.value.concat(data.records)
-  // } else {
-  //   tableData.value = data.records
-  // }
+  loading.value = false
+  if(data.pageToken) {
+    pageToken.value = data.pageToken
+    setTimeout(() => {
+      getCellList(tableId)
+    }, 1000);
+  } else {
+    pageToken.value = null
+  }
+  // 分页请求
+  if(data.pageToken){
+    tableData.value = tableData.value.concat(data.records)
+  } else {
+    tableData.value = data.records
+  }
 }
 
 const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
