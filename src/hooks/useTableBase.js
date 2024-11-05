@@ -165,32 +165,55 @@ const getCellList = async (tableId) => {
   const data = await getAttachmentUrl(table, dataSource)
   
    // 分页参数
-  loading.value = false
-  if(data.pageToken) {
-    pageToken.value = data.pageToken
-    setTimeout(() => {
-      getCellList(tableId)
-    }, 1000);
-  } else {
-    pageToken.value = null
-  }
-  // 分页请求
-  if(data.pageToken){
-    tableData.value = tableData.value.concat(data.records)
-  } else {
-    tableData.value = data.records
-  }
+  // loading.value = false
+  // if(data.pageToken) {
+  //   pageToken.value = data.pageToken
+  //   setTimeout(() => {
+  //     getCellList(tableId)
+  //   }, 1000);
+  // } else {
+  //   pageToken.value = null
+  // }
+  // // 分页请求
+  // if(data.pageToken){
+  //   tableData.value = tableData.value.concat(data.records)
+  // } else {
+  //   tableData.value = data.records
+  // }
 }
 
 const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
-  const attachmentField = await tableInstance.getField(fieldId);
-  const attachmentUrls = await attachmentField.getAttachmentUrls(recordId);
+  // 附件为空报错
+  // const attachmentField = await tableInstance.getField(fieldId);
+  // const attachmentUrls = await attachmentField.getAttachmentUrls(recordId);
+  // if(attachmentUrls){
+  //   recordInfo[fieldId] = attachmentUrls
+  //   return Promise.resolve(recordInfo)
+  // } else {
+  //   return Promise.resolve(recordInfo)
+  // }
+
+  // 通过cell 获取
+  let fieldToken = []
+  for (const fieldIKey in recordInfo.fields){
+    if(fieldId == fieldIKey){
+      recordInfo.fields[fieldIKey].map(item => {
+        fieldToken.push(item.token)
+      })
+    }
+  }
+  const attachmentUrls = await tableInstance.getCellAttachmentUrls(fieldToken, fieldId, recordId);
+
+
+
+  console.log(attachmentUrls)
   if(attachmentUrls){
     recordInfo[fieldId] = attachmentUrls
     return Promise.resolve(recordInfo)
   } else {
     return Promise.resolve(recordInfo)
   }
+  
 }
 
 // 获取附件地址Promise
