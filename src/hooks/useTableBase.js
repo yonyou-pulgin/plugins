@@ -241,7 +241,7 @@ const getAttachmentUrl = async(tableInstance, data) => {
       if(urlArrKey.includes(fieldIKey)){
        // 附件是数组
        item.fields[fieldIKey].map((attachAttr,index) => {
-         attachAttr.attachmentUrl = urlArr[0][fieldIKey][0] || ''
+         attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
        })
       }
     }
