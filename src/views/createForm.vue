@@ -10,7 +10,7 @@
     <yySteps class="plugins-steps" :class="{'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck}" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
       <yy-button v-if="current && current < stepList.length -1 && current != stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
       <yy-button v-if="current == 0 && current != stepList.length -1" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
-      <yy-button v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
+      <yy-button :disabled="current == 0 && !selectFieldFlag" v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
           <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
@@ -57,6 +57,11 @@ const stepList = ref([
 const isVerifyIdentityCheck = computed( () => {
   return current.value == 2 && confirmResult.value && !confirmResult.value.isVerifyIdentity
 })
+// 选中的字段id 
+const selectFieldFlag = computed(() => {
+  const fieldSort = formData.value.fieldSort || []
+  return fieldSort.filter(item => item.checked).length || 0
+})
 
 const handleNext = () => {
   //current.value++
@@ -64,6 +69,9 @@ const handleNext = () => {
     // 提交
     handleSubmit()
   } else {
+    if(current.value == 0 && !selectFieldFlag.value){
+      return false
+    }
     current.value++
   }
 }
