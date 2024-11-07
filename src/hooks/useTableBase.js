@@ -1,8 +1,7 @@
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, toRaw } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 import { confirmImgDown } from '@/api/api.js'
 import { urltoBlob } from 'image-conversion'
-import { timestamp } from '@vueuse/core';
 
 const FieldType = {
   Text: 1, // 多行文本
@@ -65,7 +64,8 @@ const tenantKey = ref('') // 租户key
 const userId = ref('') // 用户id 创建人
 const tableData =ref([]) // 表格数据
 const pageToken = ref(null) // 分页token
-const delFieldFlag = ref(false) // 删除字段
+const delFieldFlag = ref(false) // 删除字段\
+const attachmentFieldList = ref([]) // 附件字段
 
 const base = bitable.base;
 const baseUi = bitable.ui;
@@ -104,7 +104,6 @@ const setTableInfo = async(selection, type = '') => {
     })
     // 监听数据变化
     bitable.base.onSelectionChange((event) => {
-      console.log('change tableId:' + tableInfo.value.tableId)
       nextTick(() => {
         tableData.value = []
         getTableSheetList(tableInfo.value.tableId)
@@ -179,14 +178,87 @@ const getCellList = async (tableId) => {
     tableData.value = data.records
   }
 }
+const getCellUrlResult = async (tableId) => {
+  return new Promise(async (resolve, reject) => {
+    const table = await base.getTableById(tableId);
+    // 处理附件数据
+    const dataSource = await getAttachmentUrlSync(table, tableData.value)
+    const data = await getAttachmentUrl(table, dataSource)
+    resolve(data)
+  })
+}
 
-// 获取附件地址
-// const getAttachmentUrl = async (tableId) => {
-//     const table = await base.getTable(tableId);
-//     const attachment = await table.getCellAttachmentUrls([]);
-//     const url = await attachment.getUrl();
-//     return url
-// }
+const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
+  // 附件为空报错
+  // const attachmentField = await tableInstance.getField(fieldId);
+  // const attachmentUrls = await attachmentField.getAttachmentUrls(recordId);
+  // if(attachmentUrls){
+  //   recordInfo[fieldId] = attachmentUrls
+  //   return Promise.resolve(recordInfo)
+  // } else {
+  //   return Promise.resolve(recordInfo)
+  // }
+
+  // 通过cell 获取
+  let fieldToken = []
+  for (const fieldIKey in recordInfo.fields){
+    if(fieldId == fieldIKey){
+      recordInfo.fields[fieldIKey].map(item => {
+        fieldToken.push(item.token)
+      })
+    }
+  }
+  const attachmentUrls = await tableInstance.getCellAttachmentUrls(fieldToken, fieldId, recordId);
+  if(attachmentUrls){
+    recordInfo[fieldId] = attachmentUrls
+    return Promise.resolve(recordInfo)
+  } else {
+    return Promise.resolve(recordInfo)
+  }
+  
+}
+// 核查附件字段
+const checkHasAttachment = async (tableId) => {
+  const tableInstance = await base.getTableById(tableId);
+  // 获取 table 下所有的附件字段
+  attachmentFieldList.value = await tableInstance.getFieldListByType(FieldType.Attachment);
+  return attachmentFieldList.value
+}
+// 获取附件地址Promise
+const getAttachmentUrlSync = async(tableInstance, data) => {
+  const attachmentFieldListData = toRaw(attachmentFieldList.value)
+  //获取 table 下所有的附件字段
+  // const attachmentFieldList = await tableInstance.getFieldListByType(FieldType.Attachment);
+  data.map(item => {
+    item.PromiseFun = []
+    // 拿到行 recordId
+    const recordId = item.recordId
+    //处理每个附件的url
+    attachmentFieldListData.map(field => {
+      item.PromiseFun.push(getFieldSync(tableInstance, field.id, recordId, item))
+    })
+  })
+  return Promise.resolve(data)
+}
+
+const getAttachmentUrl = async(tableInstance, data) => {
+  return new Promise((resolve, reject) => {
+    data.map(async item => {
+      const urlArr = await Promise.all(item.PromiseFun)
+      delete item.PromiseFun
+      let urlArrKey = Object.keys(urlArr[0])
+      for (let fieldIKey in item.fields){
+        if(urlArrKey.includes(fieldIKey)){
+        // 附件是数组
+        item.fields[fieldIKey].map((attachAttr,index) => {
+          attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
+        })
+        }
+      }
+      resolve(data)
+    })
+  })
+}
 
 const getTenantKey = async () => {
   const Id = await bitable.bridge.getTenantKey();
@@ -374,6 +446,10 @@ export default function useTableBase() {
     recordList,
     tenantKey,
     tableData,
+    attachmentFieldList,
+    checkHasAttachment,
+    getCellList,
+    getCellUrlResult,
     getTableSheetList,
     setTableInfo,
     addField,

@@ -1,5 +1,9 @@
 <template>
   <div class="form-container">
+    <div class="loading-container" v-if="previewLoading">
+      <div class="loading-gif"></div>
+      <span>预览数据生成中，请稍等</span>
+    </div>
     <div class="form-content">
       <div class="form-item">
         <span class="form-item-label required">数据表</span>
@@ -10,6 +14,9 @@
         <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
+          <div class="drag-all">
+              <a-checkbox v-model:checked="fieldAllChecked" @click="handleAllClick">全选</a-checkbox>
+          </div>
           <VueDraggable
             class="drag-container"
             :animation="150"
@@ -22,11 +29,14 @@
             :scrollSensitivity="scrollSensitivity"
           >
             <li class="drag-item" v-for="item in fieldsSortList">
-              <icon-draggripper class="drag-item-icon draggripper" />
-              <a-checkbox v-model:checked="item.checked">{{item.name}}</a-checkbox>
+              <div class="f">
+                <icon-draggripper class="drag-item-icon draggripper" />
+                <a-checkbox v-model:checked="item.checked">{{item.name}}</a-checkbox>
+              </div>
+              <div class="field-desc" v-if="item.type == 17">* 附件仅支持图片，不支持其他文件格式</div>
             </li>
           </VueDraggable>
-        </template>  
+        </template>
       </div>
     </div>
     <!-- <div class="form-footer">
@@ -44,10 +54,11 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
-import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, getCellUrlResult, checkHasAttachment,
+addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
@@ -86,6 +97,8 @@ const plainOptions = [
   { label: '隐藏为0数据项', value: 'isHiddenZero' },
 ];
 const fieldsSortListLenth = ref(0)
+const fieldAllChecked = ref(true)
+const previewLoading = ref(false)
 
 // 确认单选择文案
 const fieldTitle = computed(() => {
@@ -118,7 +131,7 @@ const handleDataSheet = async(val) => {
     //获取手机号字段
     getPhoneField()
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15, 17].includes(item.type)).map(item => {
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
       item.checked = true
       return item
     })
@@ -130,12 +143,14 @@ const handleDataSheet = async(val) => {
 watch(() => fieldList.value.length, () => {
   getPhoneField()
   fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15, 17].includes(item.type)).map(item => {
+  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
     item.checked = true
     return item
   })
   fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
   fromData.value.fieldSort = fieldsSortList.value
+  if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
+  else fieldAllChecked.value = false
   setFormData(fromData.value)
 })
 
@@ -144,6 +159,10 @@ watch(() => fromData.value, (val) => {
   if(initFlag.value) setFormData(fromData.value)
 }, { deep: true })
 
+watch(() => selectFields.value.length, (val) => {
+  if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
+  else fieldAllChecked.value = false
+}, { deep: true })
 onMounted(async()=>{
   initFlag.value = false
   const selection = await bitable.base.getSelection();
@@ -240,8 +259,6 @@ const getParams = () => {
   params.isHiddenZero = +params.isHiddenZero
   params.isVerifyIdentity = +params.isVerifyIdentity
   params.isNewRecordConfirm = +params.isNewRecordConfirm
-  // 表格数据
-  params.records = tableData.value
   return params
 }
 const onStart = () => {}
@@ -264,16 +281,38 @@ const checkPhoneNumbersInArray = (phoneNumbers) => {
   return false;
 }
 
-const handlePreview = () => {
+const handlePreview = async () => {
+  previewLoading.value = true
+  // 核查有没有附件
+  const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
   const params = getParams()
-  delete params.records
-  params.record = tableData.value[0]
+  let records = tableData
+  if(attachmentFieldList && attachmentFieldList.length ){
+     records = await getCellUrlResult(tableInfo.value.tableId)
+  }
+  // 表格数据
+  params.record = records[0]
   confirmPreview(params).then(res => {
+    previewLoading.value = false
     if(res.success){
       previewData.value = res.data
       fromPreviewInstance.value.open()
     }
   })
+}
+
+const handleAllClick = (val) => {
+  if(!fieldAllChecked.value){
+     fieldsSortList.value = fieldsSortList.value.map(item => {
+      item.checked = true
+      return item
+    })
+  } else {
+     fieldsSortList.value = fieldsSortList.value.map(item => {
+      item.checked = false
+      return item
+    })
+  }
 }
 
 </script>
@@ -371,23 +410,32 @@ const handlePreview = () => {
 
 .drag{
   &-container{
-    width: 100%; 
-  }
-
-  &-item{
     width: 100%;
-    height: 32px;
+  }
+  &-all{
+   padding-left: 32px!important;
+  }
+  &-item, &-all{
+    width: 100%;
+    min-height: 32px;
     background: #F2F4F7;
     border-radius: 4px;
     margin-bottom: 8px;
     padding: 6px 12px;
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 
     &-icon{
       cursor: move;
       margin-right: 12px;
+    }
+    .field-desc{
+      font-size: 12px;
+      color: #909399;
+      line-height: 18px;
+      padding-left: 40px;
     }
   }
 }
@@ -397,5 +445,40 @@ const handlePreview = () => {
 <style>
 .yy-fs-from-item-error .ant-select-selector{
   border-color: #FD3B3A!important;
+}
+
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.loading-container{
+  position: absolute;
+  top: -100px;
+  bottom: -100px;
+  z-index: 120;
+  background: #fff;
+  width: 100%;
+  padding-top: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .loading-gif{
+    width: 28px;
+    height: 28px;
+    border: 3px solid #3A75FF;
+    animation: rotate 1s linear infinite;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    border-top: 3px solid #EBF1FF;
+  }
+  span{
+    font-size: 14px;
+    color: #333333;
+  }
 }
 </style>

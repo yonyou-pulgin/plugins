@@ -10,8 +10,20 @@
       </div>
       <div class="modal-cotent">
         <div class="modal-content-item" :class="{'modal-content-item-row': (item.value && item.value.length > hasTitleLen) || item.name.length > hasTitleLen}" v-for="item in previewInfo" :key="item.id">
+          <template v-if="item.fieldType != 17">
             <div class="modal-content-item-label">{{ item.name }}</div>
-            <div class="modal-content-item-content">{{ item.value }}</div>
+            <div class="modal-content-item-content" >{{ item.value || '-' }}</div>
+          </template>
+          <template v-else>
+            <div class="attachment-field">
+              <div class="modal-content-item-label item-name">{{ item.name }} <span>（图片点击放大）</span></div>
+              <div class="modal-content-item-content item-value">
+                <a-image-preview-group>
+                  <a-image :width="80" :height="80" v-for="(itemUrl, index) in item.propertyData.attachmentUrls" :key="index" :src="itemUrl" />
+                </a-image-preview-group>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -29,8 +41,9 @@
 </template>
 
 <script setup>
-import { ref, watchEffect, onMounted, nextTick } from 'vue';
+import { ref, watchEffect, onMounted, nextTick, watch } from 'vue';
 import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
+import { image, imagePreviewGroup } from 'ant-design-vue'
 
 const hasTitleLen = ref(10) // 标题最大长度
 const props = defineProps({
@@ -42,11 +55,11 @@ const props = defineProps({
 const previewInfo = ref([])
 const visilbe = ref(false);
 
-watchEffect((val) => {
+watch(() => props.data, (val) => {
   if(props.data && props.data.fields){
     previewInfo.value = props.data.fields || []
   }
-})
+}, {deep: true, immediate: true})
 const open = () =>{
   visilbe.value = true
   nextTick(() => {  
@@ -243,8 +256,37 @@ defineExpose({ open })
 }
 </style>
 
-<style>
+<style lang="scss">
 .form-preview-yy-modal{
   max-width: 375px;
+}
+
+.attachment-field {
+  display: flex;
+  flex-direction: column;
+
+  .item-name {
+    max-width: initial;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    span {
+      color: #909399;
+    }
+  }
+
+  .item-value {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .ant-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 3px;
+      margin-right: 9px;
+      margin-bottom: 9px;
+    }
+  }
 }
 </style>

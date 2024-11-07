@@ -1,4 +1,8 @@
 <template>
+  <div class="loading-container" v-if="loading && current == 2">
+    <div class="loading-gif"></div>
+    <span>创建中，请稍等</span>
+  </div>
   <div class="create-container">
     <div class="create-container-title">
       <span>对多维表中数据进行签字确认</span>
@@ -6,7 +10,7 @@
     <yySteps class="plugins-steps" :class="{'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck}" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
       <yy-button v-if="current && current < stepList.length -1 && current != stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
       <yy-button v-if="current == 0 && current != stepList.length -1" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
-      <yy-button v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
+      <yy-button :disabled="current == 0 && !selectFieldFlag" v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
           <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
@@ -20,7 +24,7 @@
 
 <script setup>
 import { bitable } from '@lark-base-open/js-sdk';
-import { ref, reactive, onMounted, watch, computed } from 'vue'
+import { ref, reactive, onMounted, watch, computed, nextTick } from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
 import { createConfirm, confirmUpdate } from '@/api/api.js';
@@ -35,9 +39,11 @@ import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
-const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
+const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
+ addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
+const loading = ref(false)
 const current = ref(0)
 const confirmResult = ref(null)
 const errorMessages = ref('')
@@ -51,6 +57,11 @@ const stepList = ref([
 const isVerifyIdentityCheck = computed( () => {
   return current.value == 2 && confirmResult.value && !confirmResult.value.isVerifyIdentity
 })
+// 选中的字段id 
+const selectFieldFlag = computed(() => {
+  const fieldSort = formData.value.fieldSort || []
+  return fieldSort.filter(item => item.checked).length || 0
+})
 
 const handleNext = () => {
   //current.value++
@@ -58,6 +69,9 @@ const handleNext = () => {
     // 提交
     handleSubmit()
   } else {
+    if(current.value == 0 && !selectFieldFlag.value){
+      return false
+    }
     current.value++
   }
 }
@@ -90,7 +104,16 @@ const getParams = () => {
   return params
 }
 const handleSubmit = async() => {
+  loading.value = true
+  // 核查有没有附件
+  const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
   const params = getParams()
+  let records = tableData
+  if(attachmentFieldList && attachmentFieldList.length ){
+     records = await getCellUrlResult(tableInfo.value.tableId)
+  }
+    // 表格数据
+  params.records = records
   if(errorMessages.value) {
     return message.error({
       content: errorMessages.value,
@@ -117,7 +140,6 @@ const handleSubmit = async() => {
         createUserViewUrl: res.data.createUserViewUrl + '?recordId=',
         formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`,
         formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}&recordId=`,
-
       }
       res.data.isVerifyIdentity = !!params.isVerifyIdentity
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
@@ -135,9 +157,13 @@ const handleSubmit = async() => {
           })
           confirmUpdate(updateParams).then(res => {
           })
+          setTimeout(() => {
+            loading.value = false
+          },2000)
         }
       })
     } else {
+      loading.value = false
       message.error({
         content: res.msg,
         class: 'yy-message-error',
@@ -148,7 +174,6 @@ const handleSubmit = async() => {
 
 // 插入字段
 const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
-
   const { 
         formulaLink,
         currentTableId,
@@ -265,5 +290,4 @@ onMounted(async() => {
     display: none;
   }
 }
-
 </style>
