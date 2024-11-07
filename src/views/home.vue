@@ -53,7 +53,8 @@ import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
 import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, getCellUrlResult, 
+addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
@@ -254,8 +255,6 @@ const getParams = () => {
   params.isHiddenZero = +params.isHiddenZero
   params.isVerifyIdentity = +params.isVerifyIdentity
   params.isNewRecordConfirm = +params.isNewRecordConfirm
-  // 表格数据
-  params.records = tableData.value
   return params
 }
 const onStart = () => {}
@@ -278,10 +277,15 @@ const checkPhoneNumbersInArray = (phoneNumbers) => {
   return false;
 }
 
-const handlePreview = () => {
+const handlePreview = async () => {
+  console.log(1231)
   const params = getParams()
-  delete params.records
-  params.record = tableData.value[0]
+  // 表格数据
+  const records = await getCellUrlResult(tableInfo.value.tableId)
+
+  console.log(records)
+  // delete params.records
+  params.record = records[0]
   confirmPreview(params).then(res => {
     if(res.success){
       previewData.value = res.data

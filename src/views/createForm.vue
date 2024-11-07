@@ -39,7 +39,8 @@ import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
-const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
+const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult,
+ addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
 const loading = ref(false)
@@ -95,7 +96,10 @@ const getParams = () => {
   return params
 }
 const handleSubmit = async() => {
+  loading.value = true
   const params = getParams()
+    // 表格数据
+  params.records = await getCellUrlResult(tableInfo.value.tableId)
   if(errorMessages.value) {
     return message.error({
       content: errorMessages.value,
@@ -104,7 +108,6 @@ const handleSubmit = async() => {
   }
   createConfirm(params).then(async (res) => {
     if(res.success){
-      loading.value = true
       // 创建成功 清楚缓存数据
       resetFormData()
       current.value++
@@ -123,7 +126,6 @@ const handleSubmit = async() => {
         createUserViewUrl: res.data.createUserViewUrl + '?recordId=',
         formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`,
         formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}&recordId=`,
-
       }
       res.data.isVerifyIdentity = !!params.isVerifyIdentity
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
@@ -147,6 +149,7 @@ const handleSubmit = async() => {
         }
       })
     } else {
+      loading.value = false
       message.error({
         content: res.msg,
         class: 'yy-message-error',
@@ -157,7 +160,6 @@ const handleSubmit = async() => {
 
 // 插入字段
 const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
-
   const { 
         formulaLink,
         currentTableId,

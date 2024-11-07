@@ -159,12 +159,10 @@ const getCellList = async (tableId) => {
   if(pageToken.value) {
     params.pageToken = pageToken.value
   }
-  const reqData = await table.getRecords(params);
-  // 处理附件数据
-  const dataSource = await getAttachmentUrlSync(table, reqData)  
-  const data = await getAttachmentUrl(table, dataSource)
-  
-   // 分页参数
+  const data = await table.getRecords(params);
+
+
+  // 分页参数
   loading.value = false
   if(data.pageToken) {
     pageToken.value = data.pageToken
@@ -174,12 +172,26 @@ const getCellList = async (tableId) => {
   } else {
     pageToken.value = null
   }
-  // 分页请求
-  if(data.pageToken){
-    tableData.value = tableData.value.concat(data.records)
-  } else {
-    tableData.value = data.records
+
+  if(data){
+    // 分页请求
+    if(data.pageToken){
+      tableData.value = tableData.value.concat(data.records)
+    } else {
+      tableData.value = data.records
+    }
   }
+}
+const getCellUrlResult = async (tableId) => {
+  return new Promise(async (resolve, reject) => {
+    const table = await base.getTableById(tableId);
+    // 处理附件数据
+    const dataSource = await getAttachmentUrlSync(table, tableData.value)
+    const data = await getAttachmentUrl(table, dataSource)
+    setTimeout(() => {
+       resolve(data)
+     }, 1000);
+  })
 }
 
 const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
@@ -203,10 +215,6 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
     }
   }
   const attachmentUrls = await tableInstance.getCellAttachmentUrls(fieldToken, fieldId, recordId);
-
-
-
-  console.log(attachmentUrls)
   if(attachmentUrls){
     recordInfo[fieldId] = attachmentUrls
     return Promise.resolve(recordInfo)
@@ -220,7 +228,7 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
 const getAttachmentUrlSync = async(tableInstance, data) => {
   // 获取 table 下所有的附件字段
   const attachmentFieldList = await tableInstance.getFieldListByType(FieldType.Attachment);
-  data.records.forEach(item => {
+  data.forEach(item => {
     item.PromiseFun = []
     // 拿到行 recordId
     const recordId = item.recordId
@@ -233,7 +241,7 @@ const getAttachmentUrlSync = async(tableInstance, data) => {
 }
 
 const getAttachmentUrl = async(tableInstance, data) => {
-  data.records.map(async item => {
+  data.map(async item => {
     const urlArr = await Promise.all(item.PromiseFun)
     delete item.PromiseFun
     let urlArrKey = Object.keys(urlArr[0])
@@ -435,6 +443,8 @@ export default function useTableBase() {
     recordList,
     tenantKey,
     tableData,
+    getCellList,
+    getCellUrlResult,
     getTableSheetList,
     setTableInfo,
     addField,
