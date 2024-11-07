@@ -54,7 +54,7 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
-import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, getCellUrlResult, checkHasAttachment,
@@ -286,8 +286,8 @@ const handlePreview = async () => {
   // 核查有没有附件
   const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
   const params = getParams()
-  let records = tableData
-  if(attachmentFieldList && attachmentFieldList.length ){
+  let records = toRaw(tableData.value)
+  if(attachmentFieldList && attachmentFieldList.length){
      records = await getCellUrlResult(tableInfo.value.tableId, 'preview')
   }
   // 表格数据

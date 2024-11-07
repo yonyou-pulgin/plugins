@@ -185,7 +185,7 @@ const getCellUrlResult = async (tableId, type = '') => {
     let tableDataSource = toRaw(tableData.value)
     if(type == 'preview'){
       // 预览数据处理一条
-      tableDataSource = tableDataSource[0]
+      tableDataSource = [tableDataSource[0]]
     }
     const dataSource = await getAttachmentUrlSync(table, tableDataSource)
     const data = await getAttachmentUrl(table, dataSource)
