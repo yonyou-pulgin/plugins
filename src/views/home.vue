@@ -33,7 +33,7 @@
                 <icon-draggripper class="drag-item-icon draggripper" />
                 <a-checkbox v-model:checked="item.checked">{{item.name}}</a-checkbox>
               </div>
-              <div class="field-desc" v-if="item.type == 17">* 附件仅支持图片，不支持其他文件格式</div>
+              <div class="field-desc" v-if="item.type == 17">* 当前仅支持图片，不支持其他文件格式</div>
             </li>
           </VueDraggable>
         </template>
@@ -288,7 +288,7 @@ const handlePreview = async () => {
   const params = getParams()
   let records = tableData
   if(attachmentFieldList && attachmentFieldList.length ){
-     records = await getCellUrlResult(tableInfo.value.tableId)
+     records = await getCellUrlResult(tableInfo.value.tableId, 'preview')
   }
   // 表格数据
   params.record = records[0]
