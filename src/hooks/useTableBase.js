@@ -178,11 +178,16 @@ const getCellList = async (tableId) => {
     tableData.value = data.records
   }
 }
-const getCellUrlResult = async (tableId) => {
+const getCellUrlResult = async (tableId, type = '') => {
   return new Promise(async (resolve, reject) => {
     const table = await base.getTableById(tableId);
     // 处理附件数据
-    const dataSource = await getAttachmentUrlSync(table, tableData.value)
+    let tableDataSource = toRaw(tableData.value)
+    if(type == 'preview'){
+      // 预览数据处理一条
+      tableDataSource = tableDataSource[0]
+    }
+    const dataSource = await getAttachmentUrlSync(table, tableDataSource)
     const data = await getAttachmentUrl(table, dataSource)
     resolve(data)
   })

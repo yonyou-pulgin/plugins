@@ -108,11 +108,12 @@ const handleSubmit = async() => {
   // 核查有没有附件
   const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
   const params = getParams()
-  let records = tableData
-  if(attachmentFieldList && attachmentFieldList.length ){
+  let records = tableData.value
+  // 没有授权码
+  if(attachmentFieldList && attachmentFieldList.length && !params.isNewRecordConfirm){
      records = await getCellUrlResult(tableInfo.value.tableId)
   }
-    // 表格数据
+  // 表格数据
   params.records = records
   if(errorMessages.value) {
     return message.error({

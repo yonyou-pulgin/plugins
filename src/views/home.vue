@@ -288,7 +288,7 @@ const handlePreview = async () => {
   const params = getParams()
   let records = tableData
   if(attachmentFieldList && attachmentFieldList.length ){
-     records = await getCellUrlResult(tableInfo.value.tableId)
+     records = await getCellUrlResult(tableInfo.value.tableId, 'preview')
   }
   // 表格数据
   params.record = records[0]
