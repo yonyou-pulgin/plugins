@@ -1,4 +1,4 @@
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, toRaw } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 import { confirmImgDown } from '@/api/api.js'
 import { urltoBlob } from 'image-conversion'
@@ -64,7 +64,8 @@ const tenantKey = ref('') // 租户key
 const userId = ref('') // 用户id 创建人
 const tableData =ref([]) // 表格数据
 const pageToken = ref(null) // 分页token
-const delFieldFlag = ref(false) // 删除字段
+const delFieldFlag = ref(false) // 删除字段\
+const attachmentFieldList = ref([]) // 附件字段
 
 const base = bitable.base;
 const baseUi = bitable.ui;
@@ -160,8 +161,6 @@ const getCellList = async (tableId) => {
     params.pageToken = pageToken.value
   }
   const data = await table.getRecords(params);
-
-
   // 分页参数
   loading.value = false
   if(data.pageToken) {
@@ -172,14 +171,11 @@ const getCellList = async (tableId) => {
   } else {
     pageToken.value = null
   }
-
-  if(data){
-    // 分页请求
-    if(data.pageToken){
-      tableData.value = tableData.value.concat(data.records)
-    } else {
-      tableData.value = data.records
-    }
+  // 分页请求
+  if(data.pageToken){
+    tableData.value = tableData.value.concat(data.records)
+  } else {
+    tableData.value = data.records
   }
 }
 const getCellUrlResult = async (tableId) => {
@@ -188,9 +184,7 @@ const getCellUrlResult = async (tableId) => {
     // 处理附件数据
     const dataSource = await getAttachmentUrlSync(table, tableData.value)
     const data = await getAttachmentUrl(table, dataSource)
-    setTimeout(() => {
-       resolve(data)
-     }, 1000);
+    resolve(data)
   })
 }
 
@@ -223,17 +217,24 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
   }
   
 }
-
+// 核查附件字段
+const checkHasAttachment = async (tableId) => {
+  const tableInstance = await base.getTableById(tableId);
+  // 获取 table 下所有的附件字段
+  attachmentFieldList.value = await tableInstance.getFieldListByType(FieldType.Attachment);
+  return attachmentFieldList.value
+}
 // 获取附件地址Promise
 const getAttachmentUrlSync = async(tableInstance, data) => {
-  // 获取 table 下所有的附件字段
-  const attachmentFieldList = await tableInstance.getFieldListByType(FieldType.Attachment);
-  data.forEach(item => {
+  const attachmentFieldListData = toRaw(attachmentFieldList.value)
+  //获取 table 下所有的附件字段
+  // const attachmentFieldList = await tableInstance.getFieldListByType(FieldType.Attachment);
+  data.map(item => {
     item.PromiseFun = []
     // 拿到行 recordId
     const recordId = item.recordId
     //处理每个附件的url
-    attachmentFieldList.forEach(field => {
+    attachmentFieldListData.map(field => {
       item.PromiseFun.push(getFieldSync(tableInstance, field.id, recordId, item))
     })
   })
@@ -241,20 +242,22 @@ const getAttachmentUrlSync = async(tableInstance, data) => {
 }
 
 const getAttachmentUrl = async(tableInstance, data) => {
-  data.map(async item => {
-    const urlArr = await Promise.all(item.PromiseFun)
-    delete item.PromiseFun
-    let urlArrKey = Object.keys(urlArr[0])
-    for (let fieldIKey in item.fields){
-      if(urlArrKey.includes(fieldIKey)){
-       // 附件是数组
-       item.fields[fieldIKey].map((attachAttr,index) => {
-         attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
-       })
+  return new Promise((resolve, reject) => {
+    data.map(async item => {
+      const urlArr = await Promise.all(item.PromiseFun)
+      delete item.PromiseFun
+      let urlArrKey = Object.keys(urlArr[0])
+      for (let fieldIKey in item.fields){
+        if(urlArrKey.includes(fieldIKey)){
+        // 附件是数组
+        item.fields[fieldIKey].map((attachAttr,index) => {
+          attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
+        })
+        }
       }
-    }
+      resolve(data)
+    })
   })
-  return Promise.resolve(data)
 }
 
 const getTenantKey = async () => {
@@ -443,6 +446,8 @@ export default function useTableBase() {
     recordList,
     tenantKey,
     tableData,
+    attachmentFieldList,
+    checkHasAttachment,
     getCellList,
     getCellUrlResult,
     getTableSheetList,

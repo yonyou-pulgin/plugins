@@ -39,7 +39,7 @@ import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
-const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult,
+const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
@@ -97,9 +97,15 @@ const getParams = () => {
 }
 const handleSubmit = async() => {
   loading.value = true
+  // 核查有没有附件
+  const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
   const params = getParams()
+  let records = tableData
+  if(attachmentFieldList && attachmentFieldList.length ){
+     records = await getCellUrlResult(tableInfo.value.tableId)
+  }
     // 表格数据
-  params.records = await getCellUrlResult(tableInfo.value.tableId)
+  params.records = records
   if(errorMessages.value) {
     return message.error({
       content: errorMessages.value,
@@ -274,40 +280,6 @@ onMounted(async() => {
   }
   .steps-action{
     display: none;
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-.loading-container{
-  position: absolute;
-  top: -100px;
-  bottom: -100px;
-  z-index: 120;
-  background: #fff;
-  width: 100%;
-  padding-top: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  .loading-gif{
-    width: 28px;
-    height: 28px;
-    border: 3px solid #3A75FF;
-    animation: rotate 1s linear infinite;
-    margin-bottom: 14px;
-    border-radius: 50%;
-    border-top: 3px solid #EBF1FF;
-  }
-  span{
-    font-size: 14px;
-    color: #333333;
   }
 }
 </style>
