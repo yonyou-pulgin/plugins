@@ -486,6 +486,7 @@ const handleAllClick = (val) => {
 .yy-field-checked{
   .ant-checkbox-inner{
     background-color: #3a75ff!important;
+    border-color: transparent!important;
   }
   .ant-checkbox-inner:after {
       height: 2px !important;
