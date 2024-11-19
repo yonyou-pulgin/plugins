@@ -8,34 +8,36 @@
         <div class="modal-head-title">{{ data && data.confirmName }}</div>
         <span>未确认</span>
       </div>
-      <div class="modal-cotent">
-        <div class="modal-content-item" :class="{'modal-content-item-row': (item.value && item.value.length > hasTitleLen) || item.name.length > hasTitleLen}" v-for="item in previewInfo" :key="item.id">
-          <template v-if="item.fieldType != 17">
-            <div class="modal-content-item-label">{{ item.name }}</div>
-            <div class="modal-content-item-content" >{{ item.value || '-' }}</div>
-          </template>
-          <template v-else>
-            <div class="attachment-field">
-              <div class="modal-content-item-label item-name">{{ item.name }} <span>（图片点击放大）</span></div>
-              <div class="modal-content-item-content item-value">
-                <a-image-preview-group>
-                  <a-image :width="80" :height="80" v-for="(itemUrl, index) in item.propertyData.attachmentUrls" :key="index" :src="itemUrl" />
-                </a-image-preview-group>
+      <div class="flex-1">
+        <div class="modal-cotent">
+          <div class="modal-content-item" :class="{'modal-content-item-row': (item.value && item.value.length > hasTitleLen) || item.name.length > hasTitleLen}" v-for="item in previewInfo" :key="item.id">
+            <template v-if="item.fieldType != 17">
+              <div class="modal-content-item-label">{{ item.name }}</div>
+              <div class="modal-content-item-content" >{{ item.value || '-' }}</div>
+            </template>
+            <template v-else>
+              <div class="attachment-field" v-if="item.propertyData && item.propertyData.attachmentUrls && item.propertyData.attachmentUrls.length">
+                <div class="modal-content-item-label item-name">{{ item.name }} <span>（图片点击放大）</span></div>
+                <div class="modal-content-item-content item-value">
+                  <a-image-preview-group>
+                    <a-image :width="80" :height="80" v-for="(itemUrl, index) in item.propertyData.attachmentUrls" :key="index" :src="itemUrl" />
+                  </a-image-preview-group>
+                </div>
               </div>
-            </div>
-          </template>
+            </template>
+          </div>
         </div>
-      </div>
 
-      <div class="sign-content">
-        <div class="sign-content-head">签字确认</div>
-        <div class="sign-content-desc">请在下方灰色区域内签字</div>
-        <div class="sign-content-box"></div>
-        <div class="sign-content-btn">
-          <div class="btn-reset">清除重写</div>
-          <div class="btn-sign">签好了，提交</div>
+        <div class="sign-content">
+          <div class="sign-content-head">签字确认</div>
+          <div class="sign-content-desc">请在下方灰色区域内签字</div>
+          <div class="sign-content-box"></div>
+          <div class="sign-content-btn">
+            <div class="btn-reset">清除重写</div>
+            <div class="btn-sign">签好了，提交</div>
+          </div>
         </div>
-      </div>
+        </div>
     </div>
   </yy-modal>
 </template>
@@ -84,12 +86,21 @@ defineExpose({ open })
   &-container {
     max-width: 375px;
     min-height: 300px;
-    max-height: 700px;
+    height: 80%;
     overflow-y: scroll;
     background: #fff;
+    display: flex;
+    flex-direction: column;
     &::-webkit-scrollbar {
       width: 0!important;
       height: 0!important;
+    }
+    .flex-1{
+      flex: 1;
+      overflow-y: scroll;
+      &::-webkit-scrollbar{
+        width: 0!important;
+      }
     }
   }
 
@@ -98,7 +109,7 @@ defineExpose({ open })
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    padding: 18px 15px 0;
+    padding: 18px 15px 10px;
     font-weight: 600;
     font-size: 15px;
     color: #333333;
@@ -134,6 +145,8 @@ defineExpose({ open })
     }
   }
 
+
+
   &-content{
     &:last-child{
       border-bottom: none!important;
@@ -149,7 +162,6 @@ defineExpose({ open })
   &-content-item {
     display: flex;
     flex-direction: row;
-    min-height: 45px;
     border-bottom: 1px dashed #f2f4f7;
     &-label {
       max-width: 40%;
@@ -158,6 +170,7 @@ defineExpose({ open })
       text-overflow: ellipsis;
       line-height: 45px;
       margin-right: 8px;
+      min-height: 45px;
     }
     &-content {
       flex: 1;

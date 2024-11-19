@@ -207,7 +207,7 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
   // 通过cell 获取
   let fieldToken = []
   for (const fieldIKey in recordInfo.fields){
-    if(fieldId == fieldIKey){
+    if(fieldId == fieldIKey && recordInfo.fields[fieldIKey]){
       recordInfo.fields[fieldIKey].map(item => {
         fieldToken.push(item.token)
       })
@@ -253,7 +253,7 @@ const getAttachmentUrl = async(tableInstance, data) => {
       delete item.PromiseFun
       let urlArrKey = Object.keys(urlArr[0])
       for (let fieldIKey in item.fields){
-        if(urlArrKey.includes(fieldIKey)){
+        if(urlArrKey.includes(fieldIKey) && item.fields[fieldIKey]){
         // 附件是数组
         item.fields[fieldIKey].map((attachAttr,index) => {
           attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''

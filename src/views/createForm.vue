@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-container" v-if="loading && current == 2">
+  <div class="loading-container" v-if="loading">
     <div class="loading-gif"></div>
     <span>创建中，请稍等</span>
   </div>
@@ -10,7 +10,7 @@
     <yySteps class="plugins-steps" :class="{'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck}" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
       <yy-button v-if="current && current < stepList.length -1 && current != stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
       <yy-button v-if="current == 0 && current != stepList.length -1" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
-      <yy-button :disabled="current == 0 && !selectFieldFlag" v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
+      <yy-button :disabled="loading || (current == 0 && !selectFieldFlag)" v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
           <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
