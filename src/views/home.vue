@@ -15,7 +15,7 @@
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
           <div class="drag-all">
-              <a-checkbox v-model:checked="fieldAllChecked" @click="handleAllClick">全选</a-checkbox>
+              <a-checkbox :class="{'yy-field-checked': selectFields.length && selectFields.length != fieldsSortListLenth }" v-model:checked="fieldAllChecked" @click="handleAllClick">全选</a-checkbox>
           </div>
           <VueDraggable
             class="drag-container"
@@ -465,6 +465,7 @@ const handleAllClick = (val) => {
   width: 100%;
   padding-top: 200px;
   display: flex;
+  left: 0;
   flex-direction: column;
   align-items: center;
   .loading-gif{
@@ -480,5 +481,28 @@ const handleAllClick = (val) => {
     font-size: 14px;
     color: #333333;
   }
+}
+
+.yy-field-checked{
+  .ant-checkbox-inner{
+    background-color: #3a75ff!important;
+    border-color: transparent!important;
+  }
+  .ant-checkbox-inner:after {
+      height: 2px !important;
+      top: 50%!important;
+      left: 50%!important;
+      width: 8px!important;
+      background-color: #fff!important;
+      border: 0!important;
+      transform: translate(-50%, -50%) scale(1)!important;
+      opacity: 1!important;
+      content: "";
+      box-sizing: border-box;
+      position: absolute!important;
+      display: table;
+      transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6), opacity 0.1s;
+  }
+
 }
 </style>
