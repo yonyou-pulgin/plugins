@@ -188,7 +188,9 @@ const getCellUrlResult = async (tableId, type = '') => {
       tableDataSource = [tableDataSource[0]]
     }
     const dataSource = await getAttachmentUrlSync(table, tableDataSource)
+    console.log(dataSource)
     const data = await getAttachmentUrl(table, dataSource)
+    console.log(data)
     resolve(data)
   })
 }
@@ -214,7 +216,7 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
     }
   }
   const attachmentUrls = await tableInstance.getCellAttachmentUrls(fieldToken, fieldId, recordId);
-  if(attachmentUrls){
+  if(attachmentUrls && fieldToken.length){
     recordInfo[fieldId] = attachmentUrls
     return Promise.resolve(recordInfo)
   } else {
@@ -247,21 +249,21 @@ const getAttachmentUrlSync = async(tableInstance, data) => {
 }
 
 const getAttachmentUrl = async(tableInstance, data) => {
-  return new Promise((resolve, reject) => {
-    data.map(async item => {
+  return new Promise(async(resolve, reject) => {
+    for(const item of data){
       const urlArr = await Promise.all(item.PromiseFun)
       delete item.PromiseFun
       let urlArrKey = Object.keys(urlArr[0])
       for (let fieldIKey in item.fields){
         if(urlArrKey.includes(fieldIKey) && item.fields[fieldIKey]){
         // 附件是数组
-        item.fields[fieldIKey].map((attachAttr,index) => {
-          attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
-        })
+          item.fields[fieldIKey].map((attachAttr,index) => {
+            attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
+          })
         }
       }
-      resolve(data)
-    })
+    }
+    resolve(data)
   })
 }
 
