@@ -257,13 +257,13 @@ const getAttachmentUrl = async(tableInstance, data) => {
       for (let fieldIKey in item.fields){
         if(urlArrKey.includes(fieldIKey) && item.fields[fieldIKey]){
         // 附件是数组
-        item.fields[fieldIKey].map((attachAttr,index) => {
-          attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
-        })
+          item.fields[fieldIKey].map((attachAttr,index) => {
+            attachAttr.attachmentUrl = urlArr[0][fieldIKey][index] || ''
+          })
         }
       }
-      resolve(data)
     }
+    resolve(data)
   })
 }
 
