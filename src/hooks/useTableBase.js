@@ -92,6 +92,7 @@ const setTableInfo = async(selection, type = '') => {
     getTenantKey()
     getUserId()
     // 监听 field 变化
+
     table.onFieldAdd((event) => {
       console.log('add tableId:' + tableInfo.value.tableId)
       getTableFieldList(tableInfo.value.tableId)
@@ -443,6 +444,32 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
 const closePlugin = async () => {
   await bitable.ui.closeHostContainer()
 }
+
+// 设置人员
+const setUserField = async(tableId, selectUserFieldId = 'fld0eGqyHN', successRecords) => {
+  const table = await bitable.base.getTableById(tableId);
+  const findField = fieldList.value.filter(item => item.name.includes('签字人'))
+  let num = String.fromCharCode(findField.length + 65)
+  let name = `签字人${num}`
+  const addUserFieldId = await table.addField({type: FieldType.User, name });
+  // 获取对应列的字段
+  const userField = await table.getField(selectUserFieldId);
+  // 获取行数据
+  const recordList = await table.getRecordList();
+  recordList.recordIdList.map(async item => {
+    if(successRecords.includes(item)) {
+      // 获取对应的人员
+      const userId = await userField.getValue(item);
+      const modifiedUserField = await table.getField(addUserFieldId);
+      // 设置人员
+      await modifiedUserField.setValue(item, [
+        {
+          id: userId[0].id
+        },
+      ]);
+    }
+  })
+}
 export default function useTableBase() {
   return {
     userId,
@@ -464,6 +491,7 @@ export default function useTableBase() {
     addFormulaField,
     addSingleSelectField,
     closePlugin,
-    addFormulaLinkField
+    addFormulaLinkField,
+    setUserField
   }
 }

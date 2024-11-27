@@ -10,7 +10,7 @@
     <yySteps class="plugins-steps" :class="{'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck}" :steps="stepList" :indes="current" @next="handleNext" @prev="handlePrev">
       <yy-button v-if="current && current < stepList.length -1 && current != stepList.length -1 " class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
       <yy-button v-if="current == 0 && current != stepList.length -1" class="steps-action-button yy-custom-btn-operate" @click="handlePreview">在线预览</yy-button>
-      <yy-button :disabled="loading || (current == 0 && !selectFieldFlag)" v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
+      <yy-button :disabled="nextStepDisabled" v-if="current< stepList.length - 1" type="primary" @click="handleNext">下一步</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
           <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
@@ -40,7 +40,7 @@ import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
 const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
- addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField } = useTableBase();
+ addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
 const loading = ref(false)
@@ -53,11 +53,25 @@ const stepList = ref([
   { key: 1, title: '设置确认单', content: secondStep },
   { key: 2, title: '创建完成', content: threeStep },
 ])
+// 下一步校验
+const nextStepDisabled = computed(() => {
+  const { signType, configFields = [], isVerifyIdentity } = formData.value
+  if(current.value){
+    if(isVerifyIdentity && !configFields.length ) return true
+    // 权限校验
+    if(isVerifyIdentity) return configFields.filter(item => !item.mdnFieldId).length
+    // 签字字段校验
+    if(signType){
+      return configFields.filter(item => !item.signPeopleFieldId).length
+    }
+  }
+  return loading.value || (current.value == 0 && !selectFieldFlag.value)
+})
 
 const isVerifyIdentityCheck = computed( () => {
   return current.value == 2 && confirmResult.value && !confirmResult.value.isVerifyIdentity
 })
-// 选中的字段id 
+// 选中的字段id
 const selectFieldFlag = computed(() => {
   const fieldSort = formData.value.fieldSort || []
   return fieldSort.filter(item => item.checked).length || 0
@@ -100,6 +114,10 @@ const getParams = () => {
   params.isVerifyIdentity = +params.isVerifyIdentity
   params.isNewRecordConfirm = +params.isNewRecordConfirm
   params.fieldSort = params.fieldSort.filter(item => item.checked).map(item => item.id)
+  params.configFields = params.configFields.map((item, index) => {
+    item.sort = index
+    return item
+  })
   if(params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
   return params
 }
@@ -146,22 +164,24 @@ const handleSubmit = async() => {
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
       confirmResult.value.isVerifyIdentity = !!params.isVerifyIdentity
       setConfrimInfo(res.data)
-      let fieldArr = insertField(params.isNewRecordConfirm, params.isVerifyIdentity)
-      Promise.all(fieldArr).then(res => {
-        if(res.length){
-          let updateParams = {
-            confirmId: confirmId,
+      let fieldArr = insertField(params.isNewRecordConfirm, params.isVerifyIdentity, params.configFields)
+      fieldArr.map(item => {
+        Promise.all(item.promiseFun).then(res => {
+          if(res.length){
+            let updateParams = {
+              confirmId: confirmId,
+            }
+            res.map(item => {
+              updateParams = Object.assign(updateParams,item)
+              return item
+            })
+            confirmUpdate(updateParams).then(res => {
+            })
+            setTimeout(() => {
+              loading.value = false
+            },2000)
           }
-          res.map(item => {
-            updateParams = Object.assign(updateParams,item)
-            return item
-          })
-          confirmUpdate(updateParams).then(res => {
-          })
-          setTimeout(() => {
-            loading.value = false
-          },2000)
-        }
+        })
       })
     } else {
       loading.value = false
@@ -174,7 +194,7 @@ const handleSubmit = async() => {
 }
 
 // 插入字段
-const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
+const insertField = (isNewRecordConfirm, isVerifyIdentity, configFields = []) => {
   const { 
         formulaLink,
         currentTableId,
@@ -185,7 +205,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
         formulaUrlEmp,
         confirmId,
         createUserViewUrl} = insertFieldParams.value
-  let fieldArr = []
+  let fieldArr = [setUserField(currentTableId, 'flde0AcAX8', successRecords)]
   let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=0&confirmId=${confirmId}`
   // 无身份、无授权插入链接
   if(!isNewRecordConfirm && !isVerifyIdentity){
@@ -202,14 +222,16 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity) => {
       if(formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, loginUrl, '自动化签字链接', false))
     } else {
       fieldArr.push(addSingleSelectField(currentTableId))
-      //fieldArr.push(addField(currentTableId, formulaUrlEmp, successRecords, '签字确认'))
       fieldArr.push(addFormulaField(currentTableId, formulaUrlEmp, '签字确认'))
       if(formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, formulaUrlEmp))
     }
   }
 
-  return fieldArr
-
+  let configFieldsPromise = JSON.parse(JSON.stringify(configFields))
+  configFieldsPromise.map(item => {
+    item.promiseFun = fieldArr
+  })
+  return configFieldsPromise
 }
 
 const handleCopyLink = async() => {
