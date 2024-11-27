@@ -74,7 +74,6 @@ const fromData = ref({
   confirmName: '',
   tableName: '',
   dataSheet: null,
-  mdnFieldId: null,
   fields: null,
   fieldSort: [],
   isHiddenZero: false,

@@ -77,22 +77,24 @@ const userFields = computed(() => {
 })
 
 watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleConfigFields.value], (val) => {
-  setFormData({
+  let obj = {
     isVerifyIdentity: isVerifyIdentity.value,
     signType: signType.value,
     configFields: signType.value ? configFields.value : singleConfigFields.value
-  })
+  }
+  console.log(obj)
+  setFormData(obj)
 },{ deep: true})
 onMounted(() => {
-   isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity
-   signType.value = cacheFormData.value.signType || 0
-   if(cacheFormData.value.configFields && cacheFormData.value.configFields.length) {
+  isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity
+  signType.value = cacheFormData.value.signType || 0
+  if(cacheFormData.value.configFields && cacheFormData.value.configFields.length) {
     if(signType.value){
-      configFields.value = cacheFormData.value.configFields
+      configFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
     } else {
-      singleConfigFields.value = cacheFormData.value.configFields
+      singleConfigFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
     }
-   }
+  }
 })
 const handleSignType = (val) => {
   signType.value = val

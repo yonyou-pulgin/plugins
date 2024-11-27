@@ -97,6 +97,11 @@ const handlePrev = () => {
 const handlePreview = () => {
   bus.emit('preview')
 }
+const arrToObj = (arr) => {
+ return arr.reduce((prev, next) => {
+    return Object.assign(prev,next)
+  }, {});
+}
 const getParams = () => {
   errorMessages.value = ''
   const params = Object.assign({}, formData.value)
@@ -164,24 +169,23 @@ const handleSubmit = async() => {
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
       confirmResult.value.isVerifyIdentity = !!params.isVerifyIdentity
       setConfrimInfo(res.data)
-      let fieldArr = insertField(params.isNewRecordConfirm, params.isVerifyIdentity, params.configFields)
-      fieldArr.map(item => {
-        Promise.all(item.promiseFun).then(res => {
-          if(res.length){
-            let updateParams = {
-              confirmId: confirmId,
-            }
-            res.map(item => {
-              updateParams = Object.assign(updateParams,item)
-              return item
-            })
-            confirmUpdate(updateParams).then(res => {
-            })
-            setTimeout(() => {
-              loading.value = false
-            },2000)
-          }
-        })
+      let fieldArr = insertField(params.isNewRecordConfirm, params.isVerifyIdentity, params.configFields, params.signType)
+     
+      for (const item of fieldArr){
+        const res =  await Promise.all(item.promiseFun)
+        const obj = arrToObj(res)
+        console.log(obj)
+        Object.assign(item, obj)
+        delete item.promiseFun
+      }
+      let updateParams = {
+        confirmId,
+        configFields:fieldArr
+      }
+
+      console.log(updateParams)
+      confirmUpdate(updateParams).then(res => {
+            loading.value = false
       })
     } else {
       loading.value = false
@@ -194,7 +198,7 @@ const handleSubmit = async() => {
 }
 
 // 插入字段
-const insertField = (isNewRecordConfirm, isVerifyIdentity, configFields = []) => {
+const insertField = (isNewRecordConfirm, isVerifyIdentity, configFields = [], signType = 0) => {
   const { 
         formulaLink,
         currentTableId,
@@ -205,7 +209,7 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity, configFields = []) =>
         formulaUrlEmp,
         confirmId,
         createUserViewUrl} = insertFieldParams.value
-  let fieldArr = [setUserField(currentTableId, 'flde0AcAX8', successRecords)]
+         let fieldArr  = []
   let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=0&confirmId=${confirmId}`
   // 无身份、无授权插入链接
   if(!isNewRecordConfirm && !isVerifyIdentity){
@@ -229,6 +233,8 @@ const insertField = (isNewRecordConfirm, isVerifyIdentity, configFields = []) =>
 
   let configFieldsPromise = JSON.parse(JSON.stringify(configFields))
   configFieldsPromise.map(item => {
+    // 处理多选
+    if(signType) fieldArr.unshift(setUserField(currentTableId, item.signPeopleFieldId, successRecords))
     item.promiseFun = fieldArr
   })
   return configFieldsPromise

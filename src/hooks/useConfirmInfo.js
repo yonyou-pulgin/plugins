@@ -29,6 +29,7 @@ const getCacheAuthCode = async () => {
 const confrimInfo = ref({})
 
 const setFormData = async (val) => {
+  console.log(val)
   if(val && typeof val == 'object' ){
     formData.value = Object.assign(formData.value, val)
     // 清空授权码

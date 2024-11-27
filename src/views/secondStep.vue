@@ -55,14 +55,12 @@ const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo
 const getAuthCodeInstance = ref(null)
 const fromData = ref({
   tableName: null,
-  mdnFieldId: null,
   personalBaseToken: null, // 授权码
   isVerifyIdentity: true, // 是否验证身份
   isNewRecordConfirm: true, // 是否新增数据同步创建确认单
   currentStep: 1,
   formulaLink: true,
   signType: 0, //  0 单人签字、1 多人签字
-  configFields: []
 })
 
 const currentTableName = ref('')
@@ -87,9 +85,9 @@ watch(() => [fromData.value, currentTableName.value], () => {
 
 onMounted(async() => {
   currentTableName.value = cacheFormData.value.tableName || tableName.value
-  const { personalBaseToken, mdnFieldId, isVerifyIdentity = false, isNewRecordConfirm = false } = cacheFormData.value
+  const { personalBaseToken, isVerifyIdentity = false, isNewRecordConfirm = false } = cacheFormData.value
   fromData.value = Object.assign(fromData.value , {
-    personalBaseToken, mdnFieldId, isVerifyIdentity, isNewRecordConfirm
+    personalBaseToken, isVerifyIdentity, isNewRecordConfirm
   })
   fromData.value.tableName = currentTableName.value
   if(cacheFormData.value.hasOwnProperty('formulaLink'))fromData.value.formulaLink = cacheFormData.value.formulaLink
