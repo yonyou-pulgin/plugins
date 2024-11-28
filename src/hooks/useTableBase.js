@@ -322,6 +322,7 @@ const getAttachmentToken = async(file) => {
   return tokens
 }
 // 新增附件字段
+let imgFieldLen = 0
 const addImgField = async (tableId, url, successRecords) => {
   const result = await urltoBlob(url)
   const file = new File([result], 'imgage.png', { type: result.type});
@@ -335,7 +336,12 @@ const addImgField = async (tableId, url, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   // 创建字段~获取字段 id
   const findField = fieldList.value.filter(item => item.name.includes('签字二维码【发给签字人员】'))
-  let name = findField.length ? `签字二维码【发给签字人员】${findField.length}` : '签字二维码【发给签字人员】'
+  if(imgFieldLen){
+    imgFieldLen++
+  } else {
+    imgFieldLen = findField.length
+  }
+  let name = imgFieldLen ? `签字二维码【发给签字人员】${imgFieldLen}` : '签字二维码【发给签字人员】'
   const fieldId = await table.addField({type: FieldType.Attachment, name});
   // 通过字段 id 获取字段实例
   const field = await table.getField(fieldId);
@@ -367,10 +373,16 @@ const addImgField = async (tableId, url, successRecords) => {
     qrFieldId: fieldId,
   })
 }
+let formulaFieldLen = 0
 const addFormulaField = async (tableId, content, fieldTitle = '签字确认结果', isDesc = '') => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
-  let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
+  if(formulaFieldLen){
+    formulaFieldLen++
+  } else {
+    formulaFieldLen = findField.length
+  }
+  let name = formulaFieldLen ? `${fieldTitle}${formulaFieldLen}` : fieldTitle
   const fieldId = await table.addField({type: FieldType.Formula, name, description: { // 字段描述
     content: isDesc,
     /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
@@ -387,11 +399,17 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
   })
 }
 
+let formulaFieldLinkLen = 0
 const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签字链接', isRecord = true) => {
   let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
-  let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
+    if(formulaFieldLinkLen){
+    formulaFieldLinkLen++
+  } else {
+    formulaFieldLinkLen = findField.length
+  }
+  let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
   const fieldId = await table.addField({type: FieldType.Formula, name,
   description: { // 字段描述
     content: isDesc,
@@ -409,11 +427,17 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
     viewFieldId: fieldId,
   })
 }
+let singleSelectLen = 0
 // 新增单选
 const addSingleSelectField = async (tableId, url, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes('签字状态'))
-  let name = findField.length ? `签字状态${findField.length}` : '签字状态'
+  if(singleSelectLen){
+    singleSelectLen++
+  } else {
+    singleSelectLen = findField.length
+  }
+  let name = singleSelectLen ? `签字状态${singleSelectLen}` : '签字状态'
   const fieldId = await table.addField({type: FieldType.SingleSelect, name});
   // 获取单选实力
   const singleSelectField = await table.getField(fieldId);
@@ -443,12 +467,18 @@ const closePlugin = async () => {
   await bitable.ui.closeHostContainer()
 }
 
+let userFieldLen = 0
 // 设置人员
 const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes('签字人'))
   // let num =  String.fromCharCode(findField.length + 65)
-  let name = findField.length ? `签字人${findField.length}`: '签字人'
+  if(userFieldLen){
+    userFieldLen++
+  } else {
+    userFieldLen = findField.length
+  }
+  let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
   const addUserFieldId = await table.addField({type: FieldType.User, name });
   // 获取对应列的字段
   const userField = await table.getField(selectUserFieldId);
