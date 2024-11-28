@@ -207,9 +207,15 @@ const handleUpdateField = async (params, confirmId) => {
 
   // 执行更新操作
   try {
+    // fix loading 时间
+    if(params.signType){
+      setTimeout(() => {
+        loading.value = false
+      }, 1000 * params.configFields.length);
+    }
     await confirmUpdate(updateParams);
     // 更新加载状态
-    loading.value = false; 
+    if(!params.signType) loading.value = false; 
     
   } catch (error) {
     loading.value = false; 
@@ -225,7 +231,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
   for (const item of configFieldsPromise) {
     let fieldArr = []
     // 延迟1秒，等字段创建完保证顺序执行
-    let time = 800 * configFields.length
+    let time = 1000 * configFields.length
     await delay(time)
     // 处理多级签字人
     if (signType) {
