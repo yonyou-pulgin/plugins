@@ -175,6 +175,12 @@ const handleSubmit = async () => {
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
       confirmResult.value.isVerifyIdentity = !!params.isVerifyIdentity
       setConfrimInfo(res.data)
+      // fix loading 时间
+      if(params.signType){
+        setTimeout(() => {
+          loading.value = false
+        }, 1000 * params.configFields.length);
+      }
       // 更新字段
       handleUpdateField(params, confirmId)
     } else {
@@ -207,12 +213,6 @@ const handleUpdateField = async (params, confirmId) => {
 
   // 执行更新操作
   try {
-    // fix loading 时间
-    if(params.signType){
-      setTimeout(() => {
-        loading.value = false
-      }, 1000 * params.configFields.length);
-    }
     await confirmUpdate(updateParams);
     // 更新加载状态
     if(!params.signType) loading.value = false; 
