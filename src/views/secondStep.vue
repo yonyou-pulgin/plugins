@@ -5,7 +5,7 @@
       <yy-input :maxlength="50" v-model:value="currentTableName" placeholder="请输入确认单名称" @change="handleChangeTableName"></yy-input>
     </div>
 
-    <signType :isVerifyIdentity="fromData.isVerifyIdentity" class="sign-type-content" />
+    <signType class="sign-type-content" />
     <!-- <div class="form-item form-item-row">
       <span class="form-item-label">签字确认是否验证身份&nbsp;
         <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，成员需要手机号验证才能签字。"></yy-tooltip>
@@ -56,7 +56,6 @@ const getAuthCodeInstance = ref(null)
 const fromData = ref({
   tableName: null,
   personalBaseToken: null, // 授权码
-  isVerifyIdentity: true, // 是否验证身份
   isNewRecordConfirm: true, // 是否新增数据同步创建确认单
   currentStep: 1,
   formulaLink: true,
@@ -84,9 +83,9 @@ watch(() => [fromData.value, currentTableName.value], () => {
 
 onMounted(async() => {
   currentTableName.value = cacheFormData.value.tableName || tableName.value
-  const { personalBaseToken, isVerifyIdentity = false, isNewRecordConfirm = false } = cacheFormData.value
+  const { personalBaseToken, isNewRecordConfirm = false } = cacheFormData.value
   fromData.value = Object.assign(fromData.value , {
-    personalBaseToken, isVerifyIdentity, isNewRecordConfirm
+    personalBaseToken, isNewRecordConfirm
   })
   fromData.value.tableName = currentTableName.value
   if(cacheFormData.value.hasOwnProperty('formulaLink'))fromData.value.formulaLink = cacheFormData.value.formulaLink

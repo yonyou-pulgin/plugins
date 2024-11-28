@@ -143,10 +143,12 @@ const handleSubmit = async () => {
   // 表格数据
   params.records = records
   if (errorMessages.value) {
-    return message.error({
+    message.error({
       content: errorMessages.value,
       class: 'yy-message-error',
     })
+    loading.value = false
+    return false
   }
   createConfirm(params).then(async (res) => {
     if (res.success) {
@@ -166,8 +168,8 @@ const handleSubmit = async () => {
         qrUrl: res.data.qrUrl,
         userViewUrl: res.data.userViewUrl,
         createUserViewUrl: res.data.createUserViewUrl + '?recordId=',
-        formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}&recordId=`,
-        formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}&recordId=`,
+        formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}`,
+        formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}`,
       }
       res.data.isVerifyIdentity = !!params.isVerifyIdentity
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
@@ -204,10 +206,14 @@ const handleUpdateField = async (params, confirmId) => {
   const updateParams = { confirmId, configFields: fieldArr };
 
   // 执行更新操作
-  await confirmUpdate(updateParams);
-
-  // 更新加载状态
-  loading.value = false;
+  try {
+    await confirmUpdate(updateParams);
+    // 更新加载状态
+    loading.value = false; 
+    
+  } catch (error) {
+    loading.value = false; 
+  }
 }
 
 // 插入字段

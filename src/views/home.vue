@@ -127,8 +127,6 @@ const handleDataSheet = async(val) => {
   setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
-    //获取手机号字段
-    getPhoneField()
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
     fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
       item.checked = true
@@ -140,7 +138,6 @@ const handleDataSheet = async(val) => {
 }
 
 watch(() => fieldList.value.length, () => {
-  getPhoneField()
   fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
   fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
     item.checked = true
@@ -183,7 +180,6 @@ onMounted(async()=>{
         hiddenCheckedList.value.push('isHiddenEmpty')
         fromData.value.isHiddenEmpty = 1
       }
-      getPhoneField()
     } else {
       handleDataSheet( dataSheet.value)
     }
@@ -198,15 +194,7 @@ onBeforeUnmount(()=> {
   bus.off('preview')
 })
 
-// 获取手机号字段
-const getPhoneField = () => {
-  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
-  if(phoneField.length){
-    fromData.value.mdnFieldId = phoneField[0].id || null
-  } else {
-    fromData.value.mdnFieldId = null
-  }
-}
+
 
 const checkPhoneField = async() => {
   const table = await bitable.base.getTableById(tableInfo.value.tableId || tableInfo.value.id)

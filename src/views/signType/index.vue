@@ -22,7 +22,7 @@
         <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
-      <div v-if="signType" class="sign-type-add" @click="handleSignTypeAdd">
+      <div v-if="signType && configFields.length < 5" class="sign-type-add" @click="handleSignTypeAdd">
         增加签字人
       </div>
     </div>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeMount, nextTick } from 'vue';
 import yySwitch from '@/antDesignComponents/yySwitch/yy-switch.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import useTableBase from '@/hooks/useTableBase.js';
@@ -39,7 +39,8 @@ import useConfirmInfo from '@/hooks/useConfirmInfo'
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, } = useTableBase();
 const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo()
 
-const isVerifyIdentity = ref(false)
+const initFlag = ref(false)
+const isVerifyIdentity = ref(true)
 const checked = ref(false)
 const signType = ref(0)
 const configFields = ref([
@@ -81,14 +82,26 @@ const userFields = computed(() => {
   return fieldList.value.filter(item => [1,3,4,11,1003,1004].includes(item.type)) || []
 })
 
+// 获取手机号字段
+const getPhoneField = () => {
+  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
+  if(phoneField.length){
+    singleConfigFields.value[0].mdnFieldId = phoneField[0].id || null
+    singleConfigFields.value[0].mdnFieldName = phoneField[0].name || null
+  } 
+}
+
 watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleConfigFields.value], (val) => {
-  let obj = {
-    isVerifyIdentity: isVerifyIdentity.value,
-    signType: signType.value,
-    configFields: signType.value ? configFields.value : singleConfigFields.value
+  if(initFlag.value){
+    let obj = {
+      isVerifyIdentity: isVerifyIdentity.value,
+      signType: signType.value,
+      configFields: signType.value ? configFields.value : singleConfigFields.value
+    }
+    setFormData(obj)
   }
-  setFormData(obj)
 },{ deep: true})
+getPhoneField()
 onMounted(() => {
   isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity
   signType.value = cacheFormData.value.signType || 0
@@ -99,6 +112,9 @@ onMounted(() => {
       singleConfigFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
     }
   }
+  nextTick(() => {
+    initFlag.value = true
+  })
 })
 const handleSignType = (val) => {
   signType.value = val
