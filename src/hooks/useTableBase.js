@@ -303,7 +303,7 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
           [field.id]: [{
             "type": "url",
             "text": text,
-            "link": `${content}${item}`
+            "link": `${content}${item}&field_id=${fieldId}`
           }]
         }
       })

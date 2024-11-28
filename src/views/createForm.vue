@@ -231,7 +231,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
       fieldArr.push(addField(currentTableId, createUserViewUrl, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
-      // fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
+      fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
     } else {
       // 有授权  插入公式、状态
       if (isVerifyIdentity) {
