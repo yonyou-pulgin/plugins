@@ -15,11 +15,11 @@
           <span class="sign-type-item-title">选择签字人</span>
           <span v-if="configFields.length > 2" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
         </div>
-        <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId" ></yy-select>
+        <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
         <div class="sign-type-item-label" v-if="isVerifyIdentity">
           <span class="sign-type-item-title">选择手机号</span>
         </div>
-        <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" ></yy-select>
+        <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
       <div v-if="signType" class="sign-type-add" @click="handleSignTypeAdd">
@@ -46,12 +46,17 @@ const configFields = ref([
   {
     key: 1,
     mdnFieldId: null,
-    signPeopleFieldId: null
+    mdnFieldName: null,
+    signPeopleFieldId: null,
+    signPeopleFieldName: null
   },
   {
     key: 2,
     mdnFieldId: null,
-    signPeopleFieldId: null
+    mdnFieldId: null,
+    mdnFieldName: null,
+    signPeopleFieldId: null,
+    signPeopleFieldName: null
   }
 ])
 
@@ -59,7 +64,7 @@ const singleConfigFields = ref([
   {
     key: 1,
     mdnFieldId: null,
-    signPeopleFieldId: null
+    mdnFieldName: null
   }
 ])
 
@@ -82,7 +87,6 @@ watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleC
     signType: signType.value,
     configFields: signType.value ? configFields.value : singleConfigFields.value
   }
-  console.log(obj)
   setFormData(obj)
 },{ deep: true})
 onMounted(() => {
@@ -108,6 +112,19 @@ const handleSignTypeAdd = () => {
 }
 const handleSignTypeDel = (index) => {
   configFields.value.splice(index, 1)
+}
+
+const handleChange = (index, val, key) => {
+  const fieldInfo = fieldList.value.filter(item => item.value == val)[0]
+  if(signType.value){
+    if(key =='phone'){
+      configFields.value[index].mdnFieldName = fieldInfo.name
+    } else {
+      configFields.value[index].signPeopleFieldName = fieldInfo.name
+    }
+  } else {
+    singleConfigFields.value[index].mdnFieldName = fieldInfo.name
+  }
 }
 </script>
 

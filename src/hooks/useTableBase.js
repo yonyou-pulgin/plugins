@@ -189,9 +189,7 @@ const getCellUrlResult = async (tableId, type = '') => {
       tableDataSource = [tableDataSource[0]]
     }
     const dataSource = await getAttachmentUrlSync(table, tableDataSource)
-    console.log(dataSource)
     const data = await getAttachmentUrl(table, dataSource)
-    console.log(data)
     resolve(data)
   })
 }
@@ -284,7 +282,7 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
   // 创建字段~获取字段 id
   // 查找签字字段
   const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
-  let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
+  let name = findField.length ? `${fieldTitle}${findField.length}` : `${fieldTitle}`
   // 创建字段~获取字段 id
   const fieldId = await table.addField({type: FieldType.Url, name,
   description: { // 字段描述
@@ -394,7 +392,7 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
   let name = findField.length ? `${fieldTitle}${findField.length}` : fieldTitle
-  const fieldId = await table.addField({type: FieldType.Formula, name, 
+  const fieldId = await table.addField({type: FieldType.Formula, name,
   description: { // 字段描述
     content: isDesc,
     /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
@@ -446,11 +444,11 @@ const closePlugin = async () => {
 }
 
 // 设置人员
-const setUserField = async(tableId, selectUserFieldId = 'fld0eGqyHN', successRecords) => {
+const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes('签字人'))
-  let num = String.fromCharCode(findField.length + 65)
-  let name = `签字人${num}`
+  // let num =  String.fromCharCode(findField.length + 65)
+  let name = findField.length ? `签字人${findField.length}`: '签字人'
   const addUserFieldId = await table.addField({type: FieldType.User, name });
   // 获取对应列的字段
   const userField = await table.getField(selectUserFieldId);
@@ -468,6 +466,9 @@ const setUserField = async(tableId, selectUserFieldId = 'fld0eGqyHN', successRec
         },
       ]);
     }
+  })
+  return Promise.resolve({
+    userField: addUserFieldId
   })
 }
 export default function useTableBase() {
