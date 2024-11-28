@@ -60,7 +60,6 @@ const fromData = ref({
   isNewRecordConfirm: true, // 是否新增数据同步创建确认单
   currentStep: 1,
   formulaLink: true,
-  signType: 0, //  0 单人签字、1 多人签字
 })
 
 const currentTableName = ref('')

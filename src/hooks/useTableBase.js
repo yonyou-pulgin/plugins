@@ -458,13 +458,15 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
     if(successRecords.includes(item)) {
       // 获取对应的人员
       const userId = await userField.getValue(item);
-      const modifiedUserField = await table.getField(addUserFieldId);
-      // 设置人员
-      await modifiedUserField.setValue(item, [
-        {
-          id: userId[0].id
-        },
-      ]);
+      if(userId && userId[0] && userId[0].id){
+        const modifiedUserField = await table.getField(addUserFieldId);
+        // 设置人员
+        await modifiedUserField.setValue(item, [
+          {
+            id: userId[0].id
+          },
+        ]);
+      }
     }
   })
   return Promise.resolve({
