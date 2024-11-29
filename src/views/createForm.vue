@@ -167,7 +167,7 @@ const handleSubmit = async () => {
         formulaLink: params.formulaLink,
         qrUrl: res.data.qrUrl,
         userViewUrl: res.data.userViewUrl,
-        createUserViewUrl: res.data.createUserViewUrl + '?recordId=',
+        createUserViewUrl: res.data.createUserViewUrl + '?key=1',
         formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}`,
         formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}`,
       }
