@@ -369,6 +369,7 @@ const addImgField = async (tableId, url, successRecords) => {
   })
   // 批量赋值
   table.setRecords(setRecords)
+  imgFieldLen = 0
   return Promise.resolve({
     qrFieldId: fieldId,
   })
@@ -394,6 +395,7 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
   let  titleVal = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
   let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
   await formulaField.setFormula(contentUrl);
+  formulaFieldLen = 0
   return Promise.resolve({
     viewFieldId: fieldId,
   })
@@ -423,6 +425,7 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
   if(isRecord) contentUrl = `CONCATENATE("${url}", RECORD_ID())`
   else contentUrl = `CONCATENATE("${url}&rowId=", RECORD_ID())`
   await formulaField.setFormula(contentUrl);
+  formulaFieldLinkLen = 0
   return Promise.resolve({
     viewFieldId: fieldId,
   })
@@ -457,6 +460,7 @@ const addSingleSelectField = async (tableId, url, successRecords) => {
   recordIdList.forEach(item => {
     singleSelectField.setValue(item, '未查看/未签字'); // 传入选项 id   
   })
+  singleSelectLen = 0
   return Promise.resolve({
     statusFieldId: fieldId,
     statusFieldName: name
@@ -472,6 +476,7 @@ let userFieldLen = 0
 const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes('签字人'))
+  console.log(findField)
   // let num =  String.fromCharCode(findField.length + 65)
   if(userFieldLen){
     userFieldLen++
@@ -499,6 +504,7 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
       }
     }
   })
+  userFieldLen = 0
   return Promise.resolve({
     userField: addUserFieldId
   })
