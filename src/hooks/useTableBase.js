@@ -303,7 +303,7 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
           [field.id]: [{
             "type": "url",
             "text": text,
-            "link": `${content}&recordId=${item}&field_id=${fieldId}`
+            "link": `${content}&recordId=${item}`
           }]
         }
       })
@@ -391,7 +391,7 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
   }});
   // 公式字段
   const formulaField = await table.getField(fieldId);
-  let url = content + `&field_id=${fieldId}&recordId=`  || 'https://www.baidu.com/'
+  let url = content + `&recordId=`  || 'https://www.baidu.com/'
   let  titleVal = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
   let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
   await formulaField.setFormula(contentUrl);
@@ -420,7 +420,7 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
   }});
   // 公式字段
   const formulaField = await table.getField(fieldId);
-  let url = content + `&field_id=${fieldId}&recordId=`  || 'https://www.baidu.com/'
+  let url = content + `&recordId=`  || 'https://www.baidu.com/'
   let  contentUrl = ''
   if(isRecord) contentUrl = `CONCATENATE("${url}", RECORD_ID())`
   else contentUrl = `CONCATENATE("${url}&rowId=", RECORD_ID())`
