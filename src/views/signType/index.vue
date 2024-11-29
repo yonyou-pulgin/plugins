@@ -101,7 +101,7 @@ watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleC
     setFormData(obj)
   }
 },{ deep: true})
-getPhoneField()
+
 onMounted(() => {
   isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity
   signType.value = cacheFormData.value.signType || 0
@@ -114,6 +114,7 @@ onMounted(() => {
   }
   nextTick(() => {
     initFlag.value = true
+    getPhoneField()
   })
 })
 const handleSignType = (val) => {
