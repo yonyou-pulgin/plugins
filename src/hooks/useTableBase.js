@@ -476,15 +476,16 @@ let userFieldLen = 0
 const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   const table = await bitable.base.getTableById(tableId);
   const findField = fieldList.value.filter(item => item.name.includes('签字人'))
-  console.log(findField)
   // let num =  String.fromCharCode(findField.length + 65)
   if(userFieldLen){
     userFieldLen++
   } else {
-    userFieldLen = findField.length
+   let num = findField.length
+   if(num) userFieldLen = num++
+   else userFieldLen = num
   }
   let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
-  const addUserFieldId = await table.addField({type: FieldType.User, name });
+  const addUserFieldId = await table.addField({type: FieldType.Text, name });
   // 获取对应列的字段
   const userField = await table.getField(selectUserFieldId);
   // 获取行数据
@@ -492,15 +493,11 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   recordList.recordIdList.map(async item => {
     if(successRecords.includes(item)) {
       // 获取对应的人员
-      const userId = await userField.getValue(item);
-      if(userId && userId[0] && userId[0].id){
+      const cellValue = await userField.getValue(item);
+      if(cellValue[0]){
         const modifiedUserField = await table.getField(addUserFieldId);
         // 设置人员
-        await modifiedUserField.setValue(item, [
-          {
-            id: userId[0].id
-          },
-        ]);
+        await modifiedUserField.setValue(item, cellValue);
       }
     }
   })

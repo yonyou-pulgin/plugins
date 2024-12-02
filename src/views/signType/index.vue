@@ -6,7 +6,7 @@
       <span :class="{'is-active': signType == 1}" @click="handleSignType(1)">多人签字</span>
     </div>
 
-    <div class="sign-type-list">
+    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5}">
       <a-checkbox :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity">是否验证身份</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
@@ -15,7 +15,7 @@
           <span class="sign-type-item-title">选择签字人</span>
           <span v-if="configFields.length > 2" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
         </div>
-        <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
+        <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择签字人" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
         <div class="sign-type-item-label" v-if="isVerifyIdentity">
           <span class="sign-type-item-title">选择手机号</span>
         </div>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, onBeforeMount, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, onBeforeMount, nextTick } from 'vue';
 import yySwitch from '@/antDesignComponents/yySwitch/yy-switch.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import useTableBase from '@/hooks/useTableBase.js';
@@ -117,8 +117,10 @@ onMounted(() => {
     getPhoneField()
   })
 })
+
 const handleSignType = (val) => {
   signType.value = val
+  isVerifyIdentity.value = false
 }
 const handleSignTypeAdd = () => {
   configFields.value.push({
@@ -217,7 +219,7 @@ const handleChange = (index, val, key) => {
         position: absolute;
         border-left: 1px dashed #ccc;
       }
-    }    
+    }
     &-label{
       display: flex;
       flex-direction: row;
@@ -243,10 +245,11 @@ const handleChange = (index, val, key) => {
       color: #FD3B3A;
       line-height: 20px;
       cursor: pointer;
+      font-weight: initial;
     }
 
     .yy-fs-from-item{
-      width: calc(100% - 26px)!important;
+      width: calc(100% - 24px)!important;
       margin-left: 24px;
       margin-bottom: 12px;
     }
@@ -260,6 +263,22 @@ const handleChange = (index, val, key) => {
     color: #3A75FF;
     line-height: 20px;
     margin-left: 24px;
+  }
+}
+
+.sign-list-all{
+  .sign-type-item{
+    position: relative;
+    &:not(:last-child):not(:nth-last-child(1)){
+      &::before{
+        content: '';
+        top: 24px;
+        left: 8px;
+        bottom: 10px;
+        position: absolute;
+        border-left: 1px dashed #ccc;
+      }
+    }
   }
 }
 </style>
