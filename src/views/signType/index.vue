@@ -7,7 +7,7 @@
     </div>
 
     <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5}">
-      <a-checkbox :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity">是否验证身份</a-checkbox>
+      <a-checkbox class="checkbox-plugin" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity">是否验证身份</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
         <div class="sign-type-item-label" v-if="signType">
@@ -185,11 +185,18 @@ const handleChange = (index, val, key) => {
         border-top-right-radius: 6px;
         border-bottom-right-radius: 6px;
       }
+      &:hover{
+        border-color: #3A75FF;
+      }
     }
     .is-active{
       color: #fff;
       background: #3A75FF;
       border-color: #3A75FF;
+      &:hover{
+        background: #6191ff;
+        border-color: #6191ff;
+      }
     }
   }
 
@@ -202,6 +209,9 @@ const handleChange = (index, val, key) => {
     flex-direction: column;
     .ant-checkbox-wrapper {
       margin-bottom: 12px;
+      span{
+        font-weight: initial!important;
+      }
     }
     .checkbox-margin{
       margin-bottom: 0;
@@ -279,6 +289,13 @@ const handleChange = (index, val, key) => {
         border-left: 1px dashed #ccc;
       }
     }
+  }
+}
+</style>
+<style lang="scss">
+.checkbox-plugin {
+  .ant-checkbox + span{
+    font-weight: initial;
   }
 }
 </style>
