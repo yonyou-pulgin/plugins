@@ -493,8 +493,20 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   recordList.recordIdList.map(async item => {
     if(successRecords.includes(item)) {
       // 获取对应的人员
-      const cellValue = await userField.getValue(item);
+      let cellValue = await table.getCellValue(selectUserFieldId, item);
+      // const cellValue = await userField.getValue(item);
       if(cellValue[0]){
+        // 人员字段赋值
+        let currentField = cellValue[0]
+        if(!currentField.type && currentField.name && currentField.id ){
+          currentField = Object.assign({
+            "type": "mention",
+            "mentionType": "User",
+            "token": currentField.id,
+            "text": `@${currentField.name}`
+          }, currentField)
+          cellValue = [currentField]
+        }
         const modifiedUserField = await table.getField(addUserFieldId);
         // 设置人员
         await modifiedUserField.setValue(item, cellValue);
