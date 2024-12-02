@@ -238,25 +238,26 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
       fieldArr.push(setUserField(currentTableId, item.signPeopleFieldId, successRecords))
     }
     let routeFieldId = item.signPeopleFieldId || item.mdnFieldId || ''
+    let sort = item.sort || 0
     let loginUrl = `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsLogin?userType=0&confirmId=${confirmId}`
     // 无身份、无授权插入链接
     if (!isNewRecordConfirm && !isVerifyIdentity) {
     
-      fieldArr.push(addField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}`, successRecords, '签字确认'))
+      fieldArr.push(addField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认'))
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
-      fieldArr.push(addField(currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}`, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
+      fieldArr.push(addField(currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
       fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
     } else {
       // 有授权  插入公式、状态
       if (isVerifyIdentity) {
         fieldArr.push(addSingleSelectField(currentTableId))
-        fieldArr.push(addFormulaField(currentTableId, `${formulaUrl}&field_id=${routeFieldId}`, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
-        if (formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, `${loginUrl}&field_id=${routeFieldId}`, '自动化签字链接', false))
+        fieldArr.push(addFormulaField(currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
+        if (formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, '自动化签字链接', false))
       } else {
         fieldArr.push(addSingleSelectField(currentTableId))
-        fieldArr.push(addFormulaField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}`, '签字确认'))
-        if (formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}`,))
+        fieldArr.push(addFormulaField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, '签字确认'))
+        if (formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`,))
       }
     }
     item.promiseFun = fieldArr
