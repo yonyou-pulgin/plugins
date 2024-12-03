@@ -275,44 +275,52 @@ const getUserId = async () => {
   const Id = await bitable.bridge.getUserId();
   userId.value = Id
 }
+
+const getWindowTableInstance = async(tableId) => {
+  if(window.tableInstance) return window.tableInstance
+  else window.tableInstance = await getTableInstance(tableId);
+  return window.tableInstance
+}
 // 新增字段
 const addField = async (tableId, content, successRecords, fieldTitle='签字确认结果', isDesc = '') => {
-  const setRecords = []
-  const table = await getTableInstance(tableId);
-  // 创建字段~获取字段 id
-  // 查找签字字段
-  const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
-  let name = findField.length ? `${fieldTitle}${findField.length}` : `${fieldTitle}`
-  // 创建字段~获取字段 id
-  const fieldId = await table.addField({type: FieldType.Url, name,
-  description: { // 字段描述
-    content: isDesc,
-    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
-    disableSyncToFormDesc: false
-  }});
-  // 通过字段 id 获取字段实例
-  const field = await table.getField(fieldId);
-  // 获取所有列
-  const recordIdList = await table.getRecordIdList();
-  let text = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
-  recordIdList.forEach(item => {
-    if(successRecords.includes(item)) {
-      setRecords.push({
-        recordId: item,
-        fields: {
-          [field.id]: [{
-            "type": "url",
-            "text": text,
-            "link": `${content}&recordId=${item}`
-          }]
-        }
-      })
-    }
-  })
-  // 批量赋值
-  await table.setRecords(setRecords)
-  return Promise.resolve({
-    viewFieldId: fieldId,
+  return new Promise(async(resolve, reject) => {
+    const setRecords = []
+    const table = await getWindowTableInstance(tableId)
+    // 创建字段~获取字段 id
+    // 查找签字字段
+    const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
+    let name = findField.length ? `${fieldTitle}${findField.length}` : `${fieldTitle}`
+    // 创建字段~获取字段 id
+    const fieldId = await table.addField({type: FieldType.Url, name,
+    description: { // 字段描述
+      content: isDesc,
+      /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+      disableSyncToFormDesc: false
+    }});
+    resolve({
+      viewFieldId: fieldId,
+    })
+    // 通过字段 id 获取字段实例
+    const field = await table.getField(fieldId);
+    // 获取所有列
+    const recordIdList = await table.getRecordIdList();
+    let text = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
+    recordIdList.forEach(item => {
+      if(successRecords.includes(item)) {
+        setRecords.push({
+          recordId: item,
+          fields: {
+            [field.id]: [{
+              "type": "url",
+              "text": text,
+              "link": `${content}&recordId=${item}`
+            }]
+          }
+        })
+      }
+    })
+    // 批量赋值
+    await table.setRecords(setRecords)
   })
 }
 
@@ -333,138 +341,150 @@ const addImgField = async (tableId, url, successRecords) => {
   // await attachmentField.setValue(recordIdList[0], file);
   const token = await getAttachmentToken(file)
   const setRecords = []
-  const table = await bitable.base.getTableById(tableId);
-  // 创建字段~获取字段 id
-  const findField = fieldList.value.filter(item => item.name.includes('签字二维码【发给签字人员】'))
-  if(imgFieldLen){
-    imgFieldLen++
-  } else {
-    imgFieldLen = findField.length
-  }
-  let name = imgFieldLen ? `签字二维码【发给签字人员】${imgFieldLen}` : '签字二维码【发给签字人员】'
-  const fieldId = await table.addField({type: FieldType.Attachment, name});
-  // 通过字段 id 获取字段实例
-  const field = await table.getField(fieldId);
 
-  // 获取所有列
-  const recordIdList = await table.getRecordIdList();
+  return new Promise(async(resolve, reject) => {
+      const table = await getWindowTableInstance(tableId);
+      // 创建字段~获取字段 id
+      const findField = fieldList.value.filter(item => item.name.includes('签字二维码【发给签字人员】'))
+      if(imgFieldLen){
+        imgFieldLen++
+      } else {
+        imgFieldLen = findField.length
+      }
+      let name = imgFieldLen ? `签字二维码【发给签字人员】${imgFieldLen}` : '签字二维码【发给签字人员】'
+      const fieldId = await table.addField({type: FieldType.Attachment, name});
+      resolve({
+        qrFieldId: fieldId,
+      })
+      // 通过字段 id 获取字段实例
+      const field = await table.getField(fieldId);
 
-  recordIdList.forEach(item => {
-    if(successRecords.includes(item)) {
-      setRecords.push({
-        recordId: item,
-        fields: {
-          [field.id]: [{
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            token: token[0],
-            timeStamp: file.lastModified,
-            permission: {
+      // 获取所有列
+      const recordIdList = await table.getRecordIdList();
+
+      recordIdList.forEach(item => {
+        if(successRecords.includes(item)) {
+          setRecords.push({
+            recordId: item,
+            fields: {
+              [field.id]: [{
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                token: token[0],
+                timeStamp: file.lastModified,
+                permission: {
+                }
+              }]
             }
-          }]
+          })
         }
       })
-    }
+      // 批量赋值
+      table.setRecords(setRecords)
+      imgFieldLen = 0
   })
-  // 批量赋值
-  table.setRecords(setRecords)
-  imgFieldLen = 0
-  return Promise.resolve({
-    qrFieldId: fieldId,
-  })
+
 }
 let formulaFieldLen = 0
 const addFormulaField = async (tableId, content, fieldTitle = '签字确认结果', isDesc = '') => {
-  const table = await bitable.base.getTableById(tableId);
-  const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
-  if(formulaFieldLen){
-    formulaFieldLen++
-  } else {
-    formulaFieldLen = findField.length
-  }
-  let name = formulaFieldLen ? `${fieldTitle}${formulaFieldLen}` : fieldTitle
-  const fieldId = await table.addField({type: FieldType.Formula, name, description: { // 字段描述
-    content: isDesc,
-    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
-    disableSyncToFormDesc: false
-  }});
-  // 公式字段
-  const formulaField = await table.getField(fieldId);
-  let url = content + `&recordId=`  || 'https://www.baidu.com/'
-  let  titleVal = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
-  let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
-  await formulaField.setFormula(contentUrl);
-  formulaFieldLen = 0
-  return Promise.resolve({
-    viewFieldId: fieldId,
+  return new Promise(async(resolve, reject) => {
+    const table = await getWindowTableInstance(tableId);
+    const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
+    if(formulaFieldLen){
+      formulaFieldLen++
+    } else {
+      formulaFieldLen = findField.length
+    }
+    let name = formulaFieldLen ? `${fieldTitle}${formulaFieldLen}` : fieldTitle
+    const fieldId = await table.addField({type: FieldType.Formula, name, description: { // 字段描述
+      content: isDesc,
+      /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+      disableSyncToFormDesc: false
+    }});
+    resolve({
+      viewFieldId: fieldId,
+    })
+    // 公式字段
+    const formulaField = await table.getField(fieldId);
+    let url = content + `&recordId=`  || 'https://www.baidu.com/'
+    let  titleVal = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
+    let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
+    await formulaField.setFormula(contentUrl);
+    formulaFieldLen = 0
   })
+
 }
 
 let formulaFieldLinkLen = 0
 const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签字链接', isRecord = true) => {
-  let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
-  const table = await bitable.base.getTableById(tableId);
-  const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
-    if(formulaFieldLinkLen){
-    formulaFieldLinkLen++
-  } else {
-    formulaFieldLinkLen = findField.length
-  }
-  let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
-  const fieldId = await table.addField({type: FieldType.Formula, name,
-  description: { // 字段描述
-    content: isDesc,
-    /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
-    disableSyncToFormDesc: false
-  }});
-  // 公式字段
-  const formulaField = await table.getField(fieldId);
-  let url = content + `&recordId=`  || 'https://www.baidu.com/'
-  let  contentUrl = ''
-  if(isRecord) contentUrl = `CONCATENATE("${url}", RECORD_ID())`
-  else contentUrl = `CONCATENATE("${url}&rowId=", RECORD_ID())`
-  await formulaField.setFormula(contentUrl);
-  formulaFieldLinkLen = 0
-  return Promise.resolve({
-    viewFieldId: fieldId,
+  return new Promise(async(resolve, reject) => {
+    let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
+    const table = await getWindowTableInstance(tableId);
+    const findField = fieldList.value.filter(item => item.name.includes(fieldTitle))
+      if(formulaFieldLinkLen){
+      formulaFieldLinkLen++
+    } else {
+      formulaFieldLinkLen = findField.length
+    }
+    let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
+    const fieldId = await table.addField({type: FieldType.Formula, name,
+    description: { // 字段描述
+      content: isDesc,
+      /** 是否禁止同步，如果为true，表示禁止同步该描述内容到表单的问题描述（只在新增、修改字段时生效）; 默认false */
+      disableSyncToFormDesc: false
+    }});
+    resolve({
+      viewFieldId: fieldId,
+    })
+    // 公式字段
+    const formulaField = await table.getField(fieldId);
+    let url = content + `&recordId=`  || 'https://www.baidu.com/'
+    let  contentUrl = ''
+    if(isRecord) contentUrl = `CONCATENATE("${url}", RECORD_ID())`
+    else contentUrl = `CONCATENATE("${url}&rowId=", RECORD_ID())`
+    await formulaField.setFormula(contentUrl);
+    formulaFieldLinkLen = 0
   })
+
 }
 let singleSelectLen = 0
 // 新增单选
 const addSingleSelectField = async (tableId, url, successRecords) => {
-  const table = await bitable.base.getTableById(tableId);
-  const findField = fieldList.value.filter(item => item.name.includes('签字状态'))
-  if(singleSelectLen){
-    singleSelectLen++
-  } else {
-    singleSelectLen = findField.length
-  }
-  let name = singleSelectLen ? `签字状态${singleSelectLen}` : '签字状态'
-  const fieldId = await table.addField({type: FieldType.SingleSelect, name});
-  // 获取单选实力
-  const singleSelectField = await table.getField(fieldId);
-  // //0-未查看/未签字 1-已查看/已签字 2-已查看/未签字
-  await singleSelectField.addOptions([
-    {
-      name: '未查看/未签字',
-    },
-    {
-      name: '已查看/已签字',
-    },
-    {
-      name: '已查看/未签字',
-    },
-  ]);
-  const recordIdList = await table.getRecordIdList();
-  recordIdList.forEach(item => {
-    singleSelectField.setValue(item, '未查看/未签字'); // 传入选项 id   
-  })
-  singleSelectLen = 0
-  return Promise.resolve({
-    statusFieldId: fieldId,
-    statusFieldName: name
-  })
+ return new Promise(async(resolve, reject) => {
+    const table = await getWindowTableInstance(tableId);
+    const findField = fieldList.value.filter(item => item.name.includes('签字状态'))
+    if(singleSelectLen){
+      singleSelectLen++
+    } else {
+      singleSelectLen = findField.length
+    }
+    let name = singleSelectLen ? `签字状态${singleSelectLen}` : '签字状态'
+    const fieldId = await table.addField({type: FieldType.SingleSelect, name});
+    resolve({
+      statusFieldId: fieldId,
+      statusFieldName: name
+    })
+    // 获取单选实力
+    const singleSelectField = await table.getField(fieldId);
+    // //0-未查看/未签字 1-已查看/已签字 2-已查看/未签字
+    await singleSelectField.addOptions([
+      {
+        name: '未查看/未签字',
+      },
+      {
+        name: '已查看/已签字',
+      },
+      {
+        name: '已查看/未签字',
+      },
+    ]);
+    const recordIdList = await table.getRecordIdList();
+    recordIdList.forEach(item => {
+      singleSelectField.setValue(item, '未查看/未签字'); // 传入选项 id   
+    })
+    singleSelectLen = 0
+ })
 }
 
 const closePlugin = async () => {
@@ -474,7 +494,9 @@ const closePlugin = async () => {
 let userFieldLen = 0
 // 设置人员
 const setUserField = async(tableId, selectUserFieldId, successRecords) => {
-  const table = await bitable.base.getTableById(tableId);
+ return new Promise(async(resolve, reject) => {
+  const table = await getWindowTableInstance(tableId);
+  
   const findField = fieldList.value.filter(item => item.name.includes('签字人'))
   // let num =  String.fromCharCode(findField.length + 65)
   if(userFieldLen){
@@ -486,6 +508,9 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   }
   let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
   const addUserFieldId = await table.addField({type: FieldType.Text, name });
+  resolve({
+    userField: addUserFieldId
+  })
   // 获取对应列的字段
   const userField = await table.getField(selectUserFieldId);
   // 获取行数据
@@ -514,9 +539,7 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
     }
   })
   userFieldLen = 0
-  return Promise.resolve({
-    userField: addUserFieldId
-  })
+ })
 }
 export default function useTableBase() {
   return {
