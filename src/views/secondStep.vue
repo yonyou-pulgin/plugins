@@ -4,7 +4,9 @@
       <span class="form-item-label">确认单名称</span>
       <yy-input :maxlength="50" v-model:value="currentTableName" placeholder="请输入确认单名称" @change="handleChangeTableName"></yy-input>
     </div>
-    <div class="form-item form-item-row">
+
+    <signType class="sign-type-content" />
+    <!-- <div class="form-item form-item-row">
       <span class="form-item-label">签字确认是否验证身份&nbsp;
         <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，成员需要手机号验证才能签字。"></yy-tooltip>
       </span>
@@ -13,7 +15,7 @@
     <div class="form-item" v-if="fromData.isVerifyIdentity">
       <span class="form-item-labelTitle required">手机号（用于成员身份校验）</span>
       <yy-select class="yy-fs-from-item" :class="{'yy-fs-from-item-error': checkPhoneFieldFlag }" placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
-    </div>
+    </div> -->
     <div class="form-item form-item-row">
       <span class="form-item-label">表中新增数据是否同步创建确认单&nbsp;
         <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，当数据表新增一行记录时，自动创建一个确认单。"></yy-tooltip>
@@ -43,6 +45,7 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yySwitch from '@/antDesignComponents/yySwitch/yy-switch.vue'
 import yyTooltip from '@/antDesignComponents/yyTooltip/yy-tooltip.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
+import signType from './signType/index.vue'
 import getAuthCode from './getAuthCode.vue'
 import useTableBase from '@/hooks/useTableBase.js';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
@@ -52,12 +55,10 @@ const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo
 const getAuthCodeInstance = ref(null)
 const fromData = ref({
   tableName: null,
-  mdnFieldId: null,
   personalBaseToken: null, // 授权码
-  isVerifyIdentity: true, // 是否验证身份
   isNewRecordConfirm: true, // 是否新增数据同步创建确认单
   currentStep: 1,
-  formulaLink: true
+  formulaLink: true,
 })
 
 const currentTableName = ref('')
@@ -82,9 +83,9 @@ watch(() => [fromData.value, currentTableName.value], () => {
 
 onMounted(async() => {
   currentTableName.value = cacheFormData.value.tableName || tableName.value
-  const { personalBaseToken, mdnFieldId, isVerifyIdentity = false, isNewRecordConfirm = false } = cacheFormData.value
+  const { personalBaseToken, isNewRecordConfirm = false } = cacheFormData.value
   fromData.value = Object.assign(fromData.value , {
-    personalBaseToken, mdnFieldId, isVerifyIdentity, isNewRecordConfirm
+    personalBaseToken, isNewRecordConfirm
   })
   fromData.value.tableName = currentTableName.value
   if(cacheFormData.value.hasOwnProperty('formulaLink'))fromData.value.formulaLink = cacheFormData.value.formulaLink
@@ -214,13 +215,15 @@ onMounted(async() => {
       }
     }
   }
-
+}
+.sign-type-content{
+  margin-bottom: 16px;
 }
 </style>
 
 <style>
 .ant-checkbox+span {
-padding-left: 8px!important;
-    padding-right: 6px!important;
+  padding-left: 8px!important;
+  padding-right: 6px!important;
 }
 </style>
