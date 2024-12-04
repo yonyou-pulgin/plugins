@@ -123,10 +123,12 @@ const getParams = () => {
   params.isVerifyIdentity = +params.isVerifyIdentity
   params.isNewRecordConfirm = +params.isNewRecordConfirm
   params.fieldSort = params.fieldSort.filter(item => item.checked).map(item => item.id)
-  params.configFields = params.configFields.map((item, index) => {
-    item.sort = index + 1
-    return item
-  })
+  if(params.configFields){
+    params.configFields = params.configFields?.map((item, index) => {
+      item.sort = index + 1
+      return item
+    })
+  }
   if (params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
   return params
 }
