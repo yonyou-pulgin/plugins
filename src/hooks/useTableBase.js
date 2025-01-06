@@ -421,6 +421,7 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
     const table = await getWindowTableInstance(tableId);
     const formulaFieldLinkLen = insetFieldIndex.value || 0
     let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
+    ++ insetFieldIndex.value
     const fieldId = await table.addField({type: FieldType.Formula, name,
     description: { // 字段描述
       content: isDesc,
@@ -484,7 +485,6 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   const userFieldLen = insetFieldIndex.value || 0
   let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
   const addUserFieldId = await table.addField({type: FieldType.Text, name });
-  insetFieldIndex.value ++
   resolve({
     userField: addUserFieldId
   })
