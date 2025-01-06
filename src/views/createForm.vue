@@ -44,7 +44,7 @@ import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
 const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
-  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField } = useTableBase();
+  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
 const loading = ref(false)
@@ -134,6 +134,7 @@ const getParams = () => {
 }
 const handleSubmit = async () => {
   loading.value = true
+  findFieldIndex(fieldList.value)
   // 核查有没有附件
   const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
   const params = getParams()
