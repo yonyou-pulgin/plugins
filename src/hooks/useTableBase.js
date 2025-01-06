@@ -484,6 +484,7 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
   const userFieldLen = insetFieldIndex.value || 0
   let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
   const addUserFieldId = await table.addField({type: FieldType.Text, name });
+  insetFieldIndex.value ++
   resolve({
     userField: addUserFieldId
   })
@@ -514,7 +515,7 @@ const setUserField = async(tableId, selectUserFieldId, successRecords) => {
       }
     }
   })
-  insetFieldIndex.value ++
+
  })
 }
 export default function useTableBase() {
