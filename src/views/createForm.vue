@@ -128,6 +128,8 @@ const getParams = () => {
       item.sort = index + 1
       return item
     })
+  } else {
+    params.configFields = [{ mdnFieldName: null, mdnFieldId: null, sort: 1}]
   }
   if (params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
   return params

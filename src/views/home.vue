@@ -31,7 +31,9 @@
             <li class="drag-item" v-for="item in fieldsSortList">
               <div class="f">
                 <icon-draggripper class="drag-item-icon draggripper" />
-                <a-checkbox v-model:checked="item.checked">{{item.name}}</a-checkbox>
+                <a-checkbox v-model:checked="item.checked">
+                  <component class="icon-svg-container" :is="fieldTypeMap[item.type] || 'icon-text'" />
+                {{item.name}}</a-checkbox>
               </div>
               <div class="field-desc" v-if="item.type == 17">* 当前仅支持图片，不支持其他文件格式</div>
             </li>
@@ -67,6 +69,36 @@ import useConfirmInfo from '@/hooks/useConfirmInfo.js';
 const { formData:cacheFormData, setFormData } = useConfirmInfo();
 import { message } from 'ant-design-vue';
 
+const fieldTypeMap = {
+  1: 'icon-text',
+  2: 'icon-number',
+  3: 'icon-select',
+  5: 'icon-time',
+  4: 'icon-multipleSelect',
+  7: 'icon-checkBox',
+  11: 'icon-person',
+  13: 'icon-phone',
+  15: 'icon-link',
+  17: 'icon-attachment',
+  18: 'icon-reference',
+  19: 'icon-process',
+  20: 'icon-formula',
+  21: 'icon-bidirectionalReference',
+  22: 'icon-address',
+  23: 'icon-gourpPerson',
+1001: 'icon-time',
+1002: 'icon-time',
+1003: 'icon-person',
+1004: 'icon-person',
+1005: 'icon-autoNum',
+99001: 'icon-barCode',
+99002: 'icon-progress',
+99003: 'icon-money',
+99004: 'icon-score',
+99005: 'icon-email',
+
+}
+const MyComponent = ref('icon-text')
 const router = useRouter()
 const fromData = ref({
   baseId: '',
@@ -491,5 +523,11 @@ const handleAllClick = (val) => {
       transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6), opacity 0.1s;
   }
 
+}
+.icon-svg-container{
+  margin-top: 2px;
+      margin-top: 4px;
+    float: left;
+    margin-right: 4px;
 }
 </style>
