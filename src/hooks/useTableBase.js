@@ -59,8 +59,12 @@ const findFieldIndex = (fieldList) => {
     || item.name.indexOf('签字二维码【发给签字人员】') > -1 || item.name.indexOf('自动化签字链接') > -1 || item.name.indexOf('签字确认结果') > -1 || 
     item.name.indexOf('签字确认') > -1
   ).map(item => +item.name.replace(/\D/g, ''))
-  let maxIndex = Math.max(...findHasFieldName)
-  insetFieldIndex.value = maxIndex ? ++maxIndex : 0;
+  insetFieldIndex.value =  0;
+  if(findHasFieldName.length){
+    let maxIndex = Math.max(...findHasFieldName)
+    insetFieldIndex.value = maxIndex ? ++maxIndex : 1;
+  }
+
 }
 
 const loading = ref(false)
