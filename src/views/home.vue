@@ -59,7 +59,8 @@ import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
 import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData, getCellUrlResult, checkHasAttachment,
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData,
+ getCellUrlResult, checkHasAttachment, tableIdChangeFlag, 
 addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
@@ -81,7 +82,7 @@ const fieldTypeMap = {
   15: 'icon-link',
   17: 'icon-attachment',
   18: 'icon-reference',
-  19: 'icon-process',
+  19: 'icon-quote',
   20: 'icon-formula',
   21: 'icon-bidirectionalReference',
   22: 'icon-address',
@@ -191,13 +192,29 @@ watch(() => selectFields.value.length, (val) => {
   if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
   else fieldAllChecked.value = false
 }, { deep: true })
+
+watch(() => tableInfo.value , async(val) => {
+  if(!val) return false
+  const selection = await bitable.base.getSelection();
+  fromData.value.tableId = selection.tableId
+  fromData.value.baseId = selection.baseId
+  dataSheet.value = selection.tableId
+  handleDataSheet(selection.tableId)
+}, { deep: true })
+
 onMounted(async()=>{
   initFlag.value = false
   const selection = await bitable.base.getSelection();
+  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId
   fromData.value.baseId = cacheFormData.value.baseId || selection.baseId
   fromData.value.currentStep = 0
+  console.log(cacheFormData.value)
   setTimeout(() => {
-    dataSheet.value = cacheFormData.value.dataSheet || selection.tableId
+    dataSheet.value = cacheFormData.value.tableId || cacheFormData.value.dataSheet || selection.tableId
+    // fix 切换数据表 返回第一步
+    if(cacheFormData.value.tableId && (cacheFormData.value.tableId != cacheFormData.value.dataSheet)){
+      handleDataSheet(dataSheet.value)
+    }
     fromData.value.dataSheet = dataSheet.value
     // 读取缓存数据
     if(cacheFormData.value.dataSheet){
@@ -213,7 +230,7 @@ onMounted(async()=>{
         fromData.value.isHiddenEmpty = 1
       }
     } else {
-      handleDataSheet( dataSheet.value)
+      handleDataSheet(dataSheet.value)
     }
     initFlag.value = true
   }, 200)

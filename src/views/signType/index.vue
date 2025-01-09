@@ -102,6 +102,24 @@ watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleC
   }
 },{ deep: true})
 
+watch(() => fieldList.value, () => {
+  cacheFormData.value.configFields.map(item => {
+    item = Object.assign(item, {
+      mdnFieldId: null,
+      mdnFieldName: null,
+      signPeopleFieldId: null,
+      signPeopleFieldName: null
+    })
+    return item
+  })
+  console.log(cacheFormData.value.configFields)
+  if(signType.value){
+    configFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
+  } else {
+    singleConfigFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
+  }
+}, { deep: true })
+
 onMounted(() => {
   isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity
   signType.value = cacheFormData.value.signType || 0
