@@ -120,28 +120,11 @@ const setTableInfo = async(selection, type = '') => {
     })
     // 监听数据变化
     bitable.base.onSelectionChange(async(event) => {
-      const data = await bridge.getData('yy-form-data')
-      if(data){
-        const dataObj = JSON.parse(data)
-        console.log(event.data.tableId)
-        if(event.data.tableId != dataObj.tableId){
-          // 表格切换
-          tableData.value = []
-          tableInfo.value = event.data
-          tableIdChangeFlag.value = true
-          getTableName(event.data.tableId)
-          getCellList(event.data.tableId)
-          getTableSheetList(event.data.tableId)
-          getTableFieldList(event.data.tableId)
-        } else {
-          nextTick(() => {
-            tableData.value = []
-            getTableSheetList(tableInfo.value.tableId)
-            getCellList(tableInfo.value.tableId)
-          })
-        }
-      }
-  
+      nextTick(() => {
+        tableData.value = []
+        getTableSheetList(tableInfo.value.tableId)
+        getCellList(tableInfo.value.tableId)
+      })
     })
 }
 // 获取当前多维表格下所有的数据表
@@ -179,7 +162,6 @@ const getTableFieldList = async (tableId) => {
       item.value = item.id
       return item
   })
-  console.log(fieldList.value)
 }
 
 // 获取表格数据
@@ -315,13 +297,13 @@ const getWindowTableInstance = async(tableId) => {
   return window.tableInstance
 }
 // 新增字段
-const addField = async (tableId, content, successRecords, fieldTitle='签字确认结果', isDesc = '') => {
+const addField = async (insertIndex, tableId, content, successRecords, fieldTitle='签字确认结果', isDesc = '') => {
   return new Promise(async(resolve, reject) => {
     const setRecords = []
     const table = await getWindowTableInstance(tableId)
     // 创建字段~获取字段 id
     // 查找签字字段
-    const findField = insetFieldIndex.value || 0
+    const findField = insetFieldIndex.value + insertIndex || 0
     let name = findField ? `${fieldTitle}${findField}` : `${fieldTitle}`
 
     // 创建字段~获取字段 id
@@ -334,7 +316,6 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
     resolve({
       viewFieldId: fieldId,
     })
-    ++ insetFieldIndex.value
     // 通过字段 id 获取字段实例
     const field = await table.getField(fieldId);
     // 获取所有列
@@ -365,7 +346,7 @@ const getAttachmentToken = async(file) => {
   return tokens
 }
 // 新增附件字段
-const addImgField = async (tableId, url, successRecords) => {
+const addImgField = async (insertIndex, tableId, url, successRecords) => {
   const result = await urltoBlob(url)
   const file = new File([result], 'imgage.png', { type: result.type});
   // 设置单个值
@@ -379,7 +360,7 @@ const addImgField = async (tableId, url, successRecords) => {
   return new Promise(async(resolve, reject) => {
       const table = await getWindowTableInstance(tableId);
       // 创建字段~获取字段 id
-      const imgFieldLen =  insetFieldIndex.value || 0
+      const imgFieldLen =  insetFieldIndex.value + insertIndex || 0
       let name = imgFieldLen ? `签字二维码【发给签字人员】${imgFieldLen}` : '签字二维码【发给签字人员】'
       const fieldId = await table.addField({type: FieldType.Attachment, name});
       resolve({
@@ -415,10 +396,10 @@ const addImgField = async (tableId, url, successRecords) => {
 
 }
 
-const addFormulaField = async (tableId, content, fieldTitle = '签字确认结果', isDesc = '') => {
+const addFormulaField = async (insertIndex, tableId, content, fieldTitle = '签字确认结果', isDesc = '') => {
   return new Promise(async(resolve, reject) => {
     const table = await getWindowTableInstance(tableId);
-    const formulaFieldLen = insetFieldIndex.value || 0
+    const formulaFieldLen = insetFieldIndex.value + insertIndex || 0
     let name = formulaFieldLen ? `${fieldTitle}${formulaFieldLen}` : fieldTitle
     const fieldId = await table.addField({type: FieldType.Formula, name, description: { // 字段描述
       content: isDesc,
@@ -428,7 +409,6 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
     resolve({
       viewFieldId: fieldId,
     })
-    ++insetFieldIndex.value
     // 公式字段
     const formulaField = await table.getField(fieldId);
     let url = content + `&recordId=`  || 'https://www.baidu.com/'
@@ -439,11 +419,11 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
 
 }
 
-const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签字链接', isRecord = true) => {
+const addFormulaLinkField = async (insertIndex, tableId, content, fieldTitle = '自动化签字链接', isRecord = true) => {
   return new Promise(async(resolve, reject) => {
     let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
     const table = await getWindowTableInstance(tableId);
-    const formulaFieldLinkLen = insetFieldIndex.value || 0
+    const formulaFieldLinkLen = insetFieldIndex.value + insertIndex || 0
     let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
     const fieldId = await table.addField({type: FieldType.Formula, name,
     description: { // 字段描述
@@ -465,10 +445,10 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
 
 }
 // 新增单选
-const addSingleSelectField = async (tableId, url, successRecords) => {
+const addSingleSelectField = async (insertIndex, tableId, url, successRecords) => {
  return new Promise(async(resolve, reject) => {
     const table = await getWindowTableInstance(tableId);
-    const singleSelectLen = insetFieldIndex.value || 0
+    const singleSelectLen = insetFieldIndex.value + insertIndex || 0
     let name = singleSelectLen ? `签字状态${singleSelectLen}` : '签字状态'
     const fieldId = await table.addField({type: FieldType.SingleSelect, name});
     resolve({
@@ -501,11 +481,11 @@ const closePlugin = async () => {
 }
 
 // 设置人员
-const setUserField = async(tableId, selectUserFieldId, successRecords) => {
+const setUserField = async(insertIndex, tableId, selectUserFieldId, successRecords) => {
  return new Promise(async(resolve, reject) => {
   const table = await getWindowTableInstance(tableId);
   
-  const userFieldLen = insetFieldIndex.value || 0
+  const userFieldLen = insetFieldIndex.value + insertIndex || 0
   let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
   const addUserFieldId = await table.addField({type: FieldType.Text, name });
   resolve({

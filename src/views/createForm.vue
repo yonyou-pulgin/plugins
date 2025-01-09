@@ -81,12 +81,12 @@ const selectFieldFlag = computed(() => {
   return fieldSort.filter(item => item.checked).length || 0
 })
 
-watch(() => tableIdChangeFlag.value, () => {
-  current.value = 0 
-  nextTick(() => {
-    tableIdChangeFlag.value = false
-  })
-}, {deep: true })
+// watch(() => tableIdChangeFlag.value, () => {
+//   current.value = 0 
+//   nextTick(() => {
+//     tableIdChangeFlag.value = false
+//   })
+// }, {deep: true })
 
 const handleNext = () => {
   //current.value++
@@ -240,14 +240,16 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     formulaUrlEmp, confirmId, createUserViewUrl } = insertFieldParams.value
   let configFieldsPromise = JSON.parse(JSON.stringify(configFields))
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  let index = 0
   for (const item of configFieldsPromise) {
+    let insertIndex = index++
     let fieldArr = []
     // 延迟1秒，等字段创建完保证顺序执行
     let time = 1000 * configFields.length
     await delay(time)
     // 处理多级签字人
     if (signType) {
-      fieldArr.push(setUserField(currentTableId, item.signPeopleFieldId, successRecords))
+      fieldArr.push(setUserField(insertIndex, currentTableId, item.signPeopleFieldId, successRecords))
     }
     let routeFieldId = item.signPeopleFieldId || item.mdnFieldId || ''
     let sort = item.sort || 0
@@ -255,21 +257,21 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     // 无身份、无授权插入链接
     if (!isNewRecordConfirm && !isVerifyIdentity) {
     
-      fieldArr.push(addField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认'))
+      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认'))
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
-      fieldArr.push(addField(currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
-      fieldArr.push(addImgField(currentTableId, qrUrl, successRecords))
+      fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
+      fieldArr.push(addImgField(insertIndex, currentTableId, qrUrl, successRecords))
     } else {
       // 有授权  插入公式、状态
       if (isVerifyIdentity) {
-        fieldArr.push(addSingleSelectField(currentTableId))
-        fieldArr.push(addFormulaField(currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
-        if (formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, '自动化签字链接', false))
+        fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
+        if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, '自动化签字链接', false))
       } else {
-        fieldArr.push(addSingleSelectField(currentTableId))
-        fieldArr.push(addFormulaField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, '签字确认'))
-        if (formulaLink) fieldArr.push(addFormulaLinkField(currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`,))
+        fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, '签字确认'))
+        if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`,))
       }
     }
     item.promiseFun = fieldArr
@@ -301,14 +303,7 @@ const handleDownQr = () => {
 onMounted(async () => {
   const result = await getCacheFormData()
   if (result && Object.values(result).length) {
-    if(tableInfo.value.tableId != result.tableId){
-      const selection = await bitable.base.getSelection();
-      tableInfo.value.tableId = selection.tableId
-      formData.value.tableId = selection.tableId
-      current.value = 0
-    } else {
-      current.value = result.currentStep || 0
-    }
+    current.value = result.currentStep || 0
   }
 })
 
