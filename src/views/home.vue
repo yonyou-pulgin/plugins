@@ -81,7 +81,7 @@ const fieldTypeMap = {
   15: 'icon-link',
   17: 'icon-attachment',
   18: 'icon-reference',
-  19: 'icon-process',
+  19: 'icon-quote',
   20: 'icon-formula',
   21: 'icon-bidirectionalReference',
   22: 'icon-address',

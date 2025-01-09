@@ -316,6 +316,7 @@ const addField = async (tableId, content, successRecords, fieldTitle='签字确�
     resolve({
       viewFieldId: fieldId,
     })
+    ++ insetFieldIndex.value
     // 通过字段 id 获取字段实例
     const field = await table.getField(fieldId);
     // 获取所有列
