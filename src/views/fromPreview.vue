@@ -13,7 +13,7 @@
           <div class="modal-content-item" :class="{'modal-content-item-row': (item.value && item.value.length > hasTitleLen) || item.name.length > hasTitleLen}" v-for="item in previewInfo" :key="item.id">
             <template v-if="item.fieldType != 17">
               <div class="modal-content-item-label">{{ item.name }}</div>
-              <div class="modal-content-item-content" >{{ item.value || '-' }}</div>
+              <div class="modal-content-item-content"  :class="{ 'modal-content-item-text' : item.fieldType == 1}"  v-html="item.value || '-' "></div>
             </template>
             <template v-else>
               <div class="attachment-field" v-if="item.propertyData && item.propertyData.attachmentUrls && item.propertyData.attachmentUrls.length">
@@ -179,6 +179,9 @@ defineExpose({ open })
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    &-text{
+       white-space: pre-wrap; 
     }
   }
   &-content-item-row {

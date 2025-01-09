@@ -50,7 +50,7 @@ import getAuthCode from './getAuthCode.vue'
 import useTableBase from '@/hooks/useTableBase.js';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableIdChangeFlag } = useTableBase();
 const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo()
 const getAuthCodeInstance = ref(null)
 const fromData = ref({
@@ -79,6 +79,12 @@ const handleChangeTableName = () => {
 
 watch(() => [fromData.value, currentTableName.value], () => {
   setFormData(fromData.value)
+}, { deep: true })
+
+watch(() => fieldList.value, () => {
+  console.log('fieldList')
+  currentTableName.value = tableName.value
+  fromData.value.tableId = tableInfo.value.tableId
 }, { deep: true })
 
 onMounted(async() => {

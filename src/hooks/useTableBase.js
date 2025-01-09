@@ -81,7 +81,7 @@ const pageToken = ref(null) // 分页token
 const delFieldFlag = ref(false) // 删除字段\
 const attachmentFieldList = ref([]) // 附件字段
 const insetFieldIndex = ref(0) // 插入的下标
-
+const tableIdChangeFlag = ref(false) // 表格id 变化
 const base = bitable.base;
 const baseUi = bitable.ui;
 const bridge = bitable.bridge;
@@ -119,12 +119,29 @@ const setTableInfo = async(selection, type = '') => {
       getCellList(tableInfo.value.tableId)
     })
     // 监听数据变化
-    bitable.base.onSelectionChange((event) => {
-      nextTick(() => {
-        tableData.value = []
-        getTableSheetList(tableInfo.value.tableId)
-        getCellList(tableInfo.value.tableId)
-      })
+    bitable.base.onSelectionChange(async(event) => {
+      const data = await bridge.getData('yy-form-data')
+      if(data){
+        const dataObj = JSON.parse(data)
+        console.log(event.data.tableId)
+        if(event.data.tableId != dataObj.tableId){
+          // 表格切换
+          tableData.value = []
+          tableInfo.value = event.data
+          tableIdChangeFlag.value = true
+          getTableName(event.data.tableId)
+          getCellList(event.data.tableId)
+          getTableSheetList(event.data.tableId)
+          getTableFieldList(event.data.tableId)
+        } else {
+          nextTick(() => {
+            tableData.value = []
+            getTableSheetList(tableInfo.value.tableId)
+            getCellList(tableInfo.value.tableId)
+          })
+        }
+      }
+  
     })
 }
 // 获取当前多维表格下所有的数据表
@@ -162,6 +179,7 @@ const getTableFieldList = async (tableId) => {
       item.value = item.id
       return item
   })
+  console.log(fieldList.value)
 }
 
 // 获取表格数据
@@ -535,6 +553,7 @@ export default function useTableBase() {
     tableData,
     attachmentFieldList,
     insetFieldIndex,
+    tableIdChangeFlag,
     checkHasAttachment,
     getCellList,
     getCellUrlResult,
