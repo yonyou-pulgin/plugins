@@ -193,14 +193,14 @@ watch(() => selectFields.value.length, (val) => {
   else fieldAllChecked.value = false
 }, { deep: true })
 
-watch(() => tableInfo.value , async(val) => {
-  if(!val) return false
-  const selection = await bitable.base.getSelection();
-  fromData.value.tableId = selection.tableId
-  fromData.value.baseId = selection.baseId
-  dataSheet.value = selection.tableId
-  handleDataSheet(selection.tableId)
-}, { deep: true })
+// watch(() => tableInfo.value , async(val) => {
+//   if(!val) return false
+//   const selection = await bitable.base.getSelection();
+//   fromData.value.tableId = selection.tableId
+//   fromData.value.baseId = selection.baseId
+//   dataSheet.value = selection.tableId
+//   handleDataSheet(selection.tableId)
+// }, { deep: true })
 
 onMounted(async()=>{
   initFlag.value = false
