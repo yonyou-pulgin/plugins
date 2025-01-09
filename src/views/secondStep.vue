@@ -81,11 +81,11 @@ watch(() => [fromData.value, currentTableName.value], () => {
   setFormData(fromData.value)
 }, { deep: true })
 
-watch(() => fieldList.value, () => {
-  console.log('fieldList')
-  currentTableName.value = tableName.value
-  fromData.value.tableId = tableInfo.value.tableId
-}, { deep: true })
+// watch(() => fieldList.value, () => {
+//   console.log('fieldList')
+//   currentTableName.value = tableName.value
+//   fromData.value.tableId = tableInfo.value.tableId
+// }, { deep: true })
 
 onMounted(async() => {
   currentTableName.value = cacheFormData.value.tableName || tableName.value
