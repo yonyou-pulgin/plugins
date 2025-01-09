@@ -428,6 +428,7 @@ const addFormulaField = async (tableId, content, fieldTitle = '签字确认结�
     resolve({
       viewFieldId: fieldId,
     })
+    ++insetFieldIndex.value
     // 公式字段
     const formulaField = await table.getField(fieldId);
     let url = content + `&recordId=`  || 'https://www.baidu.com/'
@@ -444,7 +445,6 @@ const addFormulaLinkField = async (tableId, content, fieldTitle = '自动化签�
     const table = await getWindowTableInstance(tableId);
     const formulaFieldLinkLen = insetFieldIndex.value || 0
     let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
-    ++ insetFieldIndex.value
     const fieldId = await table.addField({type: FieldType.Formula, name,
     description: { // 字段描述
       content: isDesc,
