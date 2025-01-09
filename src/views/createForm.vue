@@ -44,7 +44,7 @@ import useTableBase from '@/hooks/useTableBase.js';
 
 const { toClipboard } = useClipboard()
 const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
-  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex } = useTableBase();
+  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag } = useTableBase();
 const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
 
 const loading = ref(false)
@@ -80,6 +80,13 @@ const selectFieldFlag = computed(() => {
   const fieldSort = formData.value.fieldSort || []
   return fieldSort.filter(item => item.checked).length || 0
 })
+
+watch(() => tableIdChangeFlag.value, () => {
+  current.value = 0 
+  nextTick(() => {
+    tableIdChangeFlag.value = false
+  })
+}, {deep: true })
 
 const handleNext = () => {
   //current.value++
@@ -294,7 +301,14 @@ const handleDownQr = () => {
 onMounted(async () => {
   const result = await getCacheFormData()
   if (result && Object.values(result).length) {
-    current.value = result.currentStep || 0
+    if(tableInfo.value.tableId != result.tableId){
+      const selection = await bitable.base.getSelection();
+      tableInfo.value.tableId = selection.tableId
+      formData.value.tableId = selection.tableId
+      current.value = 0
+    } else {
+      current.value = result.currentStep || 0
+    }
   }
 })
 

@@ -193,23 +193,21 @@ watch(() => selectFields.value.length, (val) => {
   else fieldAllChecked.value = false
 }, { deep: true })
 
-
-watch(() => tableIdChangeFlag.value, async() => {
+watch(() => tableInfo.value.tableId , async(val) => {
   const selection = await bitable.base.getSelection();
   fromData.value.tableId = selection.tableId
   fromData.value.baseId = selection.baseId
   dataSheet.value = selection.tableId
-  handleDataSheet( dataSheet.value)
-  nextTick(() => {
-    tableIdChangeFlag.value = false
-  })
-})
+  handleDataSheet(selection.tableId)
+}, { deep: true })
+
 onMounted(async()=>{
   initFlag.value = false
   const selection = await bitable.base.getSelection();
   fromData.value.tableId = cacheFormData.value.tableId || selection.tableId
   fromData.value.baseId = cacheFormData.value.baseId || selection.baseId
   fromData.value.currentStep = 0
+  console.log(cacheFormData.value)
   setTimeout(() => {
     dataSheet.value = cacheFormData.value.tableId || cacheFormData.value.dataSheet || selection.tableId
     // fix 切换数据表 返回第一步
