@@ -26,7 +26,7 @@
           </a-radio-group>
         </div>
      </div>
-      <div class="form-item" v-if='fromData.confirmType == 1'>
+      <div class="form-item" v-if='fromData.confirmType == 2'>
         <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
         <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
         <template v-else>
