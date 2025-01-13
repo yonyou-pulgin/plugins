@@ -17,6 +17,8 @@ export default {
     }
   },
   created () {
+    console.log(333)
+    console.log(process.env)
     if (process.env.NODE_ENV !== 'development') {
       this.url  = (process.env.VUE_APP_API_URL || 'https://www.yygongzi.com') + `${process.env.VUE_APP_API_prefix}/plugin/index.html#/`
     } else {
