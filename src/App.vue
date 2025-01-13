@@ -20,10 +20,11 @@ export default {
     if (process.env.NODE_ENV !== 'development') {
       this.url  = (process.env.VUE_APP_API_URL || 'https://www.yygongzi.com/') + `${process.env.VUE_APP_API_prefix}plugin/index.html#/`
       console.log(this.url)
+      microApp.start()
     } else {
       this.url = 'https://127.0.0.1:8089'
+      microApp.start()
     }
-    microApp.start()
   }
 }
 </script>
