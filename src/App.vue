@@ -1,26 +1,34 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+     <micro-app class="my-app" url='https://127.0.0.1:8089/#/' name="pligin"></micro-app>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import microApp from '@micro-zoe/micro-app'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    microApp
+  },
+  created () {
+    microApp.start()
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+html, body {
+  height: 100%;
+  width: 100%;
+}
+#app,.my-app {
+  height: 100%;
+  width: 100%;
 }
 </style>

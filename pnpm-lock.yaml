@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@micro-zoe/micro-app':
+        specifier: 1.0.0-rc.18
+        version: 1.0.0-rc.18
       core-js:
         specifier: ^3.8.3
         version: 3.40.0
@@ -628,6 +631,9 @@ packages:
 
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
+
+  '@micro-zoe/micro-app@1.0.0-rc.18':
+    resolution: {integrity: sha512-5fKGWzxhKJaevESIgXYU/cP8yKPb+jfqVH+h30RjVB7r3a0G5atXeYRdlqz91HIRsoBneUcfTX2qd4PyEUZFEA==}
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
@@ -4537,6 +4543,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.0
 
   '@leichtgewicht/ip-codec@2.0.5': {}
+
+  '@micro-zoe/micro-app@1.0.0-rc.18': {}
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     dependencies:
