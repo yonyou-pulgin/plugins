@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-     <micro-app class="my-app" url='https://127.0.0.1:8089/#/' name="pligin"></micro-app>
+    <micro-app class="my-app" :url='url' name="plugin"></micro-app>
   </div>
 </template>
 
@@ -11,7 +11,17 @@ export default {
   components: {
     microApp
   },
+  data () {
+    return {
+      url: 'https://www.yygongzi.com/plugin/index.html#/'
+    }
+  },
   created () {
+    if (process.env.NODE_ENV !== 'development') {
+      this.url  = (process.env.VUE_APP_API_URL || 'https://www.yygongzi.com') + `${process.env.VUE_APP_API_prefix}/plugin/index.html#/`
+    } else {
+      this.url = 'https://127.0.0.1:8089'
+    }
     microApp.start()
   }
 }
