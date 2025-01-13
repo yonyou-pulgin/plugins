@@ -15,13 +15,18 @@ export default {
     }
   },
   created () {
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env.NODE_ENV !== 'development' && !window.location.href.includes('127.0.0.1')) {
       this.url  = (process.env.VUE_APP_API_URL || 'https://www.yygongzi.com/') + `${process.env.VUE_APP_API_prefix}plugin/index.html#/`
-      console.log(this.url)
-      microApp.start()
+      microApp.start({
+        'disable-memory-router': true, // 关闭虚拟路由系统
+        'disable-patch-request': true, // 关闭对子应用请求的拦截
+      })
     } else {
       this.url = 'https://127.0.0.1:8089'
-      microApp.start()
+      microApp.start({
+        'disable-memory-router': true, // 关闭虚拟路由系统
+        'disable-patch-request': true, // 关闭对子应用请求的拦截
+      })
     }
   }
 }
