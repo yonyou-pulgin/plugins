@@ -10,6 +10,23 @@
         <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
+        <span class="form-item-label required">选择确认单类型</span>
+        <div class="yy-from-radio">
+          <a-radio-group v-model:value="fromData.confirmType">
+            <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value: 1}, {label: '仅签字框', value: 2}]" 
+              :key="item.value" :value="item.value" >
+              {{item.label}}
+              <yy-tooltip placement="bottomRight"	 isWhite :autoAdjustOverflow="false">
+                <template #title>
+                  <img v-if="item.value == 1" src="@/assets/img/content-sign.png" width="190" />
+                  <img v-else src="@/assets/img/noContent-sign.png" width="190" />
+                </template>
+              </yy-tooltip>
+            </a-radio>
+          </a-radio-group>
+        </div>
+     </div>
+      <div class="form-item" v-if='fromData.confirmType == 1'>
         <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
         <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
         <template v-else>
@@ -55,6 +72,7 @@ import { bitable } from '@lark-base-open/js-sdk';
 import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
+import yyTooltip from '@/antDesignComponents/yyTooltip/yy-tooltip.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
 import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
@@ -112,6 +130,7 @@ const fromData = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
+  confirmType: 1
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
@@ -332,6 +351,7 @@ const handlePreview = async () => {
     previewLoading.value = false
     if(res.success){
       previewData.value = res.data
+      previewData.value.confirmType = params.confirmType
       fromPreviewInstance.value.open()
     }
   })
@@ -396,7 +416,7 @@ const handleAllClick = (val) => {
       color: #1F2329;
       line-height: 20px;
       text-align: left;
-      font-style: normal;
+      font-weight: 600;
       margin-bottom: 8px;
     }
 
@@ -416,7 +436,7 @@ const handleAllClick = (val) => {
     .required{
       padding-left: 4px;
       &::before{
-        content: '*';
+        // content: '*';
         color: #FD3B3A;
         line-height: 20px;
         padding-right: 2px;
@@ -546,5 +566,18 @@ const handleAllClick = (val) => {
       margin-top: 4px;
     float: left;
     margin-right: 4px;
+}
+
+.plugin-form-radio{
+  span + span{
+    display: flex;
+    align-items: center;
+  }
+  span.ant-radio+*{
+    padding-left: 6px;
+  }
+  svg{
+    margin-left: 4px;
+  }
 }
 </style>

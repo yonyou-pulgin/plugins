@@ -9,7 +9,7 @@
         <span>未确认</span>
       </div>
       <div class="flex-1">
-        <div class="modal-cotent">
+        <div class="modal-cotent" v-if='data.confirmType == 1'>
           <div class="modal-content-item" :class="{'modal-content-item-row': (item.value && item.value.length > hasTitleLen) || item.name.length > hasTitleLen}" v-for="item in previewInfo" :key="item.id">
             <template v-if="item.fieldType != 17">
               <div class="modal-content-item-label">{{ item.name }}</div>

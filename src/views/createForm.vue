@@ -244,9 +244,6 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
   for (const item of configFieldsPromise) {
     let insertIndex = index++
     let fieldArr = []
-    // 延迟1秒，等字段创建完保证顺序执行
-    let time = 1000 * configFields.length
-    await delay(time)
     // 处理多级签字人
     if (signType) {
       fieldArr.push(setUserField(insertIndex, currentTableId, item.signPeopleFieldId, successRecords))

@@ -157,11 +157,24 @@ const getTableFieldList = async (tableId) => {
   const view = await table.getViewById(viewId);
   // 通过视图获取所有字段
   const fieldListData = await view.getFieldMetaList();
-  fieldList.value = fieldListData.map(item => {
-      item.label = item.name
-      item.value = item.id
-      return item
-  })
+  let fieldListArr = []
+
+  for (const item of fieldListData) {
+    // 字段引用
+    if(item.type == FieldType.Lookup){
+      item.tableId = item.property.refTableId
+      const lockupTable = await base.getTableById(item.property.refTableId);
+      const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
+      lockupFieldMeta.label = lockupFieldMeta.name
+      lockupFieldMeta.value = lockupFieldMeta.id
+      fieldListArr.push(lockupFieldMeta)
+    }
+
+    item.label = item.name
+    item.value = item.id
+    fieldListArr.push(item)
+  }
+  fieldList.value  = fieldListArr
 }
 
 // 获取表格数据
