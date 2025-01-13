@@ -8,9 +8,7 @@
 import microApp from '@micro-zoe/micro-app'
 export default {
   name: 'App',
-  components: {
-    microApp
-  },
+  components: {},
   data () {
     return {
       url: 'https://www.yygongzi.com/plugin/index.html#/'
