@@ -13,7 +13,7 @@
         <span class="form-item-label required">选择确认单类型</span>
         <div class="yy-from-radio">
           <a-radio-group v-model:value="fromData.confirmType">
-            <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value: 1}, {label: '仅签字框', value: 2}]" 
+            <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value:  2}, {label: '仅签字框', value: 1}]" 
               :key="item.value" :value="item.value" >
               {{item.label}}
               <yy-tooltip placement="bottomRight"	 isWhite :autoAdjustOverflow="false">
@@ -130,7 +130,7 @@ const fromData = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
-  confirmType: 1
+  confirmType: 2
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
