@@ -179,8 +179,9 @@ const handleDataSheet = async(val) => {
   setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
-    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
+
+    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value)).filter
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
       item.checked = true
       return item
     })
@@ -191,7 +192,7 @@ const handleDataSheet = async(val) => {
 
 watch(() => fieldList.value.length, () => {
   fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
+  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
     item.checked = true
     return item
   })

@@ -167,6 +167,7 @@ const getTableFieldList = async (tableId) => {
       const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
       lockupFieldMeta.label = lockupFieldMeta.name
       lockupFieldMeta.value = lockupFieldMeta.id
+      lockupFieldMeta.isHidden = true
       fieldListArr.push(lockupFieldMeta)
     }
 
