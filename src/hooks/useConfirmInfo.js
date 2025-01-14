@@ -59,7 +59,14 @@ const getConfrimInfo = () => {
 const useConfirmInfo = () => {
   onMounted(async() => {
     const cacheBaseId = await bridge.getData('yy-baseId')
-    const { baseId:currentBaseId } =  await bitable.base.getSelection()
+    const selection =  await bitable.base.getSelection()
+    const currentBaseId = selection.baseId
+    formData.value.selection = selection
+    const cacheData = await getCacheFormData()
+    if(cacheData){
+      formData.value = Object.assign(formData.value, cacheData)
+    }
+    // 切换baseId 清空授权码
     if(cacheBaseId && typeof cacheBaseId == 'string' && cacheBaseId != currentBaseId) {
       await bridge.setData('yy-auth-code', {})
       formData.value.personalBaseToken = ''

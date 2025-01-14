@@ -130,7 +130,7 @@ const fromData = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
-  confirmType: 2
+  confirmType: null
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
@@ -191,16 +191,18 @@ const handleDataSheet = async(val) => {
 }
 
 watch(() => fieldList.value.length, () => {
-  fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-    item.checked = true
-    return item
-  })
-  fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-  fromData.value.fieldSort = fieldsSortList.value
-  if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
-  else fieldAllChecked.value = false
-  setFormData(fromData.value)
+  if(initFlag.value){
+    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = true
+      return item
+    })
+    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
+    fromData.value.fieldSort = fieldsSortList.value
+    if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
+    else fieldAllChecked.value = false
+    setFormData(fromData.value)
+  }
 })
 
 watch(() => fromData.value, (val) => {
@@ -209,8 +211,10 @@ watch(() => fromData.value, (val) => {
 }, { deep: true })
 
 watch(() => selectFields.value.length, (val) => {
-  if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
-  else fieldAllChecked.value = false
+  if(initFlag.value){  
+    if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
+    else fieldAllChecked.value = false
+  }
 }, { deep: true })
 
 // watch(() => tableInfo.value , async(val) => {
@@ -222,13 +226,21 @@ watch(() => selectFields.value.length, (val) => {
 //   handleDataSheet(selection.tableId)
 // }, { deep: true })
 
+const sleep = (time) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, time)
+  })
+}
 onMounted(async()=>{
+  await sleep(200)
   initFlag.value = false
-  const selection = await bitable.base.getSelection();
-  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId
-  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId
+  const selection = cacheFormData.value.selection // 读取cache
+  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId || ''
+  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId || ''
   fromData.value.currentStep = 0
-  console.log(cacheFormData.value)
+  fromData.value.confirmType = cacheFormData.value.confirmType || 2
   setTimeout(() => {
     dataSheet.value = cacheFormData.value.tableId || cacheFormData.value.dataSheet || selection.tableId
     // fix 切换数据表 返回第一步
