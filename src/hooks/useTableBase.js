@@ -160,11 +160,10 @@ const getTableFieldList = async (tableId) => {
   // 通过视图获取所有字段
   const fieldListData = await view.getFieldMetaList();
   let fieldListArr = []
-
   for (const item of fieldListData) {
     // 字段引用
+    item.tableId = tableId // 主表id 
     if(item.type == FieldType.Lookup){
-      item.tableId = tableId // 主表id 
       const lockupTable = await base.getTableById(item.property.refTableId);
       const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
       lockupFieldMeta.label = lockupFieldMeta.name
@@ -178,7 +177,6 @@ const getTableFieldList = async (tableId) => {
         lockupAttachmentField.value.push(field) 
       }
     }
-
     item.label = item.name
     item.value = item.id
     fieldListArr.push(item)
