@@ -162,12 +162,13 @@ const getTableFieldList = async (tableId) => {
   for (const item of fieldListData) {
     // 字段引用
     if(item.type == FieldType.Lookup){
-      item.tableId = item.property.refTableId
+      item.tableId = tableId // 主表id 
       const lockupTable = await base.getTableById(item.property.refTableId);
       const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
       lockupFieldMeta.label = lockupFieldMeta.name
       lockupFieldMeta.value = lockupFieldMeta.id
       lockupFieldMeta.isHidden = true
+      lockupFieldMeta.tableId = item.property.refTableId // 关联表id
       fieldListArr.push(lockupFieldMeta)
     }
 
