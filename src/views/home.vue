@@ -18,7 +18,7 @@
               {{item.label}}
               <yy-tooltip placement="bottomRight"	 isWhite :autoAdjustOverflow="false">
                 <template #title>
-                  <img v-if="item.value == 1" src="@/assets/img/content-sign.png" width="190" />
+                  <img v-if="item.value == 2" src="@/assets/img/content-sign.png" width="190" />
                   <img v-else src="@/assets/img/noContent-sign.png" width="190" />
                 </template>
               </yy-tooltip>
@@ -179,12 +179,13 @@ const handleDataSheet = async(val) => {
   setTableInfo(table, 'change')
   // 获取手机字段 确认单内容
   setTimeout(() => {
-
+    console.log(fieldList.value)
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value)).filter
     fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
       item.checked = true
       return item
     })
+    console.log(fieldsSortList.value)
     fromData.value.fieldSort = fieldsSortList.value
     fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
   }, 100)
