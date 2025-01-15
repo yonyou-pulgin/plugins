@@ -129,7 +129,7 @@ const getParams = () => {
   params.isHiddenZero = +params.isHiddenZero
   params.isVerifyIdentity = +params.isVerifyIdentity
   params.isNewRecordConfirm = +params.isNewRecordConfirm
-  params.fieldSort = params.fieldSort.filter(item => item.checked).map(item => item.id)
+  params.fieldSort = params.fieldSort?.filter(item => item.checked).map(item => item.id)
   if(params.configFields){
     params.configFields = params.configFields?.map((item, index) => {
       item.sort = index + 1
@@ -141,12 +141,32 @@ const getParams = () => {
   if (params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
   return params
 }
+// 校验排序字段是否存在
+const checkSortField = (sortFields = []) => {
+  const allFieldsId = fieldList.value.map(item => item.id)
+  return new Promise((resolve, reject) => {
+    sortFields.findIndex(item => !allFieldsId.includes(item)) > -1 ? resolve(true) : resolve(false)
+  })
+}
 const handleSubmit = async () => {
   loading.value = true
   findFieldIndex(fieldList.value)
+  const params = getParams()
+  // 校验排序字段是否存在
+  const checkResult = await checkSortField(params.fieldSort)
+  if (!params.fieldSort ||!params.fieldSort.length || checkResult) {
+    message.error({
+      content: '排序字段不存在',
+      class: 'yy-message-error',
+    })
+    current.value = 0
+    resetFormData()
+    loading.value = false
+    return false
+  }
   // 核查有没有附件
   const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
-  const params = getParams()
+
   let records = tableData.value
   // 没有授权码
   if (attachmentFieldList && attachmentFieldList.length && !params.isNewRecordConfirm) {
