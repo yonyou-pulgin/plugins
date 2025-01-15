@@ -266,7 +266,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     let insertIndex = index++
     let fieldArr = []
         // 延迟1秒，等字段创建完保证顺序执行
-    let time = 800
+    let time = 1200
     await delay(time)
     // 处理多级签字人
     if (signType) {
