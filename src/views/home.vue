@@ -16,10 +16,10 @@
             <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value:  2}, {label: '仅签字框', value: 1}]" 
               :key="item.value" :value="item.value" >
               {{item.label}}
-              <yy-tooltip :placement="'bottom'"	isWhite :autoAdjustOverflow="false">
+              <yy-tooltip :placement="item.value == 2 ? 'bottom' : 'bottomRight'"	isWhite :autoAdjustOverflow="false">
                 <template #title>
-                  <img v-if="item.value == 2" src="@/assets/img/content-sign.png" width="190" />
-                  <img v-else src="@/assets/img/noContent-sign.png" width="190" />
+                  <img v-if="item.value == 2" src="@/assets/img/content-sign.png" width="220" />
+                  <img v-else src="@/assets/img/noContent-sign.png" width="220" />
                 </template>
               </yy-tooltip>
             </a-radio>
@@ -591,6 +591,14 @@ const handleAllClick = (val) => {
   }
   svg{
     margin-left: 4px;
+    margin-top: 0.5px;
   }
+}
+
+</style>
+
+<style>
+.ant-tooltip-inner{
+  padding: 6px!important; 
 }
 </style>
