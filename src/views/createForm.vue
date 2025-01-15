@@ -154,6 +154,7 @@ const handleSubmit = async () => {
   const params = getParams()
   // 校验排序字段是否存在
   const checkResult = await checkSortField(params.fieldSort)
+  console.log(params)
   if (!params.fieldSort ||!params.fieldSort.length || checkResult) {
     message.error({
       content: '排序字段不存在',
@@ -264,6 +265,9 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
   for (const item of configFieldsPromise) {
     let insertIndex = index++
     let fieldArr = []
+        // 延迟1秒，等字段创建完保证顺序执行
+    let time = 500
+    await delay(time)
     // 处理多级签字人
     if (signType) {
       fieldArr.push(setUserField(insertIndex, currentTableId, item.signPeopleFieldId, successRecords))
