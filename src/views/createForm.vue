@@ -5,7 +5,7 @@
   </div>
   <div class="create-container">
     <div class="create-container-title">
-      <span>对多维表中数据进行签字确认</span>
+      <span>创建手写签字确认单</span>
     </div>
     <yySteps class="plugins-steps" :class="{ 'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck }" :steps="stepList"
       :indes="current" @next="handleNext" @prev="handlePrev">
