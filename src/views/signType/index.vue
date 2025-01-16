@@ -75,16 +75,16 @@ const currentConfigFields = computed(() => {
 })
 // 手机号列
 const phoneFields = computed(() => {
-  return fieldList.value.filter(item => item.type!=17) || []
+  return fieldList.value.filter(item => item.type!=17 && !item.isHidden) || []
 })
 // 选择人员
 const userFields = computed(() => {
-  return fieldList.value.filter(item => [1,3,4,11,1003,1004].includes(item.type)) || []
+  return fieldList.value.filter(item => [1,3,4,11,1003,1004].includes(item.type) && !item.isHidden) || []
 })
 
 // 获取手机号字段
 const getPhoneField = () => {
-  const phoneField = fieldList.value.filter(item => item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1)
+  const phoneField = fieldList.value.filter(item => ( item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1) && !item.isHidden)
   if(phoneField.length){
     singleConfigFields.value[0].mdnFieldId = phoneField[0].id || null
     singleConfigFields.value[0].mdnFieldName = phoneField[0].name || null

@@ -82,6 +82,7 @@ const delFieldFlag = ref(false) // 删除字段\
 const attachmentFieldList = ref([]) // 附件字段
 const insetFieldIndex = ref(0) // 插入的下标
 const tableIdChangeFlag = ref(false) // 表格id 变化
+const lockupAttachmentField = ref([]) // 引用表附件字段
 const base = bitable.base;
 const baseUi = bitable.ui;
 const bridge = bitable.bridge;
@@ -145,6 +146,7 @@ const getTableName = async (tableId) => {
 }
 // 获取表格字段列表
 const getTableFieldList = async (tableId) => {
+  lockupAttachmentField.value = []
   // const baseInfo = await bitable.base.getSelection();
   const table = await getTableInstance(tableId);
   const viewList = await table.getViewMetaList();
@@ -157,11 +159,29 @@ const getTableFieldList = async (tableId) => {
   const view = await table.getViewById(viewId);
   // 通过视图获取所有字段
   const fieldListData = await view.getFieldMetaList();
-  fieldList.value = fieldListData.map(item => {
-      item.label = item.name
-      item.value = item.id
-      return item
-  })
+  let fieldListArr = []
+  for (const item of fieldListData) {
+    // 字段引用
+    item.tableId = tableId // 主表id 
+    if(item.type == FieldType.Lookup){
+      const lockupTable = await base.getTableById(item.property.refTableId);
+      const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
+      lockupFieldMeta.label = lockupFieldMeta.name
+      lockupFieldMeta.value = lockupFieldMeta.id
+      lockupFieldMeta.isHidden = true
+      lockupFieldMeta.tableId = item.property.refTableId // 关联表id
+      fieldListArr.push(lockupFieldMeta)
+      // 判断引用是否有附件字段
+      if(lockupFieldMeta.type == FieldType.Attachment){
+        const field = await table.getFieldById(item.id);
+        lockupAttachmentField.value.push(field) 
+      }
+    }
+    item.label = item.name
+    item.value = item.id
+    fieldListArr.push(item)
+  }
+  fieldList.value  = fieldListArr
 }
 
 // 获取表格数据
@@ -219,7 +239,6 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
   // } else {
   //   return Promise.resolve(recordInfo)
   // }
-
   // 通过cell 获取
   let fieldToken = []
   for (const fieldIKey in recordInfo.fields){
@@ -236,20 +255,18 @@ const getFieldSync = async(tableInstance, fieldId, recordId, recordInfo) => {
   } else {
     return Promise.resolve(recordInfo)
   }
-  
 }
 // 核查附件字段
 const checkHasAttachment = async (tableId) => {
   const tableInstance = await base.getTableById(tableId);
   // 获取 table 下所有的附件字段
   attachmentFieldList.value = await tableInstance.getFieldListByType(FieldType.Attachment);
+  attachmentFieldList.value = [...toRaw(attachmentFieldList.value), ...toRaw(lockupAttachmentField.value)]
   return attachmentFieldList.value
 }
 // 获取附件地址Promise
 const getAttachmentUrlSync = async(tableInstance, data) => {
   const attachmentFieldListData = toRaw(attachmentFieldList.value)
-  //获取 table 下所有的附件字段
-  // const attachmentFieldList = await tableInstance.getFieldListByType(FieldType.Attachment);
   data.map(item => {
     item.PromiseFun = []
     // 拿到行 recordId

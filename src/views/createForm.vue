@@ -5,7 +5,7 @@
   </div>
   <div class="create-container">
     <div class="create-container-title">
-      <span>对多维表中数据进行签字确认</span>
+      <span>创建手写签字确认单</span>
     </div>
     <yySteps class="plugins-steps" :class="{ 'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck }" :steps="stepList"
       :indes="current" @next="handleNext" @prev="handlePrev">
@@ -78,6 +78,8 @@ const isVerifyIdentityCheck = computed(() => {
 // 选中的字段id
 const selectFieldFlag = computed(() => {
   const fieldSort = formData.value.fieldSort || []
+  // 仅签字确认 无需选择字段
+  if(formData.value.confirmType == 1) return true
   return fieldSort.filter(item => item.checked).length || 0
 })
 
@@ -129,7 +131,7 @@ const getParams = () => {
   params.isHiddenZero = +params.isHiddenZero
   params.isVerifyIdentity = +params.isVerifyIdentity
   params.isNewRecordConfirm = +params.isNewRecordConfirm
-  params.fieldSort = params.fieldSort.filter(item => item.checked).map(item => item.id)
+  params.fieldSort = params.fieldSort?.filter(item => item.checked).map(item => item.id)
   if(params.configFields){
     params.configFields = params.configFields?.map((item, index) => {
       item.sort = index + 1
@@ -141,12 +143,33 @@ const getParams = () => {
   if (params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
   return params
 }
+// 校验排序字段是否存在
+const checkSortField = (sortFields = []) => {
+  const allFieldsId = fieldList.value.map(item => item.id)
+  return new Promise((resolve, reject) => {
+    sortFields.findIndex(item => !allFieldsId.includes(item)) > -1 ? resolve(true) : resolve(false)
+  })
+}
 const handleSubmit = async () => {
   loading.value = true
   findFieldIndex(fieldList.value)
+  const params = getParams()
+  // 校验排序字段是否存在
+  const checkResult = await checkSortField(params.fieldSort)
+  console.log(params)
+  if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
+    message.error({
+      content: '排序字段不存在',
+      class: 'yy-message-error',
+    })
+    current.value = 0
+    resetFormData()
+    loading.value = false
+    return false
+  }
   // 核查有没有附件
   const attachmentFieldList = await checkHasAttachment(tableInfo.value.tableId)
-  const params = getParams()
+
   let records = tableData.value
   // 没有授权码
   if (attachmentFieldList && attachmentFieldList.length && !params.isNewRecordConfirm) {
@@ -244,8 +267,8 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
   for (const item of configFieldsPromise) {
     let insertIndex = index++
     let fieldArr = []
-    // 延迟1秒，等字段创建完保证顺序执行
-    let time = 1000 * configFields.length
+        // 延迟1秒，等字段创建完保证顺序执行
+    let time = 2000
     await delay(time)
     // 处理多级签字人
     if (signType) {

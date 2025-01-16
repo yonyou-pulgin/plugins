@@ -4,8 +4,6 @@ import HTTP from '@base/http'
 
 const MockBase = 'https://yapi.yygongzi.cn/mock/79/gw/'
 
-console.log(process.env)
-
 const http = new HTTP({
   baseURL: process.env.VUE_APP_API_URL || 'https://www.yygongzi.com/',
   timeout: 1000 * 60 * 3,

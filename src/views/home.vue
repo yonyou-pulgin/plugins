@@ -6,11 +6,28 @@
     </div>
     <div class="form-content">
       <div class="form-item">
-        <span class="form-item-label required">数据表</span>
+        <span class="form-item-label required">选择数据表</span>
         <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
-        <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
+        <div class="form-item-label required">选择确认单类型
+          <yy-tooltip style="margin-top: 4px;" overlayClassName="type-tooltips" placement="bottom" :arrowPointAtCenter="false"	isWhite :autoAdjustOverflow="true">
+            <template #title>
+              <img src="@/assets/img/tips.png" width="306" />
+            </template>
+          </yy-tooltip>
+        </div>
+        <div class="yy-from-radio">
+          <a-radio-group v-model:value="fromData.confirmType">
+            <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value:  2}, {label: '仅签字框', value: 1}]" 
+              :key="item.value" :value="item.value" >
+              {{item.label}}
+            </a-radio>
+          </a-radio-group>
+        </div>
+     </div>
+      <div class="form-item" v-if='fromData.confirmType == 2'>
+        <span class="form-item-label required">选择签字内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
         <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
@@ -55,6 +72,7 @@ import { bitable } from '@lark-base-open/js-sdk';
 import yyInput from '@/antDesignComponents/yyInput/yy-input.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
+import yyTooltip from '@/antDesignComponents/yyTooltip/yy-tooltip.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
 import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
@@ -112,6 +130,7 @@ const fromData = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
+  confirmType: null
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
@@ -161,26 +180,29 @@ const handleDataSheet = async(val) => {
   // 获取手机字段 确认单内容
   setTimeout(() => {
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
       item.checked = true
       return item
     })
+    console.log(fieldsSortList.value)
     fromData.value.fieldSort = fieldsSortList.value
     fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
   }, 100)
 }
 
 watch(() => fieldList.value.length, () => {
-  fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type)).map(item => {
-    item.checked = true
-    return item
-  })
-  fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-  fromData.value.fieldSort = fieldsSortList.value
-  if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
-  else fieldAllChecked.value = false
-  setFormData(fromData.value)
+  if(initFlag.value){
+    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = true
+      return item
+    })
+    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
+    fromData.value.fieldSort = fieldsSortList.value
+    if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
+    else fieldAllChecked.value = false
+    setFormData(fromData.value)
+  }
 })
 
 watch(() => fromData.value, (val) => {
@@ -189,8 +211,10 @@ watch(() => fromData.value, (val) => {
 }, { deep: true })
 
 watch(() => selectFields.value.length, (val) => {
-  if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
-  else fieldAllChecked.value = false
+  if(initFlag.value){  
+    if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
+    else fieldAllChecked.value = false
+  }
 }, { deep: true })
 
 // watch(() => tableInfo.value , async(val) => {
@@ -202,13 +226,24 @@ watch(() => selectFields.value.length, (val) => {
 //   handleDataSheet(selection.tableId)
 // }, { deep: true })
 
+const sleep = (time) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, time)
+  })
+}
 onMounted(async()=>{
+  await sleep(300)
   initFlag.value = false
-  const selection = await bitable.base.getSelection();
-  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId
-  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId
+  const selection = cacheFormData.value.selection // 读取cache
+  if(!selection && !cacheFormData.value.tableId){
+    selection =  await bitable.base.getSelection()
+  }
+  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId || ''
+  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId || ''
   fromData.value.currentStep = 0
-  console.log(cacheFormData.value)
+  fromData.value.confirmType = cacheFormData.value.confirmType || 2
   setTimeout(() => {
     dataSheet.value = cacheFormData.value.tableId || cacheFormData.value.dataSheet || selection.tableId
     // fix 切换数据表 返回第一步
@@ -332,6 +367,7 @@ const handlePreview = async () => {
     previewLoading.value = false
     if(res.success){
       previewData.value = res.data
+      previewData.value.confirmType = params.confirmType
       fromPreviewInstance.value.open()
     }
   })
@@ -396,9 +432,12 @@ const handleAllClick = (val) => {
       color: #1F2329;
       line-height: 20px;
       text-align: left;
-      font-style: normal;
+      font-weight: 600;
       margin-bottom: 8px;
+      display: inline-flex;
+      align-items: center;
     }
+
 
     &-empty{
       font-size: 12px;
@@ -416,7 +455,7 @@ const handleAllClick = (val) => {
     .required{
       padding-left: 4px;
       &::before{
-        content: '*';
+        // content: '*';
         color: #FD3B3A;
         line-height: 20px;
         padding-right: 2px;
@@ -546,5 +585,33 @@ const handleAllClick = (val) => {
       margin-top: 4px;
     float: left;
     margin-right: 4px;
+}
+
+.plugin-form-radio{
+  span + span{
+    display: flex;
+    align-items: center;
+  }
+  span.ant-radio+*{
+    padding-left: 6px;
+  }
+}
+
+</style>
+
+<style lang="scss">
+.form-item-label  .icon-tooltip{
+  margin-left: 6px!important;
+}
+.ant-tooltip{
+  max-width: initial!important;
+}
+.ant-tooltip-inner{
+  padding: 12px 10px!important; 
+}
+.type-tooltips{
+  .ant-tooltip-arrow{
+    left: 136px!important;
+  }
 }
 </style>
