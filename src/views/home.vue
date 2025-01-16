@@ -234,9 +234,12 @@ const sleep = (time) => {
   })
 }
 onMounted(async()=>{
-  await sleep(200)
+  await sleep(300)
   initFlag.value = false
   const selection = cacheFormData.value.selection // 读取cache
+  if(!selection && !cacheFormData.value.tableId){
+    selection =  await bitable.base.getSelection()
+  }
   fromData.value.tableId = cacheFormData.value.tableId || selection.tableId || ''
   fromData.value.baseId = cacheFormData.value.baseId || selection.baseId || ''
   fromData.value.currentStep = 0
