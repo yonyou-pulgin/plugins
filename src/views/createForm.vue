@@ -78,6 +78,8 @@ const isVerifyIdentityCheck = computed(() => {
 // 选中的字段id
 const selectFieldFlag = computed(() => {
   const fieldSort = formData.value.fieldSort || []
+  // 仅签字确认 无需选择字段
+  if(formData.value.confirmType == 1) return true
   return fieldSort.filter(item => item.checked).length || 0
 })
 
@@ -155,7 +157,7 @@ const handleSubmit = async () => {
   // 校验排序字段是否存在
   const checkResult = await checkSortField(params.fieldSort)
   console.log(params)
-  if (!params.fieldSort ||!params.fieldSort.length || checkResult) {
+  if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
     message.error({
       content: '排序字段不存在',
       class: 'yy-message-error',

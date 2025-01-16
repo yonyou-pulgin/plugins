@@ -10,18 +10,18 @@
         <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
-        <span class="form-item-label required">选择确认单类型</span>
+        <div class="form-item-label required">选择确认单类型
+          <yy-tooltip style="margin-top: 4px;" overlayClassName="type-tooltips" placement="bottom" :arrowPointAtCenter="false"	isWhite :autoAdjustOverflow="true">
+            <template #title>
+              <img src="@/assets/img/tips.png" width="306" />
+            </template>
+          </yy-tooltip>
+        </div>
         <div class="yy-from-radio">
           <a-radio-group v-model:value="fromData.confirmType">
             <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value:  2}, {label: '仅签字框', value: 1}]" 
               :key="item.value" :value="item.value" >
               {{item.label}}
-              <yy-tooltip :placement="item.value == 2 ? 'bottom' : 'bottomRight'"	isWhite :autoAdjustOverflow="false">
-                <template #title>
-                  <img v-if="item.value == 2" src="@/assets/img/content-sign.png" width="220" />
-                  <img v-else src="@/assets/img/noContent-sign.png" width="220" />
-                </template>
-              </yy-tooltip>
             </a-radio>
           </a-radio-group>
         </div>
@@ -431,7 +431,10 @@ const handleAllClick = (val) => {
       text-align: left;
       font-weight: 600;
       margin-bottom: 8px;
+      display: inline-flex;
+      align-items: center;
     }
+
 
     &-empty{
       font-size: 12px;
@@ -589,16 +592,23 @@ const handleAllClick = (val) => {
   span.ant-radio+*{
     padding-left: 6px;
   }
-  svg{
-    margin-left: 4px;
-    margin-top: 0.5px;
-  }
 }
 
 </style>
 
-<style>
+<style lang="scss">
+.form-item-label  .icon-tooltip{
+  margin-left: 6px!important;
+}
+.ant-tooltip{
+  max-width: initial!important;
+}
 .ant-tooltip-inner{
-  padding: 6px!important; 
+  padding: 12px 10px!important; 
+}
+.type-tooltips{
+  .ant-tooltip-arrow{
+    left: 134px!important;
+  }
 }
 </style>
