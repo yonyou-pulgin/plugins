@@ -611,7 +611,7 @@ const handleAllClick = (val) => {
 }
 .type-tooltips{
   .ant-tooltip-arrow{
-    left: 134px!important;
+    left: 136px!important;
   }
 }
 </style>
