@@ -6,7 +6,7 @@
     </div>
     <div class="form-content">
       <div class="form-item">
-        <span class="form-item-label required">数据表</span>
+        <span class="form-item-label required">选择数据表</span>
         <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
       </div>
       <div class="form-item">
@@ -27,7 +27,7 @@
         </div>
      </div>
       <div class="form-item" v-if='fromData.confirmType == 2'>
-        <span class="form-item-label required">确认单内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
+        <span class="form-item-label required">选择签字内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
         <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
