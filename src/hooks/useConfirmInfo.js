@@ -12,9 +12,11 @@ const getCacheFormData = async () => {
   const data = await bridge.getData('yy-form-data')
   if(data && Object.values(data).length && data !=1){
     formData.value = Object.assign(formData.value, JSON.parse(data))
-    return Promise.resolve(formData.value)
+  } else {
+    formData.value = Object.assign(formData.value, {
+      key: +Date.now(),
+    })
   }
-  return Promise.resolve(null)
 }
 // 获取缓存授权码
 const getCacheAuthCode = async () => {
@@ -57,21 +59,9 @@ const getConfrimInfo = () => {
 
 
 const useConfirmInfo = () => {
-  onMounted(async() => {
-    const cacheBaseId = await bridge.getData('yy-baseId')
-    const selection =  await bitable.base.getSelection()
-    const currentBaseId = selection.baseId
-    formData.value.selection = selection
-    const cacheData = await getCacheFormData()
-    if(cacheData){
-      formData.value = Object.assign(formData.value, cacheData)
-    }
-    // 切换baseId 清空授权码
-    if(cacheBaseId && typeof cacheBaseId == 'string' && cacheBaseId != currentBaseId) {
-      await bridge.setData('yy-auth-code', {})
-      formData.value.personalBaseToken = ''
-    }
-  })
+  // 获取缓存的表单数据
+  getCacheFormData()  
+
   return {
     formData,
     confrimInfo,

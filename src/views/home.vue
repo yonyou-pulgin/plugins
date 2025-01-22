@@ -50,7 +50,7 @@
                 <icon-draggripper class="drag-item-icon draggripper" />
                 <a-checkbox v-model:checked="item.checked">
                   <component class="icon-svg-container" :is="fieldTypeMap[item.type] || 'icon-text'" />
-                {{item.name}}</a-checkbox>
+                {{item.name }}</a-checkbox>
               </div>
               <div class="field-desc" v-if="item.type == 17">* 当前仅支持图片，不支持其他文件格式</div>
             </li>
@@ -74,7 +74,7 @@ import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import yyTooltip from '@/antDesignComponents/yyTooltip/yy-tooltip.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
-import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw, shallowRef } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData,
@@ -85,7 +85,7 @@ import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
-const { formData:cacheFormData, setFormData } = useConfirmInfo();
+const { formData, setFormData } = useConfirmInfo();
 import { message } from 'ant-design-vue';
 
 const fieldTypeMap = {
@@ -119,6 +119,7 @@ const fieldTypeMap = {
 }
 const MyComponent = ref('icon-text')
 const router = useRouter()
+const cacheFormData = ref(null)
 const fromData = ref({
   baseId: '',
   tableId: '',
@@ -130,7 +131,7 @@ const fromData = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
-  confirmType: null
+  confirmType: 2
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
@@ -150,6 +151,7 @@ const plainOptions = [
 const fieldsSortListLenth = ref(0)
 const fieldAllChecked = ref(true)
 const previewLoading = ref(false)
+const tableChangeFlag = ref(false) // 监听切换数据表
 
 // 确认单选择文案
 const fieldTitle = computed(() => {
@@ -157,7 +159,7 @@ const fieldTitle = computed(() => {
 })
 
 const selectFields = computed(() => {
-  return fieldsSortList.value.filter(item => item.checked)
+  return fieldsSortList.value.filter(item => item && item.checked)
 })
 
 const handleGroupChange = (val) => {
@@ -165,66 +167,98 @@ const handleGroupChange = (val) => {
   fromData.value.isHiddenEmpty = + hiddenCheckedList.value.includes('isHiddenEmpty')
 }
 
-const handleDataSheet = async(val) => {
+const handleDataSheet = async(val, type ='') => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   fromData.value.fields = currentSheetObj
   fromData.value.dataSheet = val
   fromData.value.tableName = currentSheetObj.name
-    // 获取数据表
+  fromData.value.tableId = val
+  // 获取数据表
   const selection = await bitable.base.getSelection();
   const tableMeta = await bitable.base.getTableMetaById(val);
   const table = await bitable.base.getTable(tableMeta.id);
   table.baseId = selection.baseId // baseId
-  fromData.value.baseId = selection.baseId
+  if(type != 'init') tableChangeFlag.value = true
   setTableInfo(table, 'change')
-  // 获取手机字段 确认单内容
-  setTimeout(() => {
-    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = true
-      return item
-    })
-    console.log(fieldsSortList.value)
-    fromData.value.fieldSort = fieldsSortList.value
-    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-  }, 100)
 }
 
 watch(() => fieldList.value.length, () => {
-  if(initFlag.value){
-    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = true
-      return item
-    })
-    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-    fromData.value.fieldSort = fieldsSortList.value
-    if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
-    else fieldAllChecked.value = false
-    setFormData(fromData.value)
-  }
+  initField()
 })
 
 watch(() => fromData.value, (val) => {
   // 延迟监听
-  if(initFlag.value) setFormData(fromData.value)
+  if(initFlag.value) {
+    setFormData(val)
+  }
 }, { deep: true })
 
 watch(() => selectFields.value.length, (val) => {
-  if(initFlag.value){  
-    if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
+  if(initFlag.value){
+    if(fieldsSortListLenth.value == val && val.length) fieldAllChecked.value = true
     else fieldAllChecked.value = false
   }
 }, { deep: true })
 
-// watch(() => tableInfo.value , async(val) => {
-//   if(!val) return false
-//   const selection = await bitable.base.getSelection();
-//   fromData.value.tableId = selection.tableId
-//   fromData.value.baseId = selection.baseId
-//   dataSheet.value = selection.tableId
-//   handleDataSheet(selection.tableId)
-// }, { deep: true })
+// 监听缓存数据
+watch(() => formData.value, async(val) => {
+  cacheFormData.value = shallowRef(toRaw(val)).value
+  console.log(  cacheFormData.value)
+  if(!val) return false
+  initFlag.value = false
+  fromData.value = Object.assign({}, fromData.value, val)
+  const selection = fromData.value.selection  || tableInfo.value// 读取cache
+
+  dataSheet.value = cacheFormData.value.dataSheet || selection.tableId 
+  if(!fromData.value.baseId) fromData.value.baseId = selection.baseId || ''
+  if(!fromData.value.dataSheet) fromData.value.dataSheet = dataSheet.value
+  // 读取缓存数据
+  if(cacheFormData.value.isHiddenZero){
+    hiddenCheckedList.value.push('isHiddenZero')
+    fromData.value.isHiddenZero =  1
+  }
+  if(cacheFormData.value.isHiddenEmpty){
+    hiddenCheckedList.value.push('isHiddenEmpty')
+    fromData.value.isHiddenEmpty = 1
+  }
+  if(cacheFormData.value.dataSheet && dataSheet.value == selection.tableId){
+    initField()
+  } else {
+    handleDataSheet(dataSheet.value, 'init')
+  }
+  await sleep(200)
+  fromData.value.currentStep = 0
+  initFlag.value = true
+}, {deep: true})
+
+const initField = (type = '') => {
+  let cacheFieldSort = []
+  cacheFieldSort = fromData.value.fieldSort.map(item => {
+    if(typeof item == 'object' && item && item.checked) return item.id
+    return item
+  })
+  fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
+  // 读取缓存
+  if(fromData.value.selection && fromData.value.selection.tableId != fromData.value.dataSheet){
+    fieldsSortList.value = fromData.value.fieldSort
+    fromData.value.fieldSort = fieldsSortList.value
+    return false
+  }
+  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+    item.checked = tableChangeFlag.value ? true : cacheFieldSort.includes(item.id)
+    return item
+  })
+
+  
+  fromData.value.fieldSort = fieldsSortList.value
+  fieldsSortListLenth.value = fieldsSortList.value.length
+  if(fieldsSortListLenth.value == selectFields.value.length && selectFields.value.length) fieldAllChecked.value = true
+  else fieldAllChecked.value = false
+  if(tableChangeFlag.value){
+    setFormData(fromData.value)
+  }
+  tableChangeFlag.value = false
+}
 
 const sleep = (time) => {
   return new Promise((resolve) => {
@@ -234,42 +268,6 @@ const sleep = (time) => {
   })
 }
 onMounted(async()=>{
-  await sleep(300)
-  initFlag.value = false
-  const selection = cacheFormData.value.selection // 读取cache
-  if(!selection && !cacheFormData.value.tableId){
-    selection =  await bitable.base.getSelection()
-  }
-  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId || ''
-  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId || ''
-  fromData.value.currentStep = 0
-  fromData.value.confirmType = cacheFormData.value.confirmType || 2
-  setTimeout(() => {
-    dataSheet.value = cacheFormData.value.tableId || cacheFormData.value.dataSheet || selection.tableId
-    // fix 切换数据表 返回第一步
-    if(cacheFormData.value.tableId && (cacheFormData.value.tableId != cacheFormData.value.dataSheet)){
-      handleDataSheet(dataSheet.value)
-    }
-    fromData.value.dataSheet = dataSheet.value
-    // 读取缓存数据
-    if(cacheFormData.value.dataSheet){
-      fieldsSortList.value = cacheFormData.value.fieldSort || []
-      fieldsSortListLenth.value = fieldsSortList.value.length
-      fromData.value.fieldSort = fieldsSortList.value 
-      if(cacheFormData.value.isHiddenZero){
-        hiddenCheckedList.value.push('isHiddenZero')
-        fromData.value.isHiddenZero =  1
-      }
-      if(cacheFormData.value.isHiddenEmpty){
-        hiddenCheckedList.value.push('isHiddenEmpty')
-        fromData.value.isHiddenEmpty = 1
-      }
-    } else {
-      handleDataSheet(dataSheet.value)
-    }
-    initFlag.value = true
-  }, 200)
-
   bus.on('preview', () => {
     handlePreview()
   })
@@ -303,15 +301,6 @@ const getFieldPromise = async(record) => {
     return Promise.resolve(val.text)
   }
 }
-// const handleChecked = (val) => {
-//   fieldsSortList.value.map(item => {
-//     if(item.id == val.id){
-//       item.checked = !item.checked
-//     }
-//     return item
-//   })
-//   console.log(fieldsSortList.value)
-// }
 
 const getParams = () => {
   const params = Object.assign({}, fromData.value)

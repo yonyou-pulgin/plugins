@@ -83,6 +83,8 @@ const attachmentFieldList = ref([]) // 附件字段
 const insetFieldIndex = ref(0) // 插入的下标
 const tableIdChangeFlag = ref(false) // 表格id 变化
 const lockupAttachmentField = ref([]) // 引用表附件字段
+const confirmId = ref('') // 确认单id
+
 const base = bitable.base;
 const baseUi = bitable.ui;
 const bridge = bitable.bridge;
@@ -121,13 +123,48 @@ const setTableInfo = async(selection, type = '') => {
     })
     // 监听数据变化
     bitable.base.onSelectionChange(async(event) => {
-      nextTick(() => {
-        tableData.value = []
-        getTableSheetList(tableInfo.value.tableId)
-        getCellList(tableInfo.value.tableId)
-      })
+      const activeTable = await base.getActiveTable();
+      console.log(activeTable.id)
+      const currentSelectField = event.data.fieldId
+      const fieldMeta = await activeTable.getFieldMetaById(currentSelectField);
+      console.log(fieldMeta)
+      // 通过链接查找  确认单id
+      if([15, 20].includes(fieldMeta.type)){
+        // 当前表格id 与 选择的表格id 不一致
+        try {
+          const fieldValues = await getFieldValue(activeTable.id, currentSelectField)
+          if(fieldValues) confirmId.value = await getConfirmId(activeTable.id, fieldValues)
+
+               console.log(confirmId.value)
+        } catch (error) {
+          console.log(error)
+        }
+      }
+      tableData.value = []
+      getTableSheetList(tableInfo.value.tableId)
+      getCellList(tableInfo.value.tableId)
     })
 }
+
+// 获取字段数据
+const getFieldValue = async (tableId, fieldId) => {
+  const table = await getTableInstance(tableId);
+  const Field = await table.getFieldById(fieldId);
+  const { fieldValues= [] } = await Field.getFieldValueListByPage(fieldId)
+  return fieldValues
+}
+// 获取确认单id
+const getConfirmId = async (tableId, fieldValues) => {
+  const fieldValuesNew = fieldValues.filter(item => item.value && Array.isArray(item.value)) || []
+  if(fieldValuesNew.length){
+    const fieldCell = fieldValuesNew[0].value[0]
+    const confirmUrl = fieldCell.link || fieldCell.text
+    const urlParams = new URLSearchParams(confirmUrl);
+    return urlParams.get('confirmId')
+  }
+}
+
+
 // 获取当前多维表格下所有的数据表
 const getTableSheetList = async (tableId) => {
   const tableList = await base.getTableMetaList();
@@ -551,6 +588,7 @@ export default function useTableBase() {
     attachmentFieldList,
     insetFieldIndex,
     tableIdChangeFlag,
+    confirmId,
     checkHasAttachment,
     getCellList,
     getCellUrlResult,
