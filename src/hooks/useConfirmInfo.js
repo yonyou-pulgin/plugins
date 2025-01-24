@@ -9,9 +9,17 @@ const formData = ref({
 
 // 获取缓存的表单数据
 const getCacheFormData = async () => {
+  console.log('获取换成')
   const data = await bridge.getData('yy-form-data')
   if(data && Object.values(data).length && data !=1){
-    formData.value = Object.assign(formData.value, JSON.parse(data))
+    let dataObj = JSON.parse(data)
+    dataObj.key = +Date.now()
+    if(!dataObj.dataSheet && !dataObj.tableId){
+      dataObj.fieldSort = []
+      dataObj.fieldsList = []
+    }
+    formData.value = Object.assign({}, formData.value, dataObj)
+    console.log('formData.value', formData.value)
   } else {
     formData.value = Object.assign(formData.value, {
       key: +Date.now(),
@@ -32,9 +40,9 @@ const confrimInfo = ref({})
 
 const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
-    formData.value = Object.assign(formData.value, val)
+    let data = Object.assign({}, formData.value, val)
     // 清空授权码
-    await bridge.setData('yy-form-data', JSON.stringify(formData.value))
+    await bridge.setData('yy-form-data', JSON.stringify(data))
     // 记录当前的baseId的授权码
     if(formData.value.isNewRecordConfirm && formData.value.personalBaseToken){
       await bridge.setData('yy-auth-code', formData.value.personalBaseToken)
@@ -43,6 +51,7 @@ const setFormData = async (val) => {
   }
 }
 const getFormData = () => {
+  this.getCacheFormData()
   return formData.value
 }
 const resetFormData = async() => {
@@ -60,7 +69,7 @@ const getConfrimInfo = () => {
 
 const useConfirmInfo = () => {
   // 获取缓存的表单数据
-  getCacheFormData()  
+  // getCacheFormData()  
 
   return {
     formData,

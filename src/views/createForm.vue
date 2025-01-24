@@ -55,8 +55,8 @@ import { detail } from './data';
 
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
-  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId } = useTableBase();
-const { formData, setFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
+  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId, } = useTableBase();
+const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData } = useConfirmInfo()
 
 const loading = ref(false)
 const current = ref(0)
@@ -354,7 +354,8 @@ watch(() => formData.value.currentStep, (val) => {
   if(!initFlag.value) current.value = val || 0
   initFlag.value = true
 }, { deep: true})
-
+// 获取数据
+getCacheFormData()
 onMounted(async () => {
   // 比较当前表格和缓存表格是否一致  切换baseId 清空授权码
   const cacheBaseId = await bitable.bridge.getData('yy-baseId')
