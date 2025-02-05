@@ -19,3 +19,6 @@ export const confirmUpdate = (params) =>  http.post('feishuapi/bitable/confirm/u
 
 // 确认单详情
 export const confirmInfo = (params) =>  http.post('feishuapi/bitable/confirm/update', params)
+
+// 确认单详情
+export const getConfirmInfo = (params) =>  http.get(`feishuapi/bitable/confirm/config/${params.confirmId}`, params)

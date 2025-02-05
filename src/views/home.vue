@@ -7,7 +7,7 @@
     <div class="form-content">
       <div class="form-item">
         <span class="form-item-label required">选择数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
+        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
       </div>
       <div class="form-item">
         <div class="form-item-label required">选择确认单类型
@@ -179,7 +179,8 @@ const handleDataSheet = async(val, type ='') => {
   const tableMeta = await bitable.base.getTableMetaById(val);
   const table = await bitable.base.getTable(tableMeta.id);
   table.baseId = selection.baseId // baseId
-  tableChangeFlag.value = true
+
+  if(!type) tableChangeFlag.value = true
   setTableInfo(table, 'change')
 
   formStep1Data.value.fields = currentSheetObj
@@ -198,14 +199,13 @@ watch(() => fieldList.value, () => {
 watch(() => formStep1Data.value, (val) => {
   // 延迟监听
   if(initFlag.value) {
-    console.log(val)
     setFormData(val)
   }
 }, { deep: true })
 
-watch(() => selectFields.value.length, (val) => {
+watch(() => selectFields.value, (val) => {
   if(initFlag.value){
-    if(fieldsSortListLenth.value == val && val.length) fieldAllChecked.value = true
+    if(fieldsSortListLenth.value == val.length) fieldAllChecked.value = true
     else fieldAllChecked.value = false
   }
 }, { deep: true })
@@ -213,12 +213,13 @@ watch(() => selectFields.value.length, (val) => {
 // 监听缓存数据
 watch(() => formData.value, async(val) => {
   if(!val || initFlag.value) return false
-
-  const selection = formData.value.selection  || tableInfo.value// 读取cache
-  console.log(selection)
-
+  const selection = formData.value.selection || tableInfo.value// 读取cache
+  console.log(val.confirmId)
+  if(val.confirmId){
+    formData.value.dataSheet = formData.value.tableId
+  }
   dataSheet.value = formData.value.dataSheet || selection.tableId 
-  
+  formStep1Data.value.dataSheet = dataSheet.value 
   if(formData.value.isHiddenZero){
     hiddenCheckedList.value.push('isHiddenZero')
     formStep1Data.value.isHiddenZero =  1
@@ -229,54 +230,51 @@ watch(() => formData.value, async(val) => {
   }
   if(!tableChangeFlag.value) initField()
   initFlag.value = true
-  // if(!confirmId.value) return false
-  // cacheFormData.value = shallowRef(toRaw(val)).value
-  // console.log(cacheFormData.value)
-  // if(!val) return false
-
-  // if(!formStep1Data.value.baseId) formStep1Data.value.baseId = selection.baseId || ''
-  // if(!formStep1Data.value.dataSheet) formStep1Data.value.dataSheet = dataSheet.value
-  // // 读取缓存数据
-
-  // if(cacheFormData.value.dataSheet){
-  //   // 判断是否当前数据表
-  //   let isGetChange = false
-
-  //   console.log(selection.tableId != formStep1Data.value.dataSheet)
-  //   if(selection.tableId != formStep1Data.value.dataSheet || tableChangeFlag.value){
-  //     isGetChange = true
-  //   }
-       
-  //   initField(isGetChange)
-  // } else {
-  // 
-  //   fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-  //   fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-  //     item.checked = true
-  //     return item
-  //   })
-  // }
-
 }, {deep: true})
 
 // 初始化列表字段
 const initField = () => {
   let cacheFieldSort = []
   const selection = formData.value.selection || tableInfo.value
-  let isCache = formData.value.dataSheet && formData.value.dataSheet != selection.tableId && !tableChangeFlag.value
-  if(isCache){
+  let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
+  // 字段赋值
+  if(tableChangeFlag.value) {
+    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+  } else {
     fieldsSortList.value = JSON.parse(JSON.stringify(formData.value.fieldSort))
+  }
+
+  if(isCache){
     cacheFieldSort = formData.value.fieldSort.map(item => {
       if(typeof item == 'object' && item && item.checked) return item.id
       return item
     })
   } else {
-    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+    // 手动切换数据表，不取缓存
+    if(!tableChangeFlag.value){
+      cacheFieldSort = formData.value.fieldSort.map(item => {
+        if(typeof item == 'object' && item && item.checked) return item.id
+        return item
+      })
+      isCache = true
+    }
+    if(formData.value.dataSheet != selection.tableId){
+      handleDataSheet(formData.value.dataSheet, true)
+    }
   }
-  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-    item.checked = isCache ? cacheFieldSort.includes(item.id) : true
-    return item
-  })
+  try {
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = isCache ? cacheFieldSort.includes(item.id) : true
+      return item
+    })
+  } catch (error) {
+    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = true
+      return item
+    })
+  }
+
   formStep1Data.value.fieldSort = fieldsSortList.value
   tableIdChangeFlag.value = false
 }

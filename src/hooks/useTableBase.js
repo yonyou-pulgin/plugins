@@ -124,18 +124,14 @@ const setTableInfo = async(selection, type = '') => {
     // 监听数据变化
     bitable.base.onSelectionChange(async(event) => {
       const activeTable = await base.getActiveTable();
-      console.log(activeTable.id)
       const currentSelectField = event.data.fieldId
       const fieldMeta = await activeTable.getFieldMetaById(currentSelectField);
-      console.log(fieldMeta)
       // 通过链接查找  确认单id
       if([15, 20].includes(fieldMeta.type)){
         // 当前表格id 与 选择的表格id 不一致
         try {
           const fieldValues = await getFieldValue(activeTable.id, currentSelectField)
           if(fieldValues) confirmId.value = await getConfirmId(activeTable.id, fieldValues)
-
-               console.log(confirmId.value)
         } catch (error) {
           console.log(error)
         }

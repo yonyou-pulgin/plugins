@@ -40,7 +40,7 @@ import { bitable } from '@lark-base-open/js-sdk';
 import { ref, reactive, onMounted, watch, computed, nextTick, onBeforeUnmount} from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
-import { createConfirm, confirmUpdate } from '@/api/api.js';
+import { createConfirm, confirmUpdate, getConfirmInfo } from '@/api/api.js';
 import yySteps from '@/antDesignComponents/business-components/yySteps/yy-steps.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue';
 import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
@@ -104,17 +104,33 @@ const sleep = (ms) => {
 }
 
 watch(() => confirmId.value, (val) => {
-  if(val) getConfirmInfo()
+
+  if(val) getConfirmDetails()
 })
 
 // 获取确认单详情
-const getConfirmInfo = async () => {
+const getConfirmDetails = async () => {
   resetFormData() 
-  await sleep(300)
-  let info =  detail
-  info.key = +new Date()
-  current.value = 0
-  setFormData(info)
+  getConfirmInfo({
+    confirmId: confirmId.value
+  }).then(res => {
+    if(res.code == 0){
+      const { data } = res
+      data.key = +new Date()
+      current.value = 0
+      data.confirmId = confirmId.value
+      data.isHiddenEmpty = !!data.isHiddenEmpty
+      data.isHiddenZero = !!data.isHiddenZero
+      data.isVerifyIdentity = !!data.isVerifyIdentity
+      data.isNewRecordConfirm = !!data.isNewRecordConfirm
+      setFormData(data)
+    } else {
+      message.error({
+        content: res.message,
+        class: 'yy-message-error',
+      })
+    }
+  })
 }
 
 const handleNext = () => {

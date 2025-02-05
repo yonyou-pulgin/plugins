@@ -41,6 +41,8 @@ const confrimInfo = ref({})
 const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
     let data = Object.assign({}, formData.value, val)
+    console.log(data)
+    formData.value = data
     // 清空授权码
     await bridge.setData('yy-form-data', JSON.stringify(data))
     // 记录当前的baseId的授权码
