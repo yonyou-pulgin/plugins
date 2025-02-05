@@ -241,17 +241,21 @@ const initField = () => {
   if(tableChangeFlag.value) {
     fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
   } else {
-    fieldsSortList.value = JSON.parse(JSON.stringify(formData.value.fieldSort))
+    let fieldArr = allFields.value
+    if(formData.value.fieldSort && formData.value.fieldSort.length){
+      fieldArr = formData.value.fieldSort
+    }
+    fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
   }
 
-  if(isCache){
+  if(isCache && formData.value.fieldSort && formData.value.fieldSort.length){
     cacheFieldSort = formData.value.fieldSort.map(item => {
       if(typeof item == 'object' && item && item.checked) return item.id
       return item
     })
   } else {
     // 手动切换数据表，不取缓存
-    if(!tableChangeFlag.value){
+    if(!tableChangeFlag.value && formData.value.fieldSort && formData.value.fieldSort.length){
       cacheFieldSort = formData.value.fieldSort.map(item => {
         if(typeof item == 'object' && item && item.checked) return item.id
         return item
