@@ -24,16 +24,26 @@
       </template>
     </yySteps>
   </div>
+  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" :isHeaderBottomBorder="false" :footer="null" >
+    <div class="edit-content">
+      <div class="edit-content-desc">
+        历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！
+      </div>
+      <yy-button type="primary">修改编辑</yy-button>
+      <yy-button>批量下载当前确认单</yy-button>
+    </div>
+  </yy-modal>
 </template>
 
 <script setup>
 import { bitable } from '@lark-base-open/js-sdk';
-import { ref, reactive, onMounted, watch, computed, nextTick } from 'vue'
+import { ref, reactive, onMounted, watch, computed, nextTick, onBeforeUnmount} from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
-import { createConfirm, confirmUpdate } from '@/api/api.js';
+import { createConfirm, confirmUpdate, getConfirmInfo } from '@/api/api.js';
 import yySteps from '@/antDesignComponents/business-components/yySteps/yy-steps.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue';
+import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
 import firstStep from './home.vue'
 import secondStep from './secondStep.vue'
 import threeStep from './fromSuccess.vue'
@@ -41,17 +51,20 @@ import bus from '@/eventBus/bus.js'
 import yyInput from '@/antDesignComponents/yyInput/yy-input.vue';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
+import { detail } from './data';
 
 const { toClipboard } = useClipboard()
-const { tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
-  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag } = useTableBase();
-const { formData, setFormData, getCacheFormData, resetFormData, setConfrimInfo } = useConfirmInfo()
+const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
+  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId, } = useTableBase();
+const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData } = useConfirmInfo()
 
 const loading = ref(false)
 const current = ref(0)
 const confirmResult = ref(null)
 const errorMessages = ref('')
 const insertFieldParams = ref({}) // 插入字段需要参数
+const initFlag = ref(false)
+const editVisible = ref(false)
 const stepList = ref([
   { key: 0, title: '选择数据', content: firstStep },
   { key: 1, title: '设置确认单', content: secondStep },
@@ -80,15 +93,45 @@ const selectFieldFlag = computed(() => {
   const fieldSort = formData.value.fieldSort || []
   // 仅签字确认 无需选择字段
   if(formData.value.confirmType == 1) return true
-  return fieldSort.filter(item => item.checked).length || 0
+  return fieldSort.filter(item => (item.id ? item.checked : item)).length || 0
 })
 
-// watch(() => tableIdChangeFlag.value, () => {
-//   current.value = 0 
-//   nextTick(() => {
-//     tableIdChangeFlag.value = false
-//   })
-// }, {deep: true })
+
+const sleep = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+watch(() => confirmId.value, (val) => {
+
+  if(val) getConfirmDetails()
+})
+
+// 获取确认单详情
+const getConfirmDetails = async () => {
+  resetFormData() 
+  getConfirmInfo({
+    confirmId: confirmId.value
+  }).then(res => {
+    if(res.code == 0){
+      const { data } = res
+      data.key = +new Date()
+      current.value = 0
+      data.confirmId = confirmId.value
+      data.isHiddenEmpty = !!data.isHiddenEmpty
+      data.isHiddenZero = !!data.isHiddenZero
+      data.isVerifyIdentity = !!data.isVerifyIdentity
+      data.isNewRecordConfirm = !!data.isNewRecordConfirm
+      setFormData(data)
+    } else {
+      message.error({
+        content: res.message,
+        class: 'yy-message-error',
+      })
+    }
+  })
+}
 
 const handleNext = () => {
   //current.value++
@@ -105,6 +148,9 @@ const handleNext = () => {
 
 const handlePrev = () => {
   --current.value
+  nextTick(() => {
+    formData.value.key = +Date.now()
+  })
 }
 
 const handlePreview = () => {
@@ -323,11 +369,23 @@ const handleDownQr = () => {
   })
 }
 
+watch(() => formData.value.currentStep, (val) => {
+  if(!initFlag.value) current.value = val || 0
+  initFlag.value = true
+}, { deep: true})
+// 获取数据
+getCacheFormData()
 onMounted(async () => {
-  const result = await getCacheFormData()
-  if (result && Object.values(result).length) {
-    current.value = result.currentStep || 0
+  // 比较当前表格和缓存表格是否一致  切换baseId 清空授权码
+  const cacheBaseId = await bitable.bridge.getData('yy-baseId')
+  const currentBaseId = tableInfo.value.baseId
+  if(cacheBaseId && typeof cacheBaseId == 'string' && cacheBaseId != currentBaseId) {
+    await bitable.bridge.setData('yy-auth-code', {})
+    formData.value.personalBaseToken = ''
   }
+})
+onBeforeUnmount(() => {
+  setTableInfo.value = null
 })
 
 </script>
@@ -384,6 +442,34 @@ onMounted(async () => {
 
   .steps-action {
     display: none;
+  }
+}
+// 编辑弹窗
+.edit-confirm-modal{
+  .ant-modal-header{
+    padding: 0 20px!important;
+  }
+}
+.edit-content{
+  padding: 0 4px 24px;
+  display: flex;
+  flex-direction: column;
+  &-desc{
+    font-weight: 400;
+    font-size: 14px;
+    color: #333333;
+    line-height: 22px;
+    margin-bottom: 17px;
+  }
+  .yy-button{
+    width: 100%;
+    &:first-child{
+      margin-bottom: 16px;
+    }
+  }
+  .yy-button + .yy-button{
+    margin-left: 0;
+    margin-top: 12px;
   }
 }
 </style>

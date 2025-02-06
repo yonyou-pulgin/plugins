@@ -7,7 +7,7 @@
     <div class="form-content">
       <div class="form-item">
         <span class="form-item-label required">选择数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet"></yy-select>
+        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
       </div>
       <div class="form-item">
         <div class="form-item-label required">选择确认单类型
@@ -18,7 +18,7 @@
           </yy-tooltip>
         </div>
         <div class="yy-from-radio">
-          <a-radio-group v-model:value="fromData.confirmType">
+          <a-radio-group v-model:value="formStep1Data.confirmType">
             <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value:  2}, {label: '仅签字框', value: 1}]" 
               :key="item.value" :value="item.value" >
               {{item.label}}
@@ -26,9 +26,9 @@
           </a-radio-group>
         </div>
      </div>
-      <div class="form-item" v-if='fromData.confirmType == 2'>
-        <span class="form-item-label required">选择签字内容 <span v-if="fromData.dataSheet">{{fieldTitle}}</span></span>
-        <div class="form-item-empty" v-if="!fromData.dataSheet">选择数据表后自动识别</div>
+      <div class="form-item" v-if='formStep1Data.confirmType == 2'>
+        <span class="form-item-label required">选择签字内容 <span v-if="dataSheet">{{fieldTitle}}</span></span>
+        <div class="form-item-empty" v-if="!dataSheet">选择数据表后自动识别</div>
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
           <div class="drag-all">
@@ -50,7 +50,7 @@
                 <icon-draggripper class="drag-item-icon draggripper" />
                 <a-checkbox v-model:checked="item.checked">
                   <component class="icon-svg-container" :is="fieldTypeMap[item.type] || 'icon-text'" />
-                {{item.name}}</a-checkbox>
+                {{item.name }}</a-checkbox>
               </div>
               <div class="field-desc" v-if="item.type == 17">* 当前仅支持图片，不支持其他文件格式</div>
             </li>
@@ -74,18 +74,18 @@ import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import yyTooltip from '@/antDesignComponents/yyTooltip/yy-tooltip.vue'
 import iconDraggripper from '@/antDesignComponents/icon/icon-draggripper.vue'
-import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMount, reactive, toRaw, shallowRef } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData,
- getCellUrlResult, checkHasAttachment, tableIdChangeFlag, 
+ getCellUrlResult, checkHasAttachment, tableIdChangeFlag, confirmId,
 addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
-const { formData:cacheFormData, setFormData } = useConfirmInfo();
+const { formData, setFormData } = useConfirmInfo();
 import { message } from 'ant-design-vue';
 
 const fieldTypeMap = {
@@ -119,7 +119,9 @@ const fieldTypeMap = {
 }
 const MyComponent = ref('icon-text')
 const router = useRouter()
-const fromData = ref({
+const cacheFormData = ref(null)
+// 第一步数据
+const formStep1Data = ref({
   baseId: '',
   tableId: '',
   confirmName: '',
@@ -130,7 +132,7 @@ const fromData = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
-  confirmType: null
+  confirmType: 2
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
@@ -147,84 +149,139 @@ const plainOptions = [
   { label: '隐藏为空数据项', value: 'isHiddenEmpty' },
   { label: '隐藏为0数据项', value: 'isHiddenZero' },
 ];
-const fieldsSortListLenth = ref(0)
 const fieldAllChecked = ref(true)
 const previewLoading = ref(false)
+const tableChangeFlag = ref(false) // 监听切换数据表
 
+const allFields = computed(() => {
+  return fieldList.value || []
+})
 // 确认单选择文案
 const fieldTitle = computed(() => {
   return `(共计：${fieldsSortListLenth.value}个，已选中：${selectFields.value.length}个)`
 })
 
 const selectFields = computed(() => {
-  return fieldsSortList.value.filter(item => item.checked)
+  return fieldsSortList.value.filter(item => item && item.checked)
 })
-
+const fieldsSortListLenth = computed(() => {
+  return fieldsSortList.value.length
+})
 const handleGroupChange = (val) => {
-  fromData.value.isHiddenZero = + hiddenCheckedList.value.includes('isHiddenZero')
-  fromData.value.isHiddenEmpty = + hiddenCheckedList.value.includes('isHiddenEmpty')
+  formStep1Data.value.isHiddenZero = + hiddenCheckedList.value.includes('isHiddenZero')
+  formStep1Data.value.isHiddenEmpty = + hiddenCheckedList.value.includes('isHiddenEmpty')
 }
 
-const handleDataSheet = async(val) => {
+const handleDataSheet = async(val, type ='') => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
-  fromData.value.fields = currentSheetObj
-  fromData.value.dataSheet = val
-  fromData.value.tableName = currentSheetObj.name
-    // 获取数据表
+  // 获取数据表
   const selection = await bitable.base.getSelection();
   const tableMeta = await bitable.base.getTableMetaById(val);
   const table = await bitable.base.getTable(tableMeta.id);
   table.baseId = selection.baseId // baseId
-  fromData.value.baseId = selection.baseId
+
+  if(!type) tableChangeFlag.value = true
   setTableInfo(table, 'change')
-  // 获取手机字段 确认单内容
-  setTimeout(() => {
-    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = true
-      return item
-    })
-    console.log(fieldsSortList.value)
-    fromData.value.fieldSort = fieldsSortList.value
-    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-  }, 100)
+
+  formStep1Data.value.fields = currentSheetObj
+  formStep1Data.value.dataSheet = val
+  formStep1Data.value.tableName = currentSheetObj.name
+  formStep1Data.value.tableId = val
 }
 
-watch(() => fieldList.value.length, () => {
+watch(() => fieldList.value, () => {
   if(initFlag.value){
-    fieldsSortList.value = JSON.parse(JSON.stringify(fieldList.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = true
-      return item
-    })
-    fieldsSortListLenth.value = fieldsSortList.value.filter(item => item.checked).length || 0
-    fromData.value.fieldSort = fieldsSortList.value
-    if(fieldsSortListLenth.value == selectFields.value.length) fieldAllChecked.value = true
-    else fieldAllChecked.value = false
-    setFormData(fromData.value)
+    console.log('initField')
+    initField()
   }
 })
 
-watch(() => fromData.value, (val) => {
+watch(() => formStep1Data.value, (val) => {
   // 延迟监听
-  if(initFlag.value) setFormData(fromData.value)
+  if(initFlag.value) {
+    setFormData(val)
+  }
 }, { deep: true })
 
-watch(() => selectFields.value.length, (val) => {
-  if(initFlag.value){  
-    if(fieldsSortListLenth.value == val) fieldAllChecked.value = true
+watch(() => selectFields.value, (val) => {
+  if(initFlag.value){
+    if(fieldsSortListLenth.value == val.length) fieldAllChecked.value = true
     else fieldAllChecked.value = false
   }
 }, { deep: true })
 
-// watch(() => tableInfo.value , async(val) => {
-//   if(!val) return false
-//   const selection = await bitable.base.getSelection();
-//   fromData.value.tableId = selection.tableId
-//   fromData.value.baseId = selection.baseId
-//   dataSheet.value = selection.tableId
-//   handleDataSheet(selection.tableId)
-// }, { deep: true })
+// 监听缓存数据
+watch(() => formData.value, async(val) => {
+  if(!val || initFlag.value) return false
+  const selection = formData.value.selection || tableInfo.value// 读取cache
+  console.log(val.confirmId)
+  if(val.confirmId){
+    formData.value.dataSheet = formData.value.tableId
+  }
+  dataSheet.value = formData.value.dataSheet || selection.tableId 
+  formStep1Data.value.dataSheet = dataSheet.value 
+  if(formData.value.isHiddenZero){
+    hiddenCheckedList.value.push('isHiddenZero')
+    formStep1Data.value.isHiddenZero =  1
+  }
+  if(formData.value.isHiddenEmpty){
+    hiddenCheckedList.value.push('isHiddenEmpty')
+    formStep1Data.value.isHiddenEmpty = 1
+  }
+  if(!tableChangeFlag.value) initField()
+  initFlag.value = true
+}, {deep: true})
+
+// 初始化列表字段
+const initField = () => {
+  let cacheFieldSort = []
+  const selection = formData.value.selection || tableInfo.value
+  let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
+  // 字段赋值
+  if(tableChangeFlag.value) {
+    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+  } else {
+    let fieldArr = allFields.value
+    if(formData.value.fieldSort && formData.value.fieldSort.length){
+      fieldArr = formData.value.fieldSort
+    }
+    fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
+  }
+
+  if(isCache && formData.value.fieldSort && formData.value.fieldSort.length){
+    cacheFieldSort = formData.value.fieldSort.map(item => {
+      if(typeof item == 'object' && item && item.checked) return item.id
+      return item
+    })
+  } else {
+    // 手动切换数据表，不取缓存
+    if(!tableChangeFlag.value && formData.value.fieldSort && formData.value.fieldSort.length){
+      cacheFieldSort = formData.value.fieldSort.map(item => {
+        if(typeof item == 'object' && item && item.checked) return item.id
+        return item
+      })
+      isCache = true
+    }
+    if(formData.value.dataSheet != selection.tableId){
+      handleDataSheet(formData.value.dataSheet, true)
+    }
+  }
+  try {
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = isCache ? cacheFieldSort.includes(item.id) : true
+      return item
+    })
+  } catch (error) {
+    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = true
+      return item
+    })
+  }
+
+  formStep1Data.value.fieldSort = fieldsSortList.value
+  tableIdChangeFlag.value = false
+}
 
 const sleep = (time) => {
   return new Promise((resolve) => {
@@ -234,42 +291,6 @@ const sleep = (time) => {
   })
 }
 onMounted(async()=>{
-  await sleep(300)
-  initFlag.value = false
-  const selection = cacheFormData.value.selection // 读取cache
-  if(!selection && !cacheFormData.value.tableId){
-    selection =  await bitable.base.getSelection()
-  }
-  fromData.value.tableId = cacheFormData.value.tableId || selection.tableId || ''
-  fromData.value.baseId = cacheFormData.value.baseId || selection.baseId || ''
-  fromData.value.currentStep = 0
-  fromData.value.confirmType = cacheFormData.value.confirmType || 2
-  setTimeout(() => {
-    dataSheet.value = cacheFormData.value.tableId || cacheFormData.value.dataSheet || selection.tableId
-    // fix 切换数据表 返回第一步
-    if(cacheFormData.value.tableId && (cacheFormData.value.tableId != cacheFormData.value.dataSheet)){
-      handleDataSheet(dataSheet.value)
-    }
-    fromData.value.dataSheet = dataSheet.value
-    // 读取缓存数据
-    if(cacheFormData.value.dataSheet){
-      fieldsSortList.value = cacheFormData.value.fieldSort || []
-      fieldsSortListLenth.value = fieldsSortList.value.length
-      fromData.value.fieldSort = fieldsSortList.value 
-      if(cacheFormData.value.isHiddenZero){
-        hiddenCheckedList.value.push('isHiddenZero')
-        fromData.value.isHiddenZero =  1
-      }
-      if(cacheFormData.value.isHiddenEmpty){
-        hiddenCheckedList.value.push('isHiddenEmpty')
-        fromData.value.isHiddenEmpty = 1
-      }
-    } else {
-      handleDataSheet(dataSheet.value)
-    }
-    initFlag.value = true
-  }, 200)
-
   bus.on('preview', () => {
     handlePreview()
   })
@@ -290,7 +311,7 @@ const checkPhoneField = async() => {
   return phoneFieldVal
 }
 const getFieldPromise = async(record) => {
-  const cell = await record.getCellByField(fromData.value.mdnFieldId);
+  const cell = await record.getCellByField(formStep1Data.value.mdnFieldId);
   const val = await cell.getValue();
   // 只处理文本 非文本类型 return 空
   if(val && Array.isArray(val) && val[0].text){
@@ -303,18 +324,9 @@ const getFieldPromise = async(record) => {
     return Promise.resolve(val.text)
   }
 }
-// const handleChecked = (val) => {
-//   fieldsSortList.value.map(item => {
-//     if(item.id == val.id){
-//       item.checked = !item.checked
-//     }
-//     return item
-//   })
-//   console.log(fieldsSortList.value)
-// }
 
 const getParams = () => {
-  const params = Object.assign({}, fromData.value)
+  const params = Object.assign({}, formStep1Data.value)
   params.baseId = tableInfo.value.baseId
   params.tableId = tableInfo.value.tableId
   params.tenantId = tableInfo.value.tenantId || tenantKey.value
@@ -334,7 +346,7 @@ const getParams = () => {
 }
 const onStart = () => {}
 const onEnd = (val) => {
-  fromData.value.fieldSort = fieldsSortList.value
+  formStep1Data.value.fieldSort = fieldsSortList.value
 }
 
 const isPhoneNumber = (phoneNumber) => {

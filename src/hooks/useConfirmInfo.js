@@ -9,12 +9,22 @@ const formData = ref({
 
 // 获取缓存的表单数据
 const getCacheFormData = async () => {
+  console.log('获取换成')
   const data = await bridge.getData('yy-form-data')
   if(data && Object.values(data).length && data !=1){
-    formData.value = Object.assign(formData.value, JSON.parse(data))
-    return Promise.resolve(formData.value)
+    let dataObj = JSON.parse(data)
+    dataObj.key = +Date.now()
+    if(!dataObj.dataSheet && !dataObj.tableId){
+      dataObj.fieldSort = []
+      dataObj.fieldsList = []
+    }
+    formData.value = Object.assign({}, formData.value, dataObj)
+    console.log('formData.value', formData.value)
+  } else {
+    formData.value = Object.assign(formData.value, {
+      key: +Date.now(),
+    })
   }
-  return Promise.resolve(null)
 }
 // 获取缓存授权码
 const getCacheAuthCode = async () => {
@@ -30,9 +40,11 @@ const confrimInfo = ref({})
 
 const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
-    formData.value = Object.assign(formData.value, val)
+    let data = Object.assign({}, formData.value, val)
+    console.log(data)
+    formData.value = data
     // 清空授权码
-    await bridge.setData('yy-form-data', JSON.stringify(formData.value))
+    await bridge.setData('yy-form-data', JSON.stringify(data))
     // 记录当前的baseId的授权码
     if(formData.value.isNewRecordConfirm && formData.value.personalBaseToken){
       await bridge.setData('yy-auth-code', formData.value.personalBaseToken)
@@ -41,6 +53,7 @@ const setFormData = async (val) => {
   }
 }
 const getFormData = () => {
+  this.getCacheFormData()
   return formData.value
 }
 const resetFormData = async() => {
@@ -57,21 +70,9 @@ const getConfrimInfo = () => {
 
 
 const useConfirmInfo = () => {
-  onMounted(async() => {
-    const cacheBaseId = await bridge.getData('yy-baseId')
-    const selection =  await bitable.base.getSelection()
-    const currentBaseId = selection.baseId
-    formData.value.selection = selection
-    const cacheData = await getCacheFormData()
-    if(cacheData){
-      formData.value = Object.assign(formData.value, cacheData)
-    }
-    // 切换baseId 清空授权码
-    if(cacheBaseId && typeof cacheBaseId == 'string' && cacheBaseId != currentBaseId) {
-      await bridge.setData('yy-auth-code', {})
-      formData.value.personalBaseToken = ''
-    }
-  })
+  // 获取缓存的表单数据
+  // getCacheFormData()  
+
   return {
     formData,
     confrimInfo,
