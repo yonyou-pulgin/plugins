@@ -148,6 +148,9 @@ const handleNext = () => {
 
 const handlePrev = () => {
   --current.value
+  nextTick(() => {
+    formData.value.key = +Date.now()
+  })
 }
 
 const handlePreview = () => {
