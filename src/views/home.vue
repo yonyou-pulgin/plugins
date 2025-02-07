@@ -194,7 +194,7 @@ watch(() => fieldList.value, () => {
     console.log('initField')
     initField()
   }
-})
+}, { deep: true })
 
 watch(() => formStep1Data.value, (val) => {
   // 延迟监听
