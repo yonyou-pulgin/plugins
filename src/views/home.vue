@@ -124,7 +124,6 @@ const cacheFormData = ref(null)
 const formStep1Data = ref({
   baseId: '',
   tableId: '',
-  confirmName: '',
   tableName: '',
   dataSheet: null,
   fields: null,
@@ -169,7 +168,7 @@ const fieldsSortListLenth = computed(() => {
 })
 
 const isEditVisible = computed(() => {
-  return formData.value.confirmId ? true : false
+  return confirmId.value && formData.value.confirmId ? true : false
 })
 const handleGroupChange = (val) => {
   formStep1Data.value.isHiddenZero = + hiddenCheckedList.value.includes('isHiddenZero')
@@ -186,10 +185,9 @@ const handleDataSheet = async(val, type ='') => {
 
   if(!type) tableChangeFlag.value = true
   setTableInfo(table, 'change')
-
   formStep1Data.value.fields = currentSheetObj
   formStep1Data.value.dataSheet = val
-  formStep1Data.value.tableName = currentSheetObj.name
+  if(!confirmId.value) formStep1Data.value.tableName = currentSheetObj.name
   formStep1Data.value.tableId = val
 }
 // 监听编辑
@@ -197,6 +195,7 @@ watch(() => editDataFlag.value, (val) => {
   if(val){
     dataSheet.value = formData.value.tableId
     // 编辑时，重新初始化字段
+    formStep1Data.value.confirmType = formData.value.confirmType
     handleDataSheet(dataSheet.value, true)
     sleep(100)
     fieldsSortList.value = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
@@ -210,7 +209,6 @@ watch(() => editDataFlag.value, (val) => {
 
 watch(() => fieldList.value, () => {
   if(initFlag.value){
-    console.log('initField')
     initField()
   }
 })
@@ -232,22 +230,24 @@ watch(() => selectFields.value, (val) => {
 // 监听缓存数据
 watch(() => formData.value, async(val) => {
   if(!val || initFlag.value) return false
-  const selection = formData.value.selection || tableInfo.value// 读取cache
+  const selection = val.selection || tableInfo.value// 读取cache
   if(val.confirmId){
-    formData.value.dataSheet = formData.value.tableId
+    formData.value.dataSheet = val.tableId
   }
-  dataSheet.value = formData.value.dataSheet || selection.tableId 
-  formStep1Data.value.dataSheet = dataSheet.value 
-  if(formData.value.isHiddenZero){
+  dataSheet.value = val.dataSheet || selection.tableId
+  formStep1Data.value.dataSheet = dataSheet.value
+  if(val.isHiddenZero){
     hiddenCheckedList.value.push('isHiddenZero')
     formStep1Data.value.isHiddenZero =  1
   }
-  if(formData.value.isHiddenEmpty){
+  if(val.isHiddenEmpty){
     hiddenCheckedList.value.push('isHiddenEmpty')
     formStep1Data.value.isHiddenEmpty = 1
   }
+  formStep1Data.value.confirmType = val.confirmType
   if(!tableChangeFlag.value) initField()
   initFlag.value = true
+
 }, {deep: true})
 
 // 初始化列表字段

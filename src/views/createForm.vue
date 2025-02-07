@@ -24,7 +24,7 @@
       </template>
     </yySteps>
   </div>
-  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" :isHeaderBottomBorder="false" :footer="null" >
+  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" :isHeaderBottomBorder="false" :footer="null">
     <div class="edit-content">
       <div class="edit-content-desc">
         历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！
@@ -55,7 +55,7 @@ import { detail } from './data';
 
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
-  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId, } = useTableBase();
+  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId:currentConfirm, } = useTableBase();
 const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData, editDataFlag } = useConfirmInfo()
 
 const loading = ref(false)
@@ -65,6 +65,7 @@ const errorMessages = ref('')
 const insertFieldParams = ref({}) // 插入字段需要参数
 const initFlag = ref(false)
 const editVisible = ref(false)
+const editDetail = ref(null) // 编辑详情对比
 const stepList = ref([
   { key: 0, title: '选择数据', content: firstStep },
   { key: 1, title: '设置确认单', content: secondStep },
@@ -103,7 +104,7 @@ const sleep = (ms) => {
   })
 }
 
-watch(() => confirmId.value, (val) => {
+watch(() => currentConfirm.value, (val) => {
   if(val){
     editVisible.value = true
     // getConfirmDetails()
@@ -121,17 +122,20 @@ const getConfirmDetails = async () => {
   resetFormData()
   current.value = 0
   getConfirmInfo({
-    confirmId: confirmId.value
+    confirmId: currentConfirm.value
   }).then(res => {
+    editVisible.value = false
     if(res.code == 0){
       const { data } = res
       data.key = +new Date()
-
-      data.confirmId = confirmId.value
+      data.confirmId = currentConfirm.value
       data.isHiddenEmpty = !!data.isHiddenEmpty
       data.isHiddenZero = !!data.isHiddenZero
       data.isVerifyIdentity = !!data.isVerifyIdentity
       data.isNewRecordConfirm = !!data.isNewRecordConfirm
+      data.tableName = data.confirmName
+      editDetail.value = Object.assign({}, data)
+
       editDataFlag.value = true
       setFormData(data)
     } else {
@@ -212,7 +216,6 @@ const handleSubmit = async () => {
   const params = getParams()
   // 校验排序字段是否存在
   const checkResult = await checkSortField(params.fieldSort)
-  console.log(params)
   if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
     message.error({
       content: '排序字段不存在',
@@ -241,8 +244,18 @@ const handleSubmit = async () => {
     loading.value = false
     return false
   }
+  // 编辑
   if(params.confirmId){
     params.operate = 'update'
+    if(!params.personalBaseToken && editDetail.value.personalBaseToken){
+      message.error({
+        content: '请输入授权码',
+        class: 'yy-message-error',
+      })
+      loading.value = false
+      return false
+    }
+
   }
   confirmOperate(params).then(async (res) => {
     if (res.success) {
@@ -265,10 +278,22 @@ const handleSubmit = async () => {
         formulaUrl: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=1&confirmId=${confirmId}`,
         formulaUrlEmp: `${confirmResult.value.domain}/salary/wx/h5/index.html#/pluginsConfirm?userType=0&confirmId=${confirmId}`,
       }
+
       res.data.isVerifyIdentity = !!params.isVerifyIdentity
       res.data.isNewRecordConfirm = !!params.isNewRecordConfirm
       confirmResult.value.isVerifyIdentity = !!params.isVerifyIdentity
+      // 设置确认单信息
       setConfrimInfo(res.data)
+      // 编辑逻辑
+      if(params.confirmId){
+        currentConfirm.value =  null
+        delete formData.value.confirmId
+        loading.value = false
+
+        handleEditUpdateField(params, insertFieldParams.value)
+        // 更新字段
+        return false
+      }
       // fix loading 时间
       if(params.signType){
         setTimeout(() => {
@@ -287,6 +312,35 @@ const handleSubmit = async () => {
   })
 }
 
+//  修改更新字段
+const handleEditUpdateField = async (params, insertFieldParams) => {
+  let { configFields = [] } = params
+  let PromiseFn = []
+  if(params.formulaLink && params.formulaLink != editDetail.value.formulaLink){
+    const {formulaLink,  currentTableId, successRecords, qrUrl, formulaUrl, userViewUrl,
+    formulaUrlEmp, confirmId, createUserViewUrl }= insertFieldParams
+    let index = 0
+    for (let item of configFields) {
+      let insertIndex = index++
+      let routeFieldId = item.signPeopleFieldId || item.mdnFieldId || ''
+      let sort = item.sort || 1
+      PromiseFn.push(addFormulaLinkField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`))
+    }
+    const results = await Promise.all(PromiseFn);
+    configFields = configFields.map((item, index) => {
+      return {
+        ...item,
+        ...results[index]
+      }
+    })
+    await confirmUpdate({
+      confirmId: params.confirmId, 
+      configFields
+    });
+  }
+}
+
+// 创建更新字段
 const handleUpdateField = async (params, confirmId) => {
 
   let fieldArr = await insertField(params.isNewRecordConfirm, params.isVerifyIdentity, params.configFields, params.signType)
@@ -387,6 +441,7 @@ watch(() => formData.value.currentStep, (val) => {
   initFlag.value = true
 }, { deep: true})
 // 获取数据
+
 getCacheFormData()
 onMounted(async () => {
   // 比较当前表格和缓存表格是否一致  切换baseId 清空授权码
@@ -398,6 +453,7 @@ onMounted(async () => {
   }
 })
 onBeforeUnmount(() => {
+  delete formData.value.confirmId
   confirmId.value = null
   setTableInfo.value = null
 })

@@ -50,7 +50,7 @@ import getAuthCode from './getAuthCode.vue'
 import useTableBase from '@/hooks/useTableBase.js';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableIdChangeFlag } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableIdChangeFlag, confirmId } = useTableBase();
 const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo()
 const getAuthCodeInstance = ref(null)
 const fromData = ref({
@@ -69,7 +69,7 @@ const phoneFields = computed(() => {
   return fieldList.value.filter(item => item.type!=17) || []
 })
 const isEditVisible = computed(() => {
-  return cacheFormData.value.confirmId ? true : false
+  return confirmId.value && cacheFormData.value.confirmId ? true : false
 })
 
 const handleEditToast = () => {
@@ -90,11 +90,12 @@ watch(() => [fromData.value, currentTableName.value], () => {
   setFormData(fromData.value)
 }, { deep: true })
 
-// watch(() => fieldList.value, () => {
-//   console.log('fieldList')
-//   currentTableName.value = tableName.value
-//   fromData.value.tableId = tableInfo.value.tableId
-// }, { deep: true })
+watch(() => cacheFormData.value, (val) => {
+  console.log('cacheFormData.value', cacheFormData.value);
+  if(isEditVisible.value){
+    currentTableName.value = val.confirmName 
+  }
+})
 
 onMounted(async() => {
   currentTableName.value = cacheFormData.value.tableName || tableName.value

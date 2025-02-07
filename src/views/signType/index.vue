@@ -6,7 +6,7 @@
       <span :class="{'is-active': signType == 1}" @click="handleSignType(1)">多人签字</span>
     </div>
 
-    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5}">
+    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5, 'sign-type-switch-disabled':isEditVisible}">
       <a-checkbox class="checkbox-plugin" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity">是否验证身份</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
