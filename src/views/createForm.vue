@@ -139,8 +139,9 @@ const getConfirmDetails = async () => {
       editDataFlag.value = true
       setFormData(data)
     } else {
+      currentConfirm.value = null
       message.error({
-        content: res.message,
+        content: res.msg,
         class: 'yy-message-error',
       })
     }
