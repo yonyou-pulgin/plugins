@@ -1,7 +1,7 @@
 <template>
   <div class="sign-type">
     <div class="sign-type-head">选择签字模式</div>
-    <div class="sign-type-switch">
+    <div class="sign-type-switch" :class="{'sign-type-switch-disabled':isEditVisible}">
       <span :class="{'is-active': signType == 0}" @click="handleSignType(0)">单人签字</span>
       <span :class="{'is-active': signType == 1}" @click="handleSignType(1)">多人签字</span>
     </div>
@@ -13,7 +13,7 @@
         <div class="sign-type-item-label" v-if="signType">
           <img src="@/assets/img/noSign.png" alt="">
           <span class="sign-type-item-title">选择签字人</span>
-          <span v-if="configFields.length > 2" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
+          <span v-if="configFields.length > 2 && !isEditVisible" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
         </div>
         <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择签字人" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
         <div class="sign-type-item-label" v-if="isVerifyIdentity">
@@ -22,7 +22,7 @@
         <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
-      <div v-if="signType && configFields.length < 5" class="sign-type-add" @click="handleSignTypeAdd">
+      <div v-if="signType && configFields.length < 5 && !isEditVisible" class="sign-type-add" @click="handleSignTypeAdd">
         增加签字人
       </div>
     </div>
@@ -73,6 +73,9 @@ const currentConfigFields = computed(() => {
   if(signType.value) return configFields.value
   return singleConfigFields.value
 })
+const isEditVisible = computed(() => {
+  return cacheFormData.value.confirmId ? true : false
+})
 // 手机号列
 const phoneFields = computed(() => {
   return fieldList.value.filter(item => item.type!=17 && !item.isHidden) || []
@@ -81,7 +84,12 @@ const phoneFields = computed(() => {
 const userFields = computed(() => {
   return fieldList.value.filter(item => [1,3,4,11,1003,1004].includes(item.type) && !item.isHidden) || []
 })
-
+const handleEditToast = () => {
+  message.error({
+    content: '不可修改！如需修改，请重新创建确认单',
+    class: 'yy-message-error',
+  })
+}
 // 获取手机号字段
 const getPhoneField = () => {
   const phoneField = fieldList.value.filter(item => ( item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1) && !item.isHidden)
@@ -308,6 +316,12 @@ const handleChange = (index, val, key) => {
       }
     }
   }
+}
+
+.sign-type-switch-disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 </style>
 <style lang="scss">

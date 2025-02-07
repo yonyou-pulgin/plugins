@@ -29,8 +29,8 @@
       <div class="edit-content-desc">
         历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！
       </div>
-      <yy-button type="primary">修改编辑</yy-button>
-      <yy-button>批量下载当前确认单</yy-button>
+      <yy-button type="primary" @click="getConfirmDetails">修改编辑</yy-button>
+      <yy-button @click="handleClick">批量下载当前确认单</yy-button>
     </div>
   </yy-modal>
 </template>
@@ -40,7 +40,7 @@ import { bitable } from '@lark-base-open/js-sdk';
 import { ref, reactive, onMounted, watch, computed, nextTick, onBeforeUnmount} from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
-import { createConfirm, confirmUpdate, getConfirmInfo } from '@/api/api.js';
+import { createConfirm, confirmUpdate, getConfirmInfo, confirmOperate } from '@/api/api.js';
 import yySteps from '@/antDesignComponents/business-components/yySteps/yy-steps.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue';
 import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
@@ -56,7 +56,7 @@ import { detail } from './data';
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
   addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId, } = useTableBase();
-const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData } = useConfirmInfo()
+const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData, editDataFlag } = useConfirmInfo()
 
 const loading = ref(false)
 const current = ref(0)
@@ -104,25 +104,35 @@ const sleep = (ms) => {
 }
 
 watch(() => confirmId.value, (val) => {
-
-  if(val) getConfirmDetails()
+  if(val){
+    editVisible.value = true
+    // getConfirmDetails()
+  }
 })
 
+const handleClick = () => {
+  message.info({
+    content: '程序员小哥正在开发中，请耐心等待',
+    class: 'yy-message-error',
+  })
+}
 // 获取确认单详情
 const getConfirmDetails = async () => {
-  resetFormData() 
+  resetFormData()
+  current.value = 0
   getConfirmInfo({
     confirmId: confirmId.value
   }).then(res => {
     if(res.code == 0){
       const { data } = res
       data.key = +new Date()
-      current.value = 0
+
       data.confirmId = confirmId.value
       data.isHiddenEmpty = !!data.isHiddenEmpty
       data.isHiddenZero = !!data.isHiddenZero
       data.isVerifyIdentity = !!data.isVerifyIdentity
       data.isNewRecordConfirm = !!data.isNewRecordConfirm
+      editDataFlag.value = true
       setFormData(data)
     } else {
       message.error({
@@ -231,7 +241,10 @@ const handleSubmit = async () => {
     loading.value = false
     return false
   }
-  createConfirm(params).then(async (res) => {
+  if(params.confirmId){
+    params.operate = 'update'
+  }
+  confirmOperate(params).then(async (res) => {
     if (res.success) {
       // 创建成功 清楚缓存数据
       resetFormData()
@@ -385,6 +398,7 @@ onMounted(async () => {
   }
 })
 onBeforeUnmount(() => {
+  confirmId.value = null
   setTableInfo.value = null
 })
 

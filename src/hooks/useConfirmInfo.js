@@ -9,7 +9,6 @@ const formData = ref({
 
 // 获取缓存的表单数据
 const getCacheFormData = async () => {
-  console.log('获取换成')
   const data = await bridge.getData('yy-form-data')
   if(data && Object.values(data).length && data !=1){
     let dataObj = JSON.parse(data)
@@ -19,7 +18,6 @@ const getCacheFormData = async () => {
       dataObj.fieldsList = []
     }
     formData.value = Object.assign({}, formData.value, dataObj)
-    console.log('formData.value', formData.value)
   } else {
     formData.value = Object.assign(formData.value, {
       key: +Date.now(),
@@ -37,11 +35,11 @@ const getCacheAuthCode = async () => {
 }
 // 确认信息
 const confrimInfo = ref({})
+const editDataFlag = ref(false)
 
 const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
     let data = Object.assign({}, formData.value, val)
-    console.log(data)
     formData.value = data
     // 清空授权码
     await bridge.setData('yy-form-data', JSON.stringify(data))
@@ -76,6 +74,7 @@ const useConfirmInfo = () => {
   return {
     formData,
     confrimInfo,
+    editDataFlag,
     setConfrimInfo,
     getConfrimInfo,
     setFormData,

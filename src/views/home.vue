@@ -5,9 +5,9 @@
       <span>预览数据生成中，请稍等</span>
     </div>
     <div class="form-content">
-      <div class="form-item">
+      <div class="form-item" @click="handleEditToast">
         <span class="form-item-label required">选择数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
+        <yy-select :disabled="isEditVisible" class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
       </div>
       <div class="form-item">
         <div class="form-item-label required">选择确认单类型
@@ -79,13 +79,13 @@ import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData,
  getCellUrlResult, checkHasAttachment, tableIdChangeFlag, confirmId,
-addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
+addField, addImgField, addFormulaField, addSingleSelectField } = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
-const { formData, setFormData } = useConfirmInfo();
+const { formData, setFormData, editDataFlag } = useConfirmInfo();
 import { message } from 'ant-design-vue';
 
 const fieldTypeMap = {
@@ -167,6 +167,10 @@ const selectFields = computed(() => {
 const fieldsSortListLenth = computed(() => {
   return fieldsSortList.value.length
 })
+
+const isEditVisible = computed(() => {
+  return formData.value.confirmId ? true : false
+})
 const handleGroupChange = (val) => {
   formStep1Data.value.isHiddenZero = + hiddenCheckedList.value.includes('isHiddenZero')
   formStep1Data.value.isHiddenEmpty = + hiddenCheckedList.value.includes('isHiddenEmpty')
@@ -188,6 +192,21 @@ const handleDataSheet = async(val, type ='') => {
   formStep1Data.value.tableName = currentSheetObj.name
   formStep1Data.value.tableId = val
 }
+// 监听编辑
+watch(() => editDataFlag.value, (val) => {
+  if(val){
+    dataSheet.value = formData.value.tableId
+    // 编辑时，重新初始化字段
+    handleDataSheet(dataSheet.value, true)
+    sleep(100)
+    fieldsSortList.value = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = formData.value.fieldSort.includes(item.id)
+      return item
+    })
+    formStep1Data.value.fieldSort = fieldsSortList.value
+    editDataFlag.value = false
+  }
+})
 
 watch(() => fieldList.value, () => {
   if(initFlag.value){
@@ -214,7 +233,6 @@ watch(() => selectFields.value, (val) => {
 watch(() => formData.value, async(val) => {
   if(!val || initFlag.value) return false
   const selection = formData.value.selection || tableInfo.value// 读取cache
-  console.log(val.confirmId)
   if(val.confirmId){
     formData.value.dataSheet = formData.value.tableId
   }
@@ -399,6 +417,14 @@ const handleAllClick = (val) => {
   }
 }
 
+const handleEditToast = () => {
+  if(isEditVisible.value){  
+    message.error({
+      content: '不可修改！如需修改，请重新创建确认单',
+      class: 'yy-message-error',
+    })
+  }
+}
 </script>
 
 <style lang="scss" scoped>
