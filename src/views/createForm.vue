@@ -112,7 +112,11 @@ watch(() => currentConfirm.value, (val) => {
 })
 
 const handleClick = () => {
-  window.yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
+  try {
+    yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
+  } catch (error) {
+    console.log(error);
+  }
   message.info({
     content: '程序员小哥正在开发中，请耐心等待',
     class: 'yy-message-error',
@@ -318,7 +322,7 @@ const handleSubmit = async () => {
 const handleEditUpdateField = async (params, insertFieldParams) => {
   let { configFields = [] } = params
   const { formulaLink, currentTableId, successRecords, formulaUrlEmp } = insertFieldParams
-  if(params.formulaLink && params.formulaLink != editDetail.value.formulaLink){
+  if(params.formulaLink && params.formulaLink != editDetail.value.formulaLink && configFields[0] && !configFields[0].autoLinkFieldId){
     const promiseFns = configFields.map((item, index) => {
       const insertIndex = index++;
       const routeFieldId = item.signPeopleFieldId || item.mdnFieldId || '';

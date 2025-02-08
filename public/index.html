@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>签字确认</title>
+  <!-- 设置gio -->
+  <script type='text/javascript'>
+    ! function (e, t, n, g, i) {
+      e[i] = e[i] || function () {
+        (e[i].q = e[i].q || []).push(arguments)
+      }, n = t.createElement("script"), tag = t.getElementsByTagName("script")[0], n.async = 1, n.src = ('https:' ==
+        document.location.protocol ? 'https://' : 'http://') + g, tag.parentNode.insertBefore(n, tag)
+    }(window, document, "script", "assets.giocdn.com/2.1/gio.js", "gio");
+    var yygio = function () {
+      var args = Array.prototype.slice.call(arguments);
+      var type = args[0];
+      if (type == 'track') {
+        var opts = args[2] || {};
+        var source = window.sessionStorage.getItem("source");
+        args[2] = Object.assign({}, opts, { source: source });
+      }
+      // console.log('gio',args)
+      gio.apply(gio, args)
+    }
+    gio('init', '86ed1f1a541272b5', {})
+    gio('config', {
+      hashtag: true,
+    })
+    gio('send');
+  </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
