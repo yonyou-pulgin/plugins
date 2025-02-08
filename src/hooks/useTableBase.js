@@ -482,7 +482,7 @@ const addFormulaLinkField = async (insertIndex, tableId, content, fieldTitle = '
       disableSyncToFormDesc: false
     }});
     resolve({
-      formulaFieldFieldId: fieldId,
+      autoLinkFieldId: fieldId,
     })
     // 公式字段
     const formulaField = await table.getField(fieldId);

@@ -244,7 +244,7 @@ watch(() => formData.value, async(val) => {
     hiddenCheckedList.value.push('isHiddenEmpty')
     formStep1Data.value.isHiddenEmpty = 1
   }
-  formStep1Data.value.confirmType = val.confirmType
+  formStep1Data.value.confirmType = val.confirmType || 2
   if(!tableChangeFlag.value) initField()
   initFlag.value = true
 

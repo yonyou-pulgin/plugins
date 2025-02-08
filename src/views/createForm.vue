@@ -112,6 +112,7 @@ watch(() => currentConfirm.value, (val) => {
 })
 
 const handleClick = () => {
+  window.yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
   message.info({
     content: '程序员小哥正在开发中，请耐心等待',
     class: 'yy-message-error',
@@ -316,18 +317,15 @@ const handleSubmit = async () => {
 //  修改更新字段
 const handleEditUpdateField = async (params, insertFieldParams) => {
   let { configFields = [] } = params
-  let PromiseFn = []
+  const { formulaLink, currentTableId, successRecords, formulaUrlEmp } = insertFieldParams
   if(params.formulaLink && params.formulaLink != editDetail.value.formulaLink){
-    const {formulaLink,  currentTableId, successRecords, qrUrl, formulaUrl, userViewUrl,
-    formulaUrlEmp, confirmId, createUserViewUrl }= insertFieldParams
-    let index = 0
-    for (let item of configFields) {
-      let insertIndex = index++
-      let routeFieldId = item.signPeopleFieldId || item.mdnFieldId || ''
-      let sort = item.sort || 1
-      PromiseFn.push(addFormulaLinkField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`))
-    }
-    const results = await Promise.all(PromiseFn);
+    const promiseFns = configFields.map((item, index) => {
+      const insertIndex = index++;
+      const routeFieldId = item.signPeopleFieldId || item.mdnFieldId || '';
+      const sort = item.sort || 1;
+      return addFormulaLinkField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`);
+    });
+    const results = await Promise.all(promiseFns);
     configFields = configFields.map((item, index) => {
       return {
         ...item,
