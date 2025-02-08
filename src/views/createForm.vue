@@ -140,7 +140,13 @@ const getConfirmDetails = async () => {
       data.isNewRecordConfirm = !!data.isNewRecordConfirm
       data.tableName = data.confirmName
       editDetail.value = Object.assign({}, data)
-
+      // 兼容字段是否存在
+      console.log(data.hasOwnProperty('autoLinkSelected'));
+      if(!data.hasOwnProperty('autoLinkSelected')){
+        data.formulaLink = true
+      } else {
+        data.formulaLink = data.autoLinkSelected
+      }
       editDataFlag.value = true
       setFormData(data)
     } else {
@@ -220,6 +226,7 @@ const handleSubmit = async () => {
   loading.value = true
   findFieldIndex(fieldList.value)
   const params = getParams()
+  params.autoLinkSelected = params.formulaLink
   // 校验排序字段是否存在
   const checkResult = await checkSortField(params.fieldSort)
   if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
@@ -251,7 +258,7 @@ const handleSubmit = async () => {
     return false
   }
   // 编辑
-  if(params.confirmId){
+  if(params.confirmId && currentConfirm.value){
     params.operate = 'update'
     if(!params.personalBaseToken && editDetail.value.personalBaseToken){
       message.error({
@@ -291,7 +298,7 @@ const handleSubmit = async () => {
       // 设置确认单信息
       setConfrimInfo(res.data)
       // 编辑逻辑
-      if(params.confirmId){
+      if(params.confirmId && currentConfirm.value){
         currentConfirm.value =  null
         delete formData.value.confirmId
         loading.value = false

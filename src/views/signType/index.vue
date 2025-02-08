@@ -36,7 +36,7 @@ import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import useTableBase from '@/hooks/useTableBase.js';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, confirmId } = useTableBase();
 const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo()
 
 const initFlag = ref(false)
@@ -74,7 +74,7 @@ const currentConfigFields = computed(() => {
   return singleConfigFields.value
 })
 const isEditVisible = computed(() => {
-  return cacheFormData.value.confirmId ? true : false
+  return confirmId.value && cacheFormData.value.confirmId ? true : false
 })
 // 手机号列
 const phoneFields = computed(() => {

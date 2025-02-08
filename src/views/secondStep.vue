@@ -86,14 +86,14 @@ const handleChangeTableName = () => {
   fromData.value.tableName = currentTableName.value
 }
 
-watch(() => [fromData.value, currentTableName.value], () => {
+watch(() => [fromData.value], () => {
   setFormData(fromData.value)
 }, { deep: true })
 
 watch(() => cacheFormData.value, (val) => {
-  console.log('cacheFormData.value', cacheFormData.value);
-  if(isEditVisible.value){
-    currentTableName.value = val.confirmName 
+  if(isEditVisible.value && confirmId.value){
+    currentTableName.value = val.tableName || val.confirmName 
+    fromData.value.formulaLink = val.formulaLink
   }
 })
 
