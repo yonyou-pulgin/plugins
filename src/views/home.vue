@@ -206,10 +206,16 @@ watch(() => editDataFlag.value, (val) => {
     if(formData.value.isHiddenZero){
       hiddenCheckedList.value.push('isHiddenZero')
       formStep1Data.value.isHiddenZero =  1
+    } else {
+      hiddenCheckedList.value =  hiddenCheckedList.value.filter(item => item !='isHiddenZero')
+      formStep1Data.value.isHiddenZero = 0
     }
     if(formData.value.isHiddenEmpty){
       hiddenCheckedList.value.push('isHiddenEmpty')
       formStep1Data.value.isHiddenEmpty = 1
+    } else {
+      hiddenCheckedList.value =  hiddenCheckedList.value.filter(item => item !='isHiddenEmpty')
+      formStep1Data.value.isHiddenEmpty = 0
     }
     formStep1Data.value.fieldSort = fieldsSortList.value
     editDataFlag.value = false
