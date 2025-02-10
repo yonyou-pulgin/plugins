@@ -224,7 +224,7 @@ watch(() => editDataFlag.value, (val) => {
   }
 })
 
-watch(() => fieldList.value, () => {
+watch(() => fieldList.value, (newVal, oldVal) => {
   if(initFlag.value){
     initField()
   }
@@ -277,9 +277,9 @@ const initField = () => {
     fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
   } else {
     let fieldArr = allFields.value
-    if(formData.value.fieldSort && formData.value.fieldSort.length){
-      fieldArr = formData.value.fieldSort
-    }
+    // if(formData.value.fieldSort && formData.value.fieldSort.length){
+    //   fieldArr = formData.value.fieldSort
+    // }
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
   }
   
