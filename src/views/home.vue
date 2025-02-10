@@ -193,6 +193,7 @@ const handleDataSheet = async(val, type ='') => {
 // 监听编辑
 watch(() => editDataFlag.value, (val) => {
   if(val){
+    initFlag.value = false
     dataSheet.value = formData.value.tableId
     // 编辑时，重新初始化字段
     formStep1Data.value.confirmType = formData.value.confirmType
@@ -219,6 +220,7 @@ watch(() => editDataFlag.value, (val) => {
     }
     formStep1Data.value.fieldSort = fieldsSortList.value
     editDataFlag.value = false
+    initFlag.value = true
   }
 })
 
@@ -280,7 +282,7 @@ const initField = () => {
     }
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
   }
-
+  
   if(isCache && formData.value.fieldSort && formData.value.fieldSort.length){
     cacheFieldSort = formData.value.fieldSort.map(item => {
       if(typeof item == 'object' && item && item.checked) return item.id
