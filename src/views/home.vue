@@ -202,6 +202,15 @@ watch(() => editDataFlag.value, (val) => {
       item.checked = formData.value.fieldSort.includes(item.id)
       return item
     })
+
+    if(formData.value.isHiddenZero){
+      hiddenCheckedList.value.push('isHiddenZero')
+      formStep1Data.value.isHiddenZero =  1
+    }
+    if(formData.value.isHiddenEmpty){
+      hiddenCheckedList.value.push('isHiddenEmpty')
+      formStep1Data.value.isHiddenEmpty = 1
+    }
     formStep1Data.value.fieldSort = fieldsSortList.value
     editDataFlag.value = false
   }
