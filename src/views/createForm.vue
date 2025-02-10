@@ -145,7 +145,7 @@ const getConfirmDetails = async () => {
       if(!data.hasOwnProperty('autoLinkSelected')){
         data.formulaLink = true
       } else {
-        data.formulaLink = data.autoLinkSelected
+        data.formulaLink = !!data.autoLinkSelected
       }
       editDataFlag.value = true
       setFormData(data)
@@ -226,7 +226,7 @@ const handleSubmit = async () => {
   loading.value = true
   findFieldIndex(fieldList.value)
   const params = getParams()
-  params.autoLinkSelected = params.formulaLink
+  params.autoLinkSelected = +params.formulaLink
   // 校验排序字段是否存在
   const checkResult = await checkSortField(params.fieldSort)
   if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
