@@ -13,6 +13,4 @@ import 'ant-design-vue/dist/reset.css'
 import './assets/antReset.scss'
 // import yycomponents from '../componentsV3/src/lib/index.js'
 createApp(App).use(Antd).use(router).use(i18n).use(iconInit).mount('#app') // 注入国际化函数$t
-
-
 // createApp(App).mount('#app')
