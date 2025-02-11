@@ -1,19 +1,19 @@
 <template>
   <div class="sign-type">
     <div class="sign-type-head">选择签字模式</div>
-    <div class="sign-type-switch">
+    <div class="sign-type-switch" :class="{'sign-type-switch-disabled':isEditVisible}">
       <span :class="{'is-active': signType == 0}" @click="handleSignType(0)">单人签字</span>
       <span :class="{'is-active': signType == 1}" @click="handleSignType(1)">多人签字</span>
     </div>
 
-    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5}">
+    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5, 'sign-type-switch-disabled':isEditVisible}">
       <a-checkbox class="checkbox-plugin" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity">是否验证身份</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
         <div class="sign-type-item-label" v-if="signType">
           <img src="@/assets/img/noSign.png" alt="">
           <span class="sign-type-item-title">选择签字人</span>
-          <span v-if="configFields.length > 2" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
+          <span v-if="configFields.length > 2 && !isEditVisible" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
         </div>
         <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择签字人" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
         <div class="sign-type-item-label" v-if="isVerifyIdentity">
@@ -22,7 +22,7 @@
         <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
-      <div v-if="signType && configFields.length < 5" class="sign-type-add" @click="handleSignTypeAdd">
+      <div v-if="signType && configFields.length < 5 && !isEditVisible" class="sign-type-add" @click="handleSignTypeAdd">
         增加签字人
       </div>
     </div>
@@ -36,7 +36,7 @@ import yySelect from '@/antDesignComponents/yySelect/yy-select.vue'
 import useTableBase from '@/hooks/useTableBase.js';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, confirmId } = useTableBase();
 const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo()
 
 const initFlag = ref(false)
@@ -73,15 +73,23 @@ const currentConfigFields = computed(() => {
   if(signType.value) return configFields.value
   return singleConfigFields.value
 })
+const isEditVisible = computed(() => {
+  return confirmId.value && cacheFormData.value.confirmId ? true : false
+})
 // 手机号列
 const phoneFields = computed(() => {
   return fieldList.value.filter(item => item.type!=17 && !item.isHidden) || []
 })
 // 选择人员
 const userFields = computed(() => {
-  return fieldList.value.filter(item => [1,3,4,11,1003,1004].includes(item.type) && !item.isHidden) || []
+  return fieldList.value.filter(item => [1,3,4,11, 19, 1003,1004].includes(item.type) && !item.isHidden) || []
 })
-
+const handleEditToast = () => {
+  message.error({
+    content: '不可修改！如需修改，请重新创建确认单',
+    class: 'yy-message-error',
+  })
+}
 // 获取手机号字段
 const getPhoneField = () => {
   const phoneField = fieldList.value.filter(item => ( item.name.indexOf('手机') > -1 || item.name.indexOf('电话') > -1) && !item.isHidden)
@@ -308,6 +316,12 @@ const handleChange = (index, val, key) => {
       }
     }
   }
+}
+
+.sign-type-switch-disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 </style>
 <style lang="scss">

@@ -482,7 +482,7 @@ const addFormulaLinkField = async (insertIndex, tableId, content, fieldTitle = '
       disableSyncToFormDesc: false
     }});
     resolve({
-      viewFieldId: fieldId,
+      autoLinkFieldId: fieldId,
     })
     // 公式字段
     const formulaField = await table.getField(fieldId);
@@ -527,7 +527,8 @@ const addSingleSelectField = async (insertIndex, tableId, url, successRecords) =
 }
 
 const closePlugin = async () => {
-  await bitable.ui.closeHostContainer()
+   console.log(bitable.ui)
+  // await bitable.ui.closeHostContainer()
 }
 
 // 设置人员

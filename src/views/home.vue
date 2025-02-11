@@ -5,9 +5,9 @@
       <span>预览数据生成中，请稍等</span>
     </div>
     <div class="form-content">
-      <div class="form-item">
+      <div class="form-item" @click="handleEditToast">
         <span class="form-item-label required">选择数据表</span>
-        <yy-select class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
+        <yy-select :disabled="isEditVisible" class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
       </div>
       <div class="form-item">
         <div class="form-item-label required">选择确认单类型
@@ -35,6 +35,7 @@
               <a-checkbox :class="{'yy-field-checked': selectFields.length && selectFields.length != fieldsSortListLenth }" v-model:checked="fieldAllChecked" @click="handleAllClick">全选</a-checkbox>
           </div>
           <VueDraggable
+            :key="draggableKey"
             class="drag-container"
             :animation="150"
             v-model="fieldsSortList"
@@ -45,7 +46,8 @@
             :handle="draggripper"
             :scrollSensitivity="scrollSensitivity"
           >
-            <li class="drag-item" v-for="item in fieldsSortList">
+
+            <li class="drag-item" v-for="item in fieldsSortList" :key="item.id">
               <div class="f">
                 <icon-draggripper class="drag-item-icon draggripper" />
                 <a-checkbox v-model:checked="item.checked">
@@ -79,13 +81,13 @@ import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData,
  getCellUrlResult, checkHasAttachment, tableIdChangeFlag, confirmId,
-addField, addImgField, addFormulaField, addSingleSelectField} = useTableBase();
+addField, addImgField, addFormulaField, addSingleSelectField } = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
 import { useRouter } from 'vue-router';
 import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
-const { formData, setFormData } = useConfirmInfo();
+const { formData, setFormData, editDataFlag } = useConfirmInfo();
 import { message } from 'ant-design-vue';
 
 const fieldTypeMap = {
@@ -124,7 +126,6 @@ const cacheFormData = ref(null)
 const formStep1Data = ref({
   baseId: '',
   tableId: '',
-  confirmName: '',
   tableName: '',
   dataSheet: null,
   fields: null,
@@ -152,6 +153,7 @@ const plainOptions = [
 const fieldAllChecked = ref(true)
 const previewLoading = ref(false)
 const tableChangeFlag = ref(false) // 监听切换数据表
+const draggableKey = ref(0)
 
 const allFields = computed(() => {
   return fieldList.value || []
@@ -166,6 +168,10 @@ const selectFields = computed(() => {
 })
 const fieldsSortListLenth = computed(() => {
   return fieldsSortList.value.length
+})
+
+const isEditVisible = computed(() => {
+  return confirmId.value && formData.value.confirmId ? true : false
 })
 const handleGroupChange = (val) => {
   formStep1Data.value.isHiddenZero = + hiddenCheckedList.value.includes('isHiddenZero')
@@ -182,16 +188,50 @@ const handleDataSheet = async(val, type ='') => {
 
   if(!type) tableChangeFlag.value = true
   setTableInfo(table, 'change')
-
   formStep1Data.value.fields = currentSheetObj
   formStep1Data.value.dataSheet = val
-  formStep1Data.value.tableName = currentSheetObj.name
+  if(!confirmId.value) formStep1Data.value.tableName = currentSheetObj.name
   formStep1Data.value.tableId = val
 }
+// 监听编辑
+watch(() => editDataFlag.value, (val) => {
+  if(val){
+    initFlag.value = false
+    dataSheet.value = formData.value.tableId
+    // 编辑时，重新初始化字段
+    formStep1Data.value.confirmType = formData.value.confirmType
+    handleDataSheet(dataSheet.value, true)
+    sleep(100)
+    const fieldSort = JSON.parse(JSON.stringify(formData.value.fieldSort))
+    const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = fieldSort.includes(item.id)
+      item.sort = fieldSort.indexOf(item.id) > -1 ? fieldSort.indexOf(item.id) : allFields.value.length -1
+      return item
+    })
+    fieldsSortList.value = arr.sort((a, b) =>  a.sort - b.sort)
+    draggableKey.value = + new Date()
+    if(formData.value.isHiddenZero){
+      hiddenCheckedList.value.push('isHiddenZero')
+      formStep1Data.value.isHiddenZero =  1
+    } else {
+      hiddenCheckedList.value =  hiddenCheckedList.value.filter(item => item !='isHiddenZero')
+      formStep1Data.value.isHiddenZero = 0
+    }
+    if(formData.value.isHiddenEmpty){
+      hiddenCheckedList.value.push('isHiddenEmpty')
+      formStep1Data.value.isHiddenEmpty = 1
+    } else {
+      hiddenCheckedList.value =  hiddenCheckedList.value.filter(item => item !='isHiddenEmpty')
+      formStep1Data.value.isHiddenEmpty = 0
+    }
+    formStep1Data.value.fieldSort = fieldsSortList.value
+    editDataFlag.value = false
+    initFlag.value = true
+  }
+})
 
-watch(() => fieldList.value, () => {
+watch(() => fieldList.value, (newVal, oldVal) => {
   if(initFlag.value){
-    console.log('initField')
     initField()
   }
 }, { deep: true })
@@ -213,27 +253,29 @@ watch(() => selectFields.value, (val) => {
 // 监听缓存数据
 watch(() => formData.value, async(val) => {
   if(!val || initFlag.value) return false
-  const selection = formData.value.selection || tableInfo.value// 读取cache
-  console.log(val.confirmId)
+  const selection = val.selection || tableInfo.value// 读取cache
   if(val.confirmId){
-    formData.value.dataSheet = formData.value.tableId
+    formData.value.dataSheet = val.tableId
   }
-  dataSheet.value = formData.value.dataSheet || selection.tableId 
-  formStep1Data.value.dataSheet = dataSheet.value 
-  if(formData.value.isHiddenZero){
+  dataSheet.value = val.dataSheet || selection.tableId
+  formStep1Data.value.dataSheet = dataSheet.value
+  if(val.isHiddenZero){
     hiddenCheckedList.value.push('isHiddenZero')
     formStep1Data.value.isHiddenZero =  1
   }
-  if(formData.value.isHiddenEmpty){
+  if(val.isHiddenEmpty){
     hiddenCheckedList.value.push('isHiddenEmpty')
     formStep1Data.value.isHiddenEmpty = 1
   }
+  formStep1Data.value.confirmType = val.confirmType || 2
   if(!tableChangeFlag.value) initField()
   initFlag.value = true
+
 }, {deep: true})
 
 // 初始化列表字段
 const initField = () => {
+  if(draggableKey.value) return false
   let cacheFieldSort = []
   const selection = formData.value.selection || tableInfo.value
   let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
@@ -242,12 +284,12 @@ const initField = () => {
     fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
   } else {
     let fieldArr = allFields.value
-    if(formData.value.fieldSort && formData.value.fieldSort.length){
-      fieldArr = formData.value.fieldSort
-    }
+    // if(formData.value.fieldSort && formData.value.fieldSort.length){
+    //   fieldArr = formData.value.fieldSort
+    // }
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
   }
-
+  
   if(isCache && formData.value.fieldSort && formData.value.fieldSort.length){
     cacheFieldSort = formData.value.fieldSort.map(item => {
       if(typeof item == 'object' && item && item.checked) return item.id
@@ -399,6 +441,14 @@ const handleAllClick = (val) => {
   }
 }
 
+const handleEditToast = () => {
+  if(isEditVisible.value){  
+    message.error({
+      content: '不可修改！如需修改，请重新创建确认单',
+      class: 'yy-message-error',
+    })
+  }
+}
 </script>
 
 <style lang="scss" scoped>

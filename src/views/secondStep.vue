@@ -20,7 +20,7 @@
       <span class="form-item-label">表中新增数据是否同步创建确认单&nbsp;
         <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，当数据表新增一行记录时，自动创建一个确认单。"></yy-tooltip>
       </span>
-      <yy-switch v-model:checked="fromData.isNewRecordConfirm"></yy-switch>
+      <yy-switch :disabled="isEditVisible" v-model:checked="fromData.isNewRecordConfirm"></yy-switch>
     </div>
     <div class="form-item" v-if="fromData.isNewRecordConfirm">
       <span class="form-item-labelTitle">多维表授权码
@@ -50,7 +50,7 @@ import getAuthCode from './getAuthCode.vue'
 import useTableBase from '@/hooks/useTableBase.js';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 
-const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableIdChangeFlag } = useTableBase();
+const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableIdChangeFlag, confirmId } = useTableBase();
 const { setFormData, formData:cacheFormData, getCacheAuthCode } = useConfirmInfo()
 const getAuthCodeInstance = ref(null)
 const fromData = ref({
@@ -68,7 +68,16 @@ const personalBaseToken = ref('')
 const phoneFields = computed(() => {
   return fieldList.value.filter(item => item.type!=17) || []
 })
+const isEditVisible = computed(() => {
+  return confirmId.value && cacheFormData.value.confirmId ? true : false
+})
 
+const handleEditToast = () => {
+  message.error({
+    content: '不可修改！如需修改，请重新创建确认单',
+    class: 'yy-message-error',
+  })
+}
 const handleGetAuth = () => {
   getAuthCodeInstance.value.open()
 }
@@ -77,15 +86,16 @@ const handleChangeTableName = () => {
   fromData.value.tableName = currentTableName.value
 }
 
-watch(() => [fromData.value, currentTableName.value], () => {
+watch(() => [fromData.value], () => {
   setFormData(fromData.value)
 }, { deep: true })
 
-// watch(() => fieldList.value, () => {
-//   console.log('fieldList')
-//   currentTableName.value = tableName.value
-//   fromData.value.tableId = tableInfo.value.tableId
-// }, { deep: true })
+watch(() => cacheFormData.value, (val) => {
+  if(isEditVisible.value && confirmId.value){
+    currentTableName.value = val.tableName || val.confirmName 
+    fromData.value.formulaLink = val.formulaLink
+  }
+})
 
 onMounted(async() => {
   currentTableName.value = cacheFormData.value.tableName || tableName.value
