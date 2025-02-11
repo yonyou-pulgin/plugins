@@ -234,7 +234,7 @@ watch(() => fieldList.value, (newVal, oldVal) => {
   if(initFlag.value){
     initField()
   }
-})
+}, { deep: true })
 
 watch(() => formStep1Data.value, (val) => {
   // 延迟监听
