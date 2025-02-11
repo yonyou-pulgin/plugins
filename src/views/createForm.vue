@@ -141,7 +141,6 @@ const getConfirmDetails = async () => {
       data.tableName = data.confirmName
       editDetail.value = Object.assign({}, data)
       // 兼容字段是否存在
-      console.log(data.hasOwnProperty('autoLinkSelected'));
       if(!data.hasOwnProperty('autoLinkSelected')){
         data.formulaLink = true
       } else {
@@ -226,7 +225,9 @@ const handleSubmit = async () => {
   loading.value = true
   findFieldIndex(fieldList.value)
   const params = getParams()
-  params.autoLinkSelected = +params.formulaLink
+
+  if(!params.isNewRecordConfirm) params.autoLinkSelected = 0
+  else params.autoLinkSelected = +params.formulaLink
   // 校验排序字段是否存在
   const checkResult = await checkSortField(params.fieldSort)
   if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
@@ -303,7 +304,7 @@ const handleSubmit = async () => {
         delete formData.value.confirmId
         loading.value = false
 
-        handleEditUpdateField(params, insertFieldParams.value)
+        if(params.isNewRecordConfirm) handleEditUpdateField(params, insertFieldParams.value)
         // 更新字段
         return false
       }

@@ -82,7 +82,7 @@ const phoneFields = computed(() => {
 })
 // 选择人员
 const userFields = computed(() => {
-  return fieldList.value.filter(item => [1,3,4,11,1003,1004].includes(item.type) && !item.isHidden) || []
+  return fieldList.value.filter(item => [1,3,4,11, 19, 1003,1004].includes(item.type) && !item.isHidden) || []
 })
 const handleEditToast = () => {
   message.error({

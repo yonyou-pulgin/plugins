@@ -35,6 +35,7 @@
               <a-checkbox :class="{'yy-field-checked': selectFields.length && selectFields.length != fieldsSortListLenth }" v-model:checked="fieldAllChecked" @click="handleAllClick">全选</a-checkbox>
           </div>
           <VueDraggable
+            :key="draggableKey"
             class="drag-container"
             :animation="150"
             v-model="fieldsSortList"
@@ -45,7 +46,8 @@
             :handle="draggripper"
             :scrollSensitivity="scrollSensitivity"
           >
-            <li class="drag-item" v-for="item in fieldsSortList">
+
+            <li class="drag-item" v-for="item in fieldsSortList" :key="item.id">
               <div class="f">
                 <icon-draggripper class="drag-item-icon draggripper" />
                 <a-checkbox v-model:checked="item.checked">
@@ -151,6 +153,7 @@ const plainOptions = [
 const fieldAllChecked = ref(true)
 const previewLoading = ref(false)
 const tableChangeFlag = ref(false) // 监听切换数据表
+const draggableKey = ref(0)
 
 const allFields = computed(() => {
   return fieldList.value || []
@@ -199,11 +202,14 @@ watch(() => editDataFlag.value, (val) => {
     formStep1Data.value.confirmType = formData.value.confirmType
     handleDataSheet(dataSheet.value, true)
     sleep(100)
-    fieldsSortList.value = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = formData.value.fieldSort.includes(item.id)
+    const fieldSort = JSON.parse(JSON.stringify(formData.value.fieldSort))
+    const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = fieldSort.includes(item.id)
+      item.sort = fieldSort.indexOf(item.id) > -1 ? fieldSort.indexOf(item.id) : allFields.value.length -1
       return item
     })
-
+    fieldsSortList.value = arr.sort((a, b) =>  a.sort - b.sort)
+    draggableKey.value = + new Date()
     if(formData.value.isHiddenZero){
       hiddenCheckedList.value.push('isHiddenZero')
       formStep1Data.value.isHiddenZero =  1
@@ -269,6 +275,7 @@ watch(() => formData.value, async(val) => {
 
 // 初始化列表字段
 const initField = () => {
+  if(draggableKey.value) return false
   let cacheFieldSort = []
   const selection = formData.value.selection || tableInfo.value
   let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
