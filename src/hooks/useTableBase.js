@@ -341,6 +341,12 @@ const getUserId = async () => {
   userId.value = Id
 }
 
+const deleteField = async (tableId, fieldId) => {
+  const table = await getTableInstance(tableId);
+  // 或者传递 fieldId
+  await table.deleteField(fieldId);
+}
+
 const getWindowTableInstance = async(tableId) => {
   if(window.tableInstance) return window.tableInstance
   else window.tableInstance = await getTableInstance(tableId);
@@ -598,6 +604,7 @@ export default function useTableBase() {
     closePlugin,
     addFormulaLinkField,
     setUserField,
-    findFieldIndex
+    findFieldIndex,
+    deleteField
   }
 }

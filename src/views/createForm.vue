@@ -55,7 +55,8 @@ import { detail } from './data';
 
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
-  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId:currentConfirm, } = useTableBase();
+  addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId:currentConfirm,
+  deleteField } = useTableBase();
 const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData, editDataFlag } = useConfirmInfo()
 
 const loading = ref(false)
@@ -305,6 +306,7 @@ const handleSubmit = async () => {
         loading.value = false
 
         if(params.isNewRecordConfirm) handleEditUpdateField(params, insertFieldParams.value)
+        if(editDetail.value.autoLinkSelected && !params.autoLinkSelected) handleDeleteField(params, confirmId)
         // 更新字段
         return false
       }
@@ -326,6 +328,19 @@ const handleSubmit = async () => {
   })
 }
 
+const handleDeleteField = async (params, confirmId) => {
+  let { configFields = [] } = editDetail.value
+  configFields.map(item => {
+    if(item.autoLinkFieldId){
+      deleteField(params.tableId, item.autoLinkFieldId)
+      item.autoLinkFieldId = null
+    }
+  })
+   await confirmUpdate({
+    confirmId,
+    configFields
+   });
+}
 //  修改更新字段
 const handleEditUpdateField = async (params, insertFieldParams) => {
   let { configFields = [] } = params
@@ -465,7 +480,7 @@ onMounted(async () => {
 })
 onBeforeUnmount(() => {
   delete formData.value.confirmId
-  confirmId.value = null
+  // confirmId.value = null
   setTableInfo.value = null
 })
 

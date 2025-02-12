@@ -9,19 +9,17 @@ module.exports = defineConfig({
   transpileDependencies: false,
   lintOnSave: false,
   publicPath: './',
+  // publicPath: process.env.NODE_ENV === 'production' ? 'https://www.yygongzi.com/' : '/',
   outputDir: 'dist',
   assetsDir: 'static',
   productionSourceMap: true,
+  filenameHashing: true,
   configureWebpack: {
     resolve: {
       alias: {
         '@': path.join(__dirname, './src'),
         vue: path.resolve('./node_modules/vue'),
       },
-    },
-    output: {
-      // 此处省略1万字...
-      // crossOriginLoading: 'anonymous',
     },
     plugins: [
       // 此处省略1万字...
@@ -39,7 +37,7 @@ module.exports = defineConfig({
       //   args[0].metaContent = 'default-src data: wss: \'self\' \'unsafe-inline\' \'unsafe-eval\' *.aliyuncs.com *.effirst.com *.qwps.cn *.kdocs.cn *.wpscdn.cn *.ksyun.com dw-online.ksosoft.com shuc-js.ksord.com *.wps.cn *.yygongzi.com *.qq.com *.dingtalk.com *.alicdn.com *.npsmeter.cn *.ahc.ink *.rumt-zh.com rumt-zh.com *.aihecong.com *.myqcloud.com *.giocdn.com *.bytegoofy.com clarity.ms *.clarity.ms cdn-go.cn *.cdn-go.cn *.growingio.com *.xinfushe.com xinfushe.com;img-src data: wss: \'self\' \'unsafe-inline\' \'unsafe-eval\' *;'
       //   args[0].httpEquiv = 'Content-Security-Policy'
       // }
-
+      args[0].configVersion = Date.now()
       args[0].title = '插件'
       return args
     })
@@ -54,31 +52,22 @@ module.exports = defineConfig({
       },
     }))
   },
-  // devServer: {
-  //   host: '127.0.0.1',
-  //   port: 8089,
-  //   https: false,
-  //   headers: {
-  //     'Access-Control-Allow-Origin': '*',
-  //     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-  //     'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
-  //   },
-  //   proxy: {
-  //     '/gw': {
-  //       target: `https://dev.yygongzi.com/gw`,
-  //       secure: false,
-  //       changeOrigin: false,
-  //       ws: false,
-  //       pathRewrite: {
-  //         '^/gw': '',
-  //       },
-  //       cookieDomainRewrite: {
-  //         '*': '',
-  //       },
-  //     },
-  //   }
-  // },
-    devServer: {
+    // 配置 webpack 的 output
+  configureWebpack: config => {
+    // if (process.env.NODE_ENV === 'production') {
+    //  // 生成时间戳
+    //   const timestamp = new Date().getTime(); // 获取当前时间的时间戳
+
+    //   // 指定 CDN 路径并添加时间戳
+    //   config.output = {
+    //     ...config.output,
+    //     filename: `[name].js?key=${timestamp}`,
+    //     chunkFilename: `[name].chunk.js?key=${timestamp}`,
+    //     publicPath: 'https://www.yygongzi.com/' // CDN 路径后添加时间戳
+    //   };
+    // }
+  },
+  devServer: {
     host: '127.0.0.1',
     port: 8089,
     https: true,
