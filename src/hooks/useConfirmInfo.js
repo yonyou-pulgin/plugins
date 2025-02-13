@@ -52,7 +52,7 @@ const getCacheAuthCode = async () => {
 const confrimInfo = ref({})
 const editDataFlag = ref(false)
 
-const setFormData = debounce(async function (val) {
+const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
     console.log('set')
     let data = Object.assign({}, formData.value, val)
@@ -65,7 +65,7 @@ const setFormData = debounce(async function (val) {
       await bridge.setData('yy-baseId', formData.value.baseId)
     }
   }
-}, 200)
+}
 const getFormData = () => {
   this.getCacheFormData()
   return formData.value
