@@ -102,7 +102,7 @@ const setTableInfo = async(selection, type = '') => {
     // 获取表格实例
     const table = await getTableInstance(selection.tableId)
     // 获取当前多维表格下所有的数据表
-    if(!type) getTableName(selection.tableId)
+    getTableName(selection.tableId)
     getTableSheetList(selection.tableId)
     getTableFieldList(selection.tableId)
     // 获取当前多维表格下所有的数据表
@@ -339,6 +339,12 @@ const getTenantKey = async () => {
 const getUserId = async () => {
   const Id = await bitable.bridge.getUserId();
   userId.value = Id
+}
+
+const deleteField = async (tableId, fieldId) => {
+  const table = await getTableInstance(tableId);
+  // 或者传递 fieldId
+  await table.deleteField(fieldId);
 }
 
 const getWindowTableInstance = async(tableId) => {
@@ -598,6 +604,7 @@ export default function useTableBase() {
     closePlugin,
     addFormulaLinkField,
     setUserField,
-    findFieldIndex
+    findFieldIndex,
+    deleteField
   }
 }

@@ -80,7 +80,7 @@ import { ref, computed, onMounted, nextTick, watch, onBeforeUnmount, onBeforeMou
 import { VueDraggable } from 'vue-draggable-plus'
 import useTableBase from '@/hooks/useTableBase.js';
 const { setTableInfo, tableInfo, tableName, sheetList, fieldList, tenantKey, userId, tableData,
- getCellUrlResult, checkHasAttachment, tableIdChangeFlag, confirmId,
+ getCellUrlResult, checkHasAttachment, tableIdChangeFlag, confirmId, 
 addField, addImgField, addFormulaField, addSingleSelectField } = useTableBase();
 import fromPreview from './fromPreview.vue';
 import { createConfirm, confirmPreview, confirmUpdate } from '@/api/api.js';
@@ -154,9 +154,10 @@ const fieldAllChecked = ref(true)
 const previewLoading = ref(false)
 const tableChangeFlag = ref(false) // 监听切换数据表
 const draggableKey = ref(0)
+const editFieldSort = ref([])
 
 const allFields = computed(() => {
-  return fieldList.value || []
+  return JSON.parse(JSON.stringify(fieldList.value)) || []
 })
 // 确认单选择文案
 const fieldTitle = computed(() => {
@@ -200,15 +201,11 @@ watch(() => editDataFlag.value, (val) => {
     dataSheet.value = formData.value.tableId
     // 编辑时，重新初始化字段
     formStep1Data.value.confirmType = formData.value.confirmType
+    formStep1Data.value.tableName = formData.value.tableName
+    formStep1Data.value.tableId = formData.value.tableId
     handleDataSheet(dataSheet.value, true)
     sleep(100)
-    const fieldSort = JSON.parse(JSON.stringify(formData.value.fieldSort))
-    const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = fieldSort.includes(item.id)
-      item.sort = fieldSort.indexOf(item.id) > -1 ? fieldSort.indexOf(item.id) : allFields.value.length -1
-      return item
-    })
-    fieldsSortList.value = arr.sort((a, b) =>  a.sort - b.sort)
+    editFieldSort.value = JSON.parse(JSON.stringify(formData.value.fieldSort))
     draggableKey.value = + new Date()
     if(formData.value.isHiddenZero){
       hiddenCheckedList.value.push('isHiddenZero')
@@ -232,6 +229,7 @@ watch(() => editDataFlag.value, (val) => {
 
 watch(() => fieldList.value, (newVal, oldVal) => {
   if(initFlag.value){
+    tableChangeFlag.value = true
     initField()
   }
 }, { deep: true })
@@ -257,8 +255,10 @@ watch(() => formData.value, async(val) => {
   if(val.confirmId){
     formData.value.dataSheet = val.tableId
   }
-  dataSheet.value = val.dataSheet || selection.tableId
+  dataSheet.value = val.dataSheet || val.sheetVal || selection.tableId
   formStep1Data.value.dataSheet = dataSheet.value
+  formStep1Data.value.tableName = val.tableName
+  formStep1Data.value.tableId = dataSheet.value
   if(val.isHiddenZero){
     hiddenCheckedList.value.push('isHiddenZero')
     formStep1Data.value.isHiddenZero =  1
@@ -275,7 +275,6 @@ watch(() => formData.value, async(val) => {
 
 // 初始化列表字段
 const initField = () => {
-  if(draggableKey.value) return false
   let cacheFieldSort = []
   const selection = formData.value.selection || tableInfo.value
   let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
@@ -284,9 +283,10 @@ const initField = () => {
     fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
   } else {
     let fieldArr = allFields.value
-    // if(formData.value.fieldSort && formData.value.fieldSort.length){
-    //   fieldArr = formData.value.fieldSort
-    // }
+    // 打开插件，取缓存
+    if(formData.value.fieldSort && formData.value.fieldSort.length){
+      fieldArr = formData.value.fieldSort
+    }
     fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
   }
   
@@ -304,9 +304,21 @@ const initField = () => {
       })
       isCache = true
     }
-    if(formData.value.dataSheet != selection.tableId){
+    if(!tableChangeFlag.value && formData.value.dataSheet != selection.tableId){
       handleDataSheet(formData.value.dataSheet, true)
     }
+  }
+  // 编辑时，重新排序
+  if(draggableKey.value){
+    const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+      item.checked = editFieldSort.value.includes(item.id)
+      item.sort = editFieldSort.value.indexOf(item.id) > -1 ? editFieldSort.value.indexOf(item.id) : allFields.value.length -1
+      return item
+    })
+    fieldsSortList.value = arr.sort((a, b) =>  a.sort - b.sort)
+    formStep1Data.value.fieldSort = fieldsSortList.value
+    tableIdChangeFlag.value = false
+    return false
   }
   try {
     fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
@@ -655,7 +667,7 @@ const handleEditToast = () => {
     align-items: center;
   }
   span.ant-radio+*{
-    padding-left: 6px;
+    padding-left: 8px!important;
   }
 }
 

@@ -2,6 +2,21 @@ import { ref, onMounted } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 
 
+const debounce = (func, wait) => {
+  let timeout;
+
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+
 const bridge = bitable.bridge;
 const formData = ref({
   isVerifyIdentity: true
