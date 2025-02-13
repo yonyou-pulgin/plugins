@@ -102,7 +102,7 @@ const setTableInfo = async(selection, type = '') => {
     // 获取表格实例
     const table = await getTableInstance(selection.tableId)
     // 获取当前多维表格下所有的数据表
-    if(!type) getTableName(selection.tableId)
+    getTableName(selection.tableId)
     getTableSheetList(selection.tableId)
     getTableFieldList(selection.tableId)
     // 获取当前多维表格下所有的数据表
