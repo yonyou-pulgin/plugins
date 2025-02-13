@@ -2,6 +2,21 @@ import { ref, onMounted } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 
 
+const debounce = (func, wait) => {
+  let timeout;
+
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+
 const bridge = bitable.bridge;
 const formData = ref({
   isVerifyIdentity: true
@@ -37,8 +52,9 @@ const getCacheAuthCode = async () => {
 const confrimInfo = ref({})
 const editDataFlag = ref(false)
 
-const setFormData = async (val) => {
+const setFormData = debounce(async function (val) {
   if(val && typeof val == 'object' ){
+    console.log('set')
     let data = Object.assign({}, formData.value, val)
     formData.value = data
     // 清空授权码
@@ -49,7 +65,7 @@ const setFormData = async (val) => {
       await bridge.setData('yy-baseId', formData.value.baseId)
     }
   }
-}
+}, 200)
 const getFormData = () => {
   this.getCacheFormData()
   return formData.value
