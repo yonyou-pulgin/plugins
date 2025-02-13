@@ -189,6 +189,7 @@ const handleDataSheet = async(val, type ='') => {
 
   if(!type) tableChangeFlag.value = true
   setTableInfo(table, 'change')
+  console.log(currentSheetObj)
   formStep1Data.value.fields = currentSheetObj
   formStep1Data.value.dataSheet = val
   if(!confirmId.value) formStep1Data.value.tableName = currentSheetObj.name
@@ -275,6 +276,8 @@ const initField = () => {
   const selection = formData.value.selection || tableInfo.value
   let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
   // 字段赋值
+  console.log(tableChangeFlag.value)
+  console.log(allFields.value)
   if(tableChangeFlag.value) {
     fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
   } else {
@@ -300,10 +303,11 @@ const initField = () => {
       })
       isCache = true
     }
-    if(formData.value.dataSheet != selection.tableId){
+    if(!tableChangeFlag.value && formData.value.dataSheet != selection.tableId){
       handleDataSheet(formData.value.dataSheet, true)
     }
   }
+  console.log(draggableKey.value)
   // 编辑时，重新排序
   if(draggableKey.value){
     const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
@@ -316,6 +320,8 @@ const initField = () => {
     tableIdChangeFlag.value = false
     return false
   }
+
+  console.log(fieldsSortList.value)
   try {
     fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
       item.checked = isCache ? cacheFieldSort.includes(item.id) : true
