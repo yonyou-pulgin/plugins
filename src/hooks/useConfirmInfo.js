@@ -54,7 +54,6 @@ const editDataFlag = ref(false)
 
 const setFormData = async (val) => {
   if(val && typeof val == 'object' ){
-    console.log('set')
     let data = Object.assign({}, formData.value, val)
     formData.value = data
     // 清空授权码
