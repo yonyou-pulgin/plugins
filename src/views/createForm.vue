@@ -462,8 +462,17 @@ const handleDownQr = () => {
   })
 }
 
-watch(() => formData.value.currentStep, (val) => {
-  if(!initFlag.value) current.value = val || 0
+watch(() => formData.value, async(val) => {
+  if(!initFlag.value) current.value = val.currentStep || 0
+  const currentTableId = tableInfo.value.tableId
+  const cacheTableId = val.dataSheet || val.tableId
+  
+  if(currentTableId && currentTableId != cacheTableId){
+    // 切换表
+    const table = await bitable.base.getTable(cacheTableId);
+    tableInfo.value.tableId = table.id
+    setTableInfo(tableInfo.value, 'change')
+  }
   initFlag.value = true
 }, { deep: true})
 // 获取数据

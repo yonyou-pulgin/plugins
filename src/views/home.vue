@@ -133,7 +133,8 @@ const formStep1Data = ref({
   isHiddenZero: false,
   isHiddenEmpty: false,
   currentStep: 0,
-  confirmType: 2
+  confirmType: 2,
+  configFields: [],
 })
 const initFlag = ref(false)
 const dataSheet = ref(null)
@@ -182,17 +183,20 @@ const handleGroupChange = (val) => {
 const handleDataSheet = async(val, type ='') => {
   const currentSheetObj = sheetList.value.find(item => item.id == val)
   // 获取数据表
-  const selection = await bitable.base.getSelection();
-  const tableMeta = await bitable.base.getTableMetaById(val);
-  const table = await bitable.base.getTable(tableMeta.id);
-  table.baseId = selection.baseId // baseId
-
+  tableInfo.value.tableId = val
   if(!type) tableChangeFlag.value = true
-  setTableInfo(table, 'change')
+  setTableInfo(tableInfo.value, 'change')
   formStep1Data.value.fields = currentSheetObj
   formStep1Data.value.dataSheet = val
   if(!confirmId.value) formStep1Data.value.tableName = currentSheetObj.name
   formStep1Data.value.tableId = val
+  if(!editDataFlag.value && Array.isArray(formData.value.configFields)){
+    formStep1Data.value.configFields = formData.value.configFields.map(item => {
+      item.mdnFieldId = null
+      item.signPeopleFieldId = null
+      return item
+    })
+  }
 }
 // 监听编辑
 watch(() => editDataFlag.value, (val) => {
@@ -203,6 +207,7 @@ watch(() => editDataFlag.value, (val) => {
     formStep1Data.value.confirmType = formData.value.confirmType
     formStep1Data.value.tableName = formData.value.tableName
     formStep1Data.value.tableId = formData.value.tableId
+    formStep1Data.value.configFields = formData.value.configFields
     handleDataSheet(dataSheet.value, true)
     sleep(100)
     editFieldSort.value = JSON.parse(JSON.stringify(formData.value.fieldSort))
@@ -259,6 +264,7 @@ watch(() => formData.value, async(val) => {
   formStep1Data.value.dataSheet = dataSheet.value
   formStep1Data.value.tableName = val.tableName
   formStep1Data.value.tableId = dataSheet.value
+  formStep1Data.value.configFields = formData.value.configFields
   if(val.isHiddenZero){
     hiddenCheckedList.value.push('isHiddenZero')
     formStep1Data.value.isHiddenZero =  1
@@ -270,71 +276,93 @@ watch(() => formData.value, async(val) => {
   formStep1Data.value.confirmType = val.confirmType || 2
   if(!tableChangeFlag.value) initField()
   initFlag.value = true
-
 }, {deep: true})
 
 // 初始化列表字段
 const initField = () => {
   let cacheFieldSort = []
   const selection = formData.value.selection || tableInfo.value
-  let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
-  // 字段赋值
-  if(tableChangeFlag.value) {
-    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
-  } else {
-    let fieldArr = allFields.value
-    // 打开插件，取缓存
-    if(formData.value.fieldSort && formData.value.fieldSort.length){
-      fieldArr = formData.value.fieldSort
-    }
-    fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
-  }
-  
-  if(isCache && formData.value.fieldSort && formData.value.fieldSort.length){
-    cacheFieldSort = formData.value.fieldSort.map(item => {
-      if(typeof item == 'object' && item && item.checked) return item.id
-      return item
-    })
-  } else {
-    // 手动切换数据表，不取缓存
-    if(!tableChangeFlag.value && formData.value.fieldSort && formData.value.fieldSort.length){
-      cacheFieldSort = formData.value.fieldSort.map(item => {
-        if(typeof item == 'object' && item && item.checked) return item.id
-        return item
-      })
-      isCache = true
-    }
-    if(!tableChangeFlag.value && formData.value.dataSheet != selection.tableId){
-      handleDataSheet(formData.value.dataSheet, true)
-    }
-  }
+
+  fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value)) || []
+
+  cacheFieldSort = formData.value.fieldSort?.map(item => {
+    if(typeof item == 'object' && item && item.checked) return item.id
+    return item
+  }) || []
   // 编辑时，重新排序
   if(draggableKey.value){
-    const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = editFieldSort.value.includes(item.id)
-      item.sort = editFieldSort.value.indexOf(item.id) > -1 ? editFieldSort.value.indexOf(item.id) : allFields.value.length -1
-      return item
-    })
-    fieldsSortList.value = arr.sort((a, b) =>  a.sort - b.sort)
-    formStep1Data.value.fieldSort = fieldsSortList.value
-    tableIdChangeFlag.value = false
-    return false
-  }
-  try {
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = isCache ? cacheFieldSort.includes(item.id) : true
-      return item
-    })
-  } catch (error) {
-    fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
-    fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
-      item.checked = true
-      return item
-    })
+     cacheFieldSort = editFieldSort.value || []
   }
 
-  formStep1Data.value.fieldSort = fieldsSortList.value
+  fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+    if((tableChangeFlag.value || !cacheFieldSort.length) && !draggableKey.value){
+      item.checked = true
+    } else {
+      item.checked = cacheFieldSort.includes(item.id)
+      item.sort = editFieldSort.value.indexOf(item.id) > -1 ? editFieldSort.value.indexOf(item.id) : allFields.value.length -1
+    }
+    return item
+  })
+  formStep1Data.value.fieldSort = fieldsSortList.value.sort((a, b) =>  a.sort - b.sort)
   tableIdChangeFlag.value = false
+  // let isCache = formData.value.dataSheet && formData.value.dataSheet == selection.tableId && !tableChangeFlag.value
+  // // 字段赋值
+  // if(tableChangeFlag.value) {
+  //   fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+  // } else {
+  //   let fieldArr = allFields.value
+  //   // 打开插件，取缓存
+  //   if(formData.value.fieldSort && formData.value.fieldSort.length){
+  //     fieldArr = formData.value.fieldSort
+  //   }
+  //   fieldsSortList.value = JSON.parse(JSON.stringify(fieldArr))
+  // }
+  
+  // if(isCache && formData.value.fieldSort && formData.value.fieldSort.length){
+  //   cacheFieldSort = formData.value.fieldSort.map(item => {
+  //     if(typeof item == 'object' && item && item.checked) return item.id
+  //     return item
+  //   })
+  // } else {
+  //   // 手动切换数据表，不取缓存
+  //   if(!tableChangeFlag.value && formData.value.fieldSort && formData.value.fieldSort.length){
+  //     cacheFieldSort = formData.value.fieldSort.map(item => {
+  //       if(typeof item == 'object' && item && item.checked) return item.id
+  //       return item
+  //     })
+  //     isCache = true
+  //   }
+  //   if(!tableChangeFlag.value && formData.value.dataSheet != selection.tableId){
+  //     handleDataSheet(formData.value.dataSheet, true)
+  //   }
+  // }
+  // // 编辑时，重新排序
+  // if(draggableKey.value){
+  //   const arr = allFields.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+  //     item.checked = editFieldSort.value.includes(item.id)
+  //     item.sort = editFieldSort.value.indexOf(item.id) > -1 ? editFieldSort.value.indexOf(item.id) : allFields.value.length -1
+  //     return item
+  //   })
+  //   fieldsSortList.value = arr.sort((a, b) =>  a.sort - b.sort)
+  //   formStep1Data.value.fieldSort = fieldsSortList.value
+  //   tableIdChangeFlag.value = false
+  //   return false
+  // }
+  // try {
+  //   fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+  //     item.checked = isCache ? cacheFieldSort.includes(item.id) : true
+  //     return item
+  //   })
+  // } catch (error) {
+  //   fieldsSortList.value = JSON.parse(JSON.stringify(allFields.value))
+  //   fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
+  //     item.checked = true
+  //     return item
+  //   })
+  // }
+
+  // formStep1Data.value.fieldSort = fieldsSortList.value
+  // tableIdChangeFlag.value = false
 }
 
 const sleep = (time) => {

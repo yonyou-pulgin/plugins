@@ -197,17 +197,22 @@ const getTableFieldList = async (tableId) => {
     // 字段引用
     item.tableId = tableId // 主表id 
     if(item.type == FieldType.Lookup){
-      const lockupTable = await base.getTableById(item.property.refTableId);
-      const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
-      lockupFieldMeta.label = lockupFieldMeta.name
-      lockupFieldMeta.value = lockupFieldMeta.id
-      lockupFieldMeta.isHidden = true
-      lockupFieldMeta.tableId = item.property.refTableId // 关联表id
-      fieldListArr.push(lockupFieldMeta)
-      // 判断引用是否有附件字段
-      if(lockupFieldMeta.type == FieldType.Attachment){
-        const field = await table.getFieldById(item.id);
-        lockupAttachmentField.value.push(field) 
+      try {
+        //fix bug  引用表不存在 
+        const lockupTable = await base.getTableById(item.property.refTableId);
+        const lockupFieldMeta = await lockupTable.getFieldMetaById(item.property.refFieldId);
+        lockupFieldMeta.label = lockupFieldMeta.name
+        lockupFieldMeta.value = lockupFieldMeta.id
+        lockupFieldMeta.isHidden = true
+        lockupFieldMeta.tableId = item.property.refTableId // 关联表id
+        fieldListArr.push(lockupFieldMeta)
+        // 判断引用是否有附件字段
+        if(lockupFieldMeta.type == FieldType.Attachment){
+          const field = await table.getFieldById(item.id);
+          lockupAttachmentField.value.push(field) 
+        }
+      } catch (error) {
+        console.log(error)
       }
     }
     item.label = item.name
