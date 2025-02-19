@@ -24,7 +24,8 @@
       </template>
     </yySteps>
   </div>
-  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" :isHeaderBottomBorder="false" :footer="null">
+  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" 
+  :isHeaderBottomBorder="false" :footer="null" @cancel="handleVisible" >
     <div class="edit-content">
       <div class="edit-content-desc">
         历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！
@@ -114,7 +115,7 @@ watch(() => currentConfirm.value, (val) => {
 
 const handleClick = () => {
   try {
-    yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
+    window.frames.yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
   } catch (error) {
     console.log(error);
   }
@@ -475,6 +476,12 @@ watch(() => formData.value, async(val) => {
   }
   initFlag.value = true
 }, { deep: true})
+
+const handleVisible = () => {
+  delete formData.value.confirmId
+  currentConfirm.value = null
+  editVisible.value = false
+}
 // 获取数据
 
 getCacheFormData()
