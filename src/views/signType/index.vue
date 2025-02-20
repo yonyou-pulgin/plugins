@@ -84,6 +84,10 @@ const phoneFields = computed(() => {
 const userFields = computed(() => {
   return fieldList.value.filter(item => [1,3,4,11, 19, 1003,1004].includes(item.type) && !item.isHidden) || []
 })
+// 所有字段id
+const allFieldId = computed(() => {
+  return fieldList.value.map(item => item.id) || []
+})
 const handleEditToast = () => {
   message.error({
     content: '不可修改！如需修改，请重新创建确认单',
@@ -96,8 +100,18 @@ const getPhoneField = () => {
   if(phoneField.length){
     singleConfigFields.value[0].mdnFieldId = phoneField[0].id || null
     singleConfigFields.value[0].mdnFieldName = phoneField[0].name || null
-  } 
+  }
 }
+
+watch(() => [fieldList.value], (val) => {
+  if(val){
+    configFields.value = configFields.value.map(item => {
+      item.mdnFieldId = allFieldId.value.includes(item.mdnFieldId) ? item.mdnFieldId : null
+      item.signPeopleFieldId = allFieldId.value.includes(item.signPeopleFieldId) ? item.signPeopleFieldId : null
+      return item
+    })
+  }
+}, {deep: true})
 
 watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleConfigFields.value], (val) => {
   if(initFlag.value){
@@ -109,24 +123,6 @@ watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleC
     setFormData(obj)
   }
 },{ deep: true})
-
-// watch(() => fieldList.value, () => {
-//   cacheFormData.value.configFields.map(item => {
-//     item = Object.assign(item, {
-//       mdnFieldId: null,
-//       mdnFieldName: null,
-//       signPeopleFieldId: null,
-//       signPeopleFieldName: null
-//     })
-//     return item
-//   })
-//   console.log(cacheFormData.value.configFields)
-//   if(signType.value){
-//     configFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
-//   } else {
-//     singleConfigFields.value = JSON.parse(JSON.stringify(cacheFormData.value.configFields))
-//   }
-// }, { deep: true })
 
 onMounted(() => {
   isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity

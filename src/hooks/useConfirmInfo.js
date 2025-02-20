@@ -1,7 +1,6 @@
 import { ref, onMounted } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 
-
 const debounce = (func, wait) => {
   let timeout;
 
@@ -57,11 +56,11 @@ const setFormData = async (val) => {
     let data = Object.assign({}, formData.value, val)
     formData.value = data
     // 清空授权码
-    await bridge.setData('yy-form-data', JSON.stringify(data))
+    bridge.setData('yy-form-data', JSON.stringify(data))
     // 记录当前的baseId的授权码
     if(formData.value.isNewRecordConfirm && formData.value.personalBaseToken){
-      await bridge.setData('yy-auth-code', formData.value.personalBaseToken)
-      await bridge.setData('yy-baseId', formData.value.baseId)
+      bridge.setData('yy-auth-code', formData.value.personalBaseToken)
+      // await bridge.setData('yy-baseId', formData.value.baseId)
     }
   }
 }

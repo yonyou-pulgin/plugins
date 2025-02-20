@@ -24,7 +24,8 @@
       </template>
     </yySteps>
   </div>
-  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" :isHeaderBottomBorder="false" :footer="null">
+  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" 
+  :isHeaderBottomBorder="false" :footer="null" @cancel="handleVisible" >
     <div class="edit-content">
       <div class="edit-content-desc">
         历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！
@@ -52,6 +53,7 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 import { detail } from './data';
+import jslog from 'jsLog';
 
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
@@ -112,9 +114,14 @@ watch(() => currentConfirm.value, (val) => {
   }
 })
 
+const jslogInstance = new jslog();
 const handleClick = () => {
   try {
-    yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
+    jslogInstance.push({
+      eventId: "plugin_downBtn",
+      name: '批量下载按钮',
+      params: `${currentConfirm.value}`
+    })
   } catch (error) {
     console.log(error);
   }
@@ -462,10 +469,25 @@ const handleDownQr = () => {
   })
 }
 
-watch(() => formData.value.currentStep, (val) => {
-  if(!initFlag.value) current.value = val || 0
+watch(() => formData.value, async(val) => {
+  if(!initFlag.value) current.value = val.currentStep || 0
+  const currentTableId = tableInfo.value.tableId
+  const cacheTableId = val.dataSheet || val.tableId
+  
+  if(currentTableId && currentTableId != cacheTableId){
+    // 切换表
+    const table = await bitable.base.getTable(cacheTableId);
+    tableInfo.value.tableId = table.id
+    setTableInfo(tableInfo.value, 'change')
+  }
   initFlag.value = true
 }, { deep: true})
+
+const handleVisible = () => {
+  delete formData.value.confirmId
+  currentConfirm.value = null
+  editVisible.value = false
+}
 // 获取数据
 
 getCacheFormData()
