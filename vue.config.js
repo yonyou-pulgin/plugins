@@ -12,7 +12,7 @@ require('events').EventEmitter.defaultMaxListeners = 0 // 解除限制 node报�
 module.exports = defineConfig({
   transpileDependencies: false,
   lintOnSave: false,
-  publicPath: process.env.NODE_ENV === 'production' ? 'https://uat.yygongzi.com/uatplugin/' : './',
+  publicPath: process.env.NODE_ENV === 'production' ? 'https://uat.yygongzi.com/uatplugin/static/' : './',
   outputDir: 'dist',
   assetsDir: 'static',
   productionSourceMap: true,
@@ -64,16 +64,16 @@ module.exports = defineConfig({
       // 指定 CDN 路径并添加时间戳
       config.output = {
         ...config.output,
-        filename: `[name].js?key=new Date()`,
-        chunkFilename: `[name].chunk.js?key=new Date()`,
+        filename: `[name].js?key=${timestamp}`,
+        chunkFilename: `[name].chunk.js?key=${timestamp}`,
         // publicPath: 'https://www.yygongzi.com/demoplugin/' // CDN 路径后添加时间戳
       };
       // 生产环境配置段内添加：
       config.plugins = config.plugins.map(plugin => {
         if (plugin instanceof MiniCssExtractPlugin) {
           return new MiniCssExtractPlugin({
-            filename: `static/css/[name].css?key=new Date()`,
-            chunkFilename: `static/css/[name].chunk.css?key=new Date()`
+            filename: `[name].css?key=${timestamp}`,
+            chunkFilename: `[name].chunk.css?key=${timestamp}`
           })
         }
         return plugin
