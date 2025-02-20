@@ -53,6 +53,7 @@ import yyInput from '@/antDesignComponents/yyInput/yy-input.vue';
 import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 import { detail } from './data';
+import jslog from 'jsLog';
 
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
@@ -113,9 +114,16 @@ watch(() => currentConfirm.value, (val) => {
   }
 })
 
+const jslogInstance = new jslog();
 const handleClick = () => {
   try {
-    window.frames.yygio("track", 'plugin_down_btn', { userId : tableInfo.value.userId, tenantId: tableInfo.value.tenantId });
+    const tenantId = tableInfo.value.tenantId || tenantKey.value
+    const userId = tableInfo.value.userId || userId.value
+    jslogInstance.push({
+      eventId: "plugin_downBtn",
+      name: '批量下载按钮',
+      params: `${currentConfirm.value}-${tenantId}-${userId}`
+    })
   } catch (error) {
     console.log(error);
   }
