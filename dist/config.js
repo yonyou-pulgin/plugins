@@ -6,7 +6,7 @@ let requestCount = 0;
 // 从服务端获取最新的html代码
 async function fetchHtml() {
     // 加上时间戳避免缓存
-    return await fetch(`/plugin/version.txt?timestamp=${+new Date()}`)
+    return await fetch(`https://www.yygongzi.com/plugin/version.txt?timestamp=${+new Date()}`)
         .then(res => res.text())
 }
 
