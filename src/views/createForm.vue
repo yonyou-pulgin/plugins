@@ -117,12 +117,10 @@ watch(() => currentConfirm.value, (val) => {
 const jslogInstance = new jslog();
 const handleClick = () => {
   try {
-    const tenantId = tableInfo.value.tenantId || tenantKey.value
-    const userId = tableInfo.value.userId || userId.value
     jslogInstance.push({
       eventId: "plugin_downBtn",
       name: '批量下载按钮',
-      params: `${currentConfirm.value}-${tenantId}-${userId}`
+      params: `${currentConfirm.value}`
     })
   } catch (error) {
     console.log(error);
