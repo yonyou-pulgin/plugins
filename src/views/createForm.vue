@@ -7,7 +7,7 @@
     <div class="create-container-title">
       <span>创建手写签字确认单</span>
     </div>
-    <yySteps class="plugins-steps" :class="{ 'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck }" :steps="stepList"
+    <yySteps class="plugins-steps" :steps="stepList"
       :indes="current" @next="handleNext" @prev="handlePrev">
       <addGroup />
       <yy-button v-if="current && current < stepList.length - 1 && current != stepList.length - 1"
