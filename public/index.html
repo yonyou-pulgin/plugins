@@ -9,9 +9,37 @@
     <meta http-equiv="Expires" content="0" />
     <title>签字确认</title>
     <script src="https://tam.cdn-go.cn/aegis-sdk/latest/aegis.f.min.js"></script>
-    <script src="./config.js?version=12345678"></script>
     </head>
     <body>
       <div id="app"></div>
     </body>
+        
+    <script>
+    const assets = {
+      scripts: [
+        '<%= BASE_URL %>chunk-vendors.js',
+        '<%= BASE_URL %>app.js'
+      ],
+      styles: [
+        '<%= BASE_URL %>app.css'
+      ]
+    };
+
+    // 加载CSS
+    assets.styles.forEach(url => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = url + `?version=${Math.random()}`;
+      document.head.appendChild(link);
+    });
+
+    // 加载JS
+    assets.scripts.forEach(url => {
+      const script = document.createElement('script');
+      script.defer = true;
+      script.src =  url + `?version=${Math.random()}`;
+      document.head.appendChild(script);
+    });
+
+    </script>
   </html>

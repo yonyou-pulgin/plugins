@@ -9,7 +9,6 @@ const fs = require('fs')
 const host = 'dev'
 const SriPlugin = require('webpack-subresource-integrity')
 require('events').EventEmitter.defaultMaxListeners = 0 // 解除限制 node报错
-
 module.exports = defineConfig({
   transpileDependencies: false,
   lintOnSave: false,
@@ -35,6 +34,7 @@ module.exports = defineConfig({
       //   args[0].metaContent = 'default-src data: wss: \'self\' \'unsafe-inline\' \'unsafe-eval\' *.aliyuncs.com *.effirst.com *.qwps.cn *.kdocs.cn *.wpscdn.cn *.ksyun.com dw-online.ksosoft.com shuc-js.ksord.com *.wps.cn *.yygongzi.com *.qq.com *.dingtalk.com *.alicdn.com *.npsmeter.cn *.ahc.ink *.rumt-zh.com rumt-zh.com *.aihecong.com *.myqcloud.com *.giocdn.com *.bytegoofy.com clarity.ms *.clarity.ms cdn-go.cn *.cdn-go.cn *.growingio.com *.xinfushe.com xinfushe.com;img-src data: wss: \'self\' \'unsafe-inline\' \'unsafe-eval\' *;'
       //   args[0].httpEquiv = 'Content-Security-Policy'
       // }
+      args[0].inject = false; 
       args[0].configVersion = Date.now()
       args[0].title = '插件'
       return args
@@ -52,10 +52,6 @@ module.exports = defineConfig({
   },
     // 配置 webpack 的 output
   configureWebpack: config => {
-
-    // fs.writeFileSync(
-    // path.resolve(__dirname, 'public/version.txt'),
-    // Date.now().toString())
     // 生成时间戳
     const timestamp = new Date().getTime(); // 获取当前时间的时间戳
 
@@ -71,7 +67,8 @@ module.exports = defineConfig({
       if (plugin instanceof MiniCssExtractPlugin) {
         return new MiniCssExtractPlugin({
           filename: `[name].css?key=${timestamp}`,
-          chunkFilename: `[name].chunk.css?key=${timestamp}`
+          chunkFilename: `[name].chunk.css?key=${timestamp}`,
+          insert: () => {}
         })
       }
       return plugin

@@ -11,6 +11,9 @@
       <div class="success-qr" v-if="qrUrl && confrimInfo.isVerifyIdentity">
         <img :src="qrUrl" alt="" width="280px">
       </div>
+      <div class="success-footer">
+        <addGroup />
+      </div>
     </div>
 </template>
 
@@ -21,6 +24,7 @@ import yyButton from '@/antDesignComponents/yyButton/yy-button.vue'
 import useConfirmInfo from '../hooks/useConfirmInfo';
 import { bitable } from '@lark-base-open/js-sdk';
 import { message } from 'ant-design-vue';
+import addGroup from './components/addGroup.vue';
 
 const { formData, confrimInfo } = useConfirmInfo()
 
@@ -86,6 +90,21 @@ onMounted(() => {
     .ant-button{
       height: 32px!important;
     }
+  }
+
+  &-footer{
+    margin-top: 24px;
+    text-align: center;
+    padding: 12px 6px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    padding: 12px 20px !important;
+    display: flex   ;
+    justify-content: flex-end;
+    border-top: 1px solid #e4e7ed;
   }
 }
 

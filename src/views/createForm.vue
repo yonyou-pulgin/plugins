@@ -7,8 +7,9 @@
     <div class="create-container-title">
       <span>创建手写签字确认单</span>
     </div>
-    <yySteps class="plugins-steps" :class="{ 'plugins-steps-isVerifyIdentity': isVerifyIdentityCheck }" :steps="stepList"
+    <yySteps class="plugins-steps" :steps="stepList"
       :indes="current" @next="handleNext" @prev="handlePrev">
+      <addGroup />
       <yy-button v-if="current && current < stepList.length - 1 && current != stepList.length - 1"
         class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
       <yy-button v-if="current == 0 && current != stepList.length - 1" class="steps-action-button yy-custom-btn-operate"
@@ -54,6 +55,7 @@ import useConfirmInfo from '@/hooks/useConfirmInfo'
 import useTableBase from '@/hooks/useTableBase.js';
 import { detail } from './data';
 import jslog from 'jsLog';
+import addGroup from './components/addGroup.vue';
 
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
