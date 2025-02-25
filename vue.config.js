@@ -68,7 +68,6 @@ module.exports = defineConfig({
         return new MiniCssExtractPlugin({
           filename: `[name].css?key=${timestamp}`,
           chunkFilename: `[name].chunk.css?key=${timestamp}`,
-          insert: () => {}
         })
       }
       return plugin
