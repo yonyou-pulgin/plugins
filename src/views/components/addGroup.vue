@@ -31,8 +31,19 @@
 
 <script setup>
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue';
+import jslog from 'jsLog';
 
+const jslogInstance = new jslog();
 const handleAddGroup = () => {
+  try {
+    jslogInstance.push({
+      eventId: "plugin_addGroupBtn",
+      name: '按钮加群',
+      params: ''
+    })
+  } catch (error) {
+    console.log(error);
+  }
   window.open('https://go.larkoffice.com/join-chat/22cs5666-9280-479f-9afc-c6a2792a8e41')
 }
 </script>
