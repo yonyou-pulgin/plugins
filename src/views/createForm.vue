@@ -479,7 +479,10 @@ watch(() => formData.value, async(val) => {
   // fix 缓存数据表不存在时，切换表单数据表
   if(sheetListId.length && !sheetListId.includes(cacheTableId) && !initFlag.value){
     // 切换表
+ 
     current.value = 0
+    formData.value.dataSheet = currentTableId
+    formData.value.signType = 0
     const table = await bitable.base.getTable(currentTableId);
     tableInfo.value.tableId = table.id
     setTableInfo(tableInfo.value, 'change')
