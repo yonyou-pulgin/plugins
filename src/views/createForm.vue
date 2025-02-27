@@ -60,7 +60,7 @@ import addGroup from './components/addGroup.vue';
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
   addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId:currentConfirm,
-  deleteField } = useTableBase();
+  deleteField, sheetList } = useTableBase();
 const { formData, setFormData, resetFormData, setConfrimInfo, getCacheFormData, editDataFlag } = useConfirmInfo()
 
 const loading = ref(false)
@@ -475,7 +475,17 @@ watch(() => formData.value, async(val) => {
   if(!initFlag.value) current.value = val.currentStep || 0
   const currentTableId = tableInfo.value.tableId
   const cacheTableId = val.dataSheet || val.tableId
-  
+  const sheetListId = sheetList.value.map(item => item.id) || [];
+  // fix 缓存数据表不存在时，切换表单数据表
+  if(sheetListId.length && !sheetListId.includes(cacheTableId) && !initFlag.value){
+    // 切换表
+    current.value = 0
+    const table = await bitable.base.getTable(currentTableId);
+    tableInfo.value.tableId = table.id
+    setTableInfo(tableInfo.value, 'change')
+    initFlag.value = true
+    return false
+  }
   if(currentTableId && currentTableId != cacheTableId){
     // 切换表
     const table = await bitable.base.getTable(cacheTableId);
