@@ -482,7 +482,7 @@ watch(() => formData.value, async(val) => {
  
     current.value = 0
     formData.value.dataSheet = currentTableId
-    formData.value.signType = 0
+    // formData.value.signType = 0
     const table = await bitable.base.getTable(currentTableId);
     tableInfo.value.tableId = table.id
     setTableInfo(tableInfo.value, 'change')
