@@ -11,9 +11,6 @@
       <div class="success-qr" v-if="qrUrl && confrimInfo.isVerifyIdentity">
         <img :src="qrUrl" alt="" width="280px">
       </div>
-      <div class="success-footer">
-        <addGroup />
-      </div>
     </div>
 </template>
 
