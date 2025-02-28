@@ -1,3 +1,80 @@
 {
-  "title":"标题"
+  "mobileSetting": {
+    "confirmTitle": "数据表",
+    "status": "已确认",
+    "status1": "确认中",
+    "status2": "未确认",
+    "desc": "当前确认单也支持手机扫码操作",
+    "desc1": "签字确认",
+    "desc2": "请在下方灰色区域内签字",
+    "fullScreen": "全屏签字",
+    "exitFullScreen": "退出全屏",
+    "confirmBtn": "签好了，提交",
+    "cancelBtn": "清除重写"
+  },
+  "baseSetting": {
+    "createLoading": "创建中，请稍等",
+    "step1": "选择数据",
+    "step2": "设置确认单",
+    "step3": "创建完成",
+    "addGroup": "加入交流群",
+    "prevBtn": "上一步",
+    "nextBtn": "下一步",
+    "previewBtn": "在线预览"
+  },
+  "editSetting": {
+    "editTitle" : "是否修改当前确认单？",
+    "editContent": "历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！",
+    "editBtn" : "修改编辑",
+    "downBtn" : "批量下载当前确认单",
+    "downBtnTip": "程序员小哥正在开发中，请耐心等待"
+  },
+  
+  "confirmTitle": "创建手写签字确认单",
+  "selectTable": "选择数据表",
+  "selectTableTip": "请选择数据表",
+  "confirmType": "选择确认单类型",
+  "confirmTypeRadio1": "签字内容+签字框",
+  "confirmTypeRadio2": "仅签字框",
+  "confirmContent": "选择签字内容",
+  "confirmContentEmpty": "选择数据表后自动识别",
+  "isHiddenEmpty": "隐藏为空数据项",
+  "isHiddenZero": "隐藏为0数据项",
+  "confirmContentEmptyTip": "请选择签字内容",
+  "attachmentType": "当前仅支持图片，不支持其他文件格式",
+  "previewLoading": "预览数据生成中，请稍等",
+  "allCount" : "共计",
+  "count": "个",
+  "selectCount": "已选中",
+  "secondSetting": {
+    "confirmName": "确认单名称",
+    "confirmNameTip": "请输入确认单名称",
+    "confirmNameSignType" : "选择签字模式",
+    "confirmNameSignType1" : "单人签字",
+    "confirmNameSignType2" : "多人签字",
+    "isVerify": "是否验证身份",
+    "selectPhone": "选择手机号",
+    "selectPhoneTip": "请选择手机号",
+    "selectPerson": "选择签字人",
+    "selectPersonTip": "请选择签字人",
+    "addSelectPerson": "增加签字人",
+    "deleteSelectPerson": "删除",
+    "confirmSync": "表中新增数据是否同步创建确认单",
+    "confirmSyncTip": "开启后，当数据表新增一行记录时，自动创建一个确认单。",
+    "tableAuthCode" : "多维表授权码",
+    "tableAuthCodeTip" : "请填写授权码",
+    "tableAuthCodeTip2" : "如何获得授权码？",
+    "addFormalField" : "增加自动化签字链接列",
+    "addFormalFieldTip" : "勾选后创建多维表自动化流程，可以实现飞书推送签字消息"
+  },
+  "thirdSetting": {
+    "copyLink": "复制链接",
+    "downCode": "下载二维码",
+    "confirmSuccess": "创建完成",
+    "verifyConfirm": "创建的是「有校验身份」确认单",
+    "verifyConfirm1": "可将二维码/链接发给对方进行签字确认",
+    "noVerifyConfirm": "创建的是「无校验身份」确认单",
+    "noVerifyConfirm1": "可将链接发给对方进行签字确认"
+  }
 }
+

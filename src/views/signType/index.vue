@@ -1,29 +1,29 @@
 <template>
   <div class="sign-type">
-    <div class="sign-type-head">选择签字模式</div>
-    <div class="sign-type-switch" :class="{'sign-type-switch-disabled':isEditVisible}">
-      <span :class="{'is-active': signType == 0}" @click="handleSignType(0)">单人签字</span>
-      <span :class="{'is-active': signType == 1}" @click="handleSignType(1)">多人签字</span>
+    <div class="sign-type-head"> {{ $t('secondSetting.confirmNameSignType') }}</div>
+    <div class="sign-type-switch" :class="{'sign-type-switch-disabled':isEditVisible , 'sign-type-auto': tableInfo.lang != 'zh'}">
+      <span :class="{'is-active': signType == 0}" @click="handleSignType(0)"> {{ $t('secondSetting.confirmNameSignType1') }}</span>
+      <span :class="{'is-active': signType == 1}" @click="handleSignType(1)"> {{ $t('secondSetting.confirmNameSignType2') }}</span>
     </div>
 
     <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5, 'sign-type-switch-disabled':isEditVisible}">
-      <a-checkbox class="checkbox-plugin" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity">是否验证身份</a-checkbox>
+      <a-checkbox class="checkbox-plugin" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity"> {{ $t('secondSetting.isVerify') }}</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
         <div class="sign-type-item-label" v-if="signType">
           <img src="@/assets/img/noSign.png" alt="">
-          <span class="sign-type-item-title">选择签字人</span>
-          <span v-if="configFields.length > 2 && !isEditVisible" class="sign-type-item-del" @click="handleSignTypeDel(index)"> 删除</span>
+          <span class="sign-type-item-title">{{ $t('secondSetting.selectPerson') }}</span>
+          <span v-if="configFields.length > 2 && !isEditVisible" class="sign-type-item-del" @click="handleSignTypeDel(index)">  {{ $t('secondSetting.deleteSelectPerson') }}</span>
         </div>
-        <yy-select v-if="signType" class="yy-fs-from-item"  placeholder="请选择签字人" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
+        <yy-select v-if="signType" class="yy-fs-from-item" :placeholder="$t('secondSetting.selectPersonTip')" :showArrow="true" :options="userFields" v-model:value="item.signPeopleFieldId"  @change="handleChange(index, $event, 'user')"></yy-select>
         <div class="sign-type-item-label" v-if="isVerifyIdentity">
-          <span class="sign-type-item-title">选择手机号</span>
+          <span class="sign-type-item-title">{{ $t('secondSetting.selectPhone') }}</span>
         </div>
-        <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
+        <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  :placeholder="$t('secondSetting.selectPhoneTip')" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
       <div v-if="signType && configFields.length < 5 && !isEditVisible" class="sign-type-add" @click="handleSignTypeAdd">
-        增加签字人
+        {{ $t('secondSetting.addSelectPerson') }}
       </div>
     </div>
   </div>
@@ -220,6 +220,10 @@ const handleChange = (index, val, key) => {
         border-color: #6191ff;
       }
     }
+  }
+
+  &-auto{
+    width: 100%;
   }
 
   &-list{

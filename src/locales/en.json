@@ -1,3 +1,82 @@
 {
-  "title":"title"
+  "mobileSetting": {
+    "confirmTitle": "Data table",
+    "status": "Confirmed",
+    "status1": "Confirming",
+    "status2": "Unconfirmed",
+    "desc": "The current confirmation form also supports mobile phone QR code scanning operations.",
+    "desc1": "Sign for confirmation",
+    "desc2": "Please sign in the gray area below.",
+    "fullScreen": "Full-screen signature",
+    "exitFullScreen": "Exit full screen",
+    "confirmBtn": "It's signed. Submit it.",
+    "cancelBtn": "Clear and rewrite"
+  },
+  "baseSetting": {
+    "createLoading": "Creating, please wait a moment.",
+    "step1": "Select data",
+    "step2": "Setting Confirmation Form",
+    "step3": "Creation completed",
+    "addGroup": "Join the communication group",
+    "prevBtn": "Previous step",
+    "nextBtn": "Next step",
+    "previewBtn": "Online preview"
+  },
+  "editSetting": {
+    "editTitle": "Do you want to modify the current confirmation form?",
+    "editContent": "The data that has been signed in the history cannot be modified. Only the data of the unsigned confirmation slips can be modified and edited!",
+    "editBtn": "Modify and edit",
+    "downBtn": "Batch download the current confirmation form",
+    "downBtnTip": "The programmer is currently developing. Please wait patiently."
+  },
+  "confirmTitle": "Create a handwritten signature confirmation form.",
+  "selectTable": "Select data table",
+  "selectTableTip": "Please select the data table.",
+  "confirmType": "Select the confirmation form type",
+  "confirmTypeRadio1": "Signature content + Signature box",
+  "confirmTypeRadio2": "Signature box only",
+  "confirmContent": "Select the signed content",
+  "confirmContentEmpty": "Automatically identify after selecting the data table.",
+  "isHiddenEmpty": "Hide empty data items",
+  "isHiddenZero": "Hide data items with a value of 0",
+  "confirmContentEmptyTip": "Please select the signature content.",
+  "attachmentType" : "Currently, only images are supported, and other file formats are not supported.",
+  "previewLoading": "Data preview is being generated. Please wait a moment.",
+  "allCount" : "Total",
+  "count": "piece",
+  "selectCount": "Selected",
+  "secondSetting": {
+    "confirmName": "Confirmation form name",
+    "confirmNameTip": "Please enter the name of the confirmation form.",
+    "confirmNameSignType": "Select the signature mode",
+    "confirmNameSignType1": "Single signature",
+    "confirmNameSignType2": "Multiple signatures",
+    "isVerify": "Whether to verify the identity",
+    "selectPhone": "Select the mobile phone number",
+    "selectPhoneTip": "Please select a mobile phone number.",
+    "selectPerson": "Select the signatory",
+    "selectPersonTip": "Please select the signatory.",
+    "addSelectPerson": "Add a signatory",
+    "deleteSelectPerson": "Delete",
+    "confirmSync": "Whether to synchronously create a confirmation form for the newly added data in the table?",
+    "confirmSyncTip": "After enabling, when a new row of records is added to the data table, a confirmation form will be automatically created.",
+    "tableAuthCode": "Multi-dimensional table authorization code",
+    "tableAuthCodeTip": "Please enter the authorization code.",
+    "tableAuthCodeTip2": "How can I obtain the authorization code?",
+    "addFormalField": "Add an automated signing link column",
+    "addFormalFieldTip": "After checking, create a multi-dimensional table automation process, which can achieve Feishu push of signature messages."
+  },
+  "thirdSetting": {
+    "copyLink": "Copy the link",
+    "downCode": "Download QR code",
+    "confirmSuccess": "Creation completed",
+    "confirmSuccessTip": "For the confirmation form with \"identity verification\" created, \t you can send the QR code/link to the other party for signature confirmation.",
+    "confirmSuccessTip2": "The created confirmation form with \"no identity verification\" allows you to send the link to the other party for signature confirmation.",
+    "verifyConfirm": "The created confirmation form is the one with 'identity verification'",
+    "verifyConfirm1": "You can send the QR code/link to the other party for signature confirmation.",
+    "noVerifyConfirm":  "The created confirmation form is for 'no identity verification'",
+    "noVerifyConfirm1": "You can send the link to the other party for signature confirmation."
+
+  }
 }
+

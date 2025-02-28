@@ -2,15 +2,15 @@
   <div class="form-container">
     <div class="loading-container" v-if="previewLoading">
       <div class="loading-gif"></div>
-      <span>预览数据生成中，请稍等</span>
+      <span>{{ $t('previewLoading') }}</span>
     </div>
     <div class="form-content">
       <div class="form-item" @click="handleEditToast">
-        <span class="form-item-label required">选择数据表</span>
-        <yy-select :disabled="isEditVisible" class="yy-fs-from-item" placeholder="请选择数据表" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
+        <span class="form-item-label required">{{ $t('selectTable') }}</span>
+        <yy-select :disabled="isEditVisible" class="yy-fs-from-item" :placeholder="$t('selectTableTip')" :showArrow="true" :options="sheetList" v-model:value="dataSheet" @change="handleDataSheet(dataSheet, '')"></yy-select>
       </div>
       <div class="form-item">
-        <div class="form-item-label required">选择确认单类型
+        <div class="form-item-label required">{{ $t('confirmType') }}
           <yy-tooltip style="margin-top: 4px;" overlayClassName="type-tooltips" placement="bottom" :arrowPointAtCenter="false"	isWhite :autoAdjustOverflow="true">
             <template #title>
               <img src="@/assets/img/tips.png" width="306" />
@@ -19,7 +19,7 @@
         </div>
         <div class="yy-from-radio">
           <a-radio-group v-model:value="formStep1Data.confirmType">
-            <a-radio class="plugin-form-radio" v-for="item in [{label: '签字内容+签字框', value:  2}, {label: '仅签字框', value: 1}]" 
+            <a-radio class="plugin-form-radio" v-for="item in [{label: $t('confirmTypeRadio1'), value:  2}, {label: $t('confirmTypeRadio2'), value: 1}]" 
               :key="item.value" :value="item.value" >
               {{item.label}}
             </a-radio>
@@ -27,8 +27,8 @@
         </div>
      </div>
       <div class="form-item" v-if='formStep1Data.confirmType == 2'>
-        <span class="form-item-label required">选择签字内容 <span v-if="dataSheet">{{fieldTitle}}</span></span>
-        <div class="form-item-empty" v-if="!dataSheet">选择数据表后自动识别</div>
+        <span class="form-item-label required">{{$t('confirmContent')}} <span v-if="dataSheet">{{fieldTitle}}</span></span>
+        <div class="form-item-empty" v-if="!dataSheet">{{ $t('confirmContentEmpty') }}</div>
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
           <div class="drag-all">
@@ -54,7 +54,7 @@
                   <component class="icon-svg-container" :is="fieldTypeMap[item.type] || 'icon-text'" />
                 {{item.name }}</a-checkbox>
               </div>
-              <div class="field-desc" v-if="item.type == 17">* 当前仅支持图片，不支持其他文件格式</div>
+              <div class="field-desc" v-if="item.type == 17">* {{ $t('attachmentType') }}</div>
             </li>
           </VueDraggable>
         </template>
@@ -89,6 +89,9 @@ import bus from '@/eventBus/bus.js'
 import useConfirmInfo from '@/hooks/useConfirmInfo.js';
 const { formData, setFormData, editDataFlag } = useConfirmInfo();
 import { message } from 'ant-design-vue';
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const fieldTypeMap = {
   1: 'icon-text',
@@ -147,10 +150,11 @@ const scrollSensitivity = ref(150)
 const fieldsSortList = ref([]) //排序数组
 // 隐藏项
 const hiddenCheckedList = ref([])
-const plainOptions = [
+const plainOptions = ref([
   { label: '隐藏为空数据项', value: 'isHiddenEmpty' },
   { label: '隐藏为0数据项', value: 'isHiddenZero' },
-];
+]);
+
 const fieldAllChecked = ref(true)
 const previewLoading = ref(false)
 const tableChangeFlag = ref(false) // 监听切换数据表
@@ -162,7 +166,7 @@ const allFields = computed(() => {
 })
 // 确认单选择文案
 const fieldTitle = computed(() => {
-  return `(共计：${fieldsSortListLenth.value}个，已选中：${selectFields.value.length}个)`
+  return `(${t('allCount')}：${fieldsSortListLenth.value}${t('count')}，：${t('selectCount')}${selectFields.value.length}${t('count')})`
 })
 
 const selectFields = computed(() => {
@@ -373,6 +377,10 @@ const sleep = (time) => {
   })
 }
 onMounted(async()=>{
+  plainOptions.value.forEach((item, index) => { 
+    item.label = t('isHiddenZero')
+    if(index == 1) item.label = t('isHiddenEmpty')
+  })
   bus.on('preview', () => {
     handlePreview()
   })

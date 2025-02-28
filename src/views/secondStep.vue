@@ -1,8 +1,8 @@
 <template>
   <div class="second-container">
     <div class="form-item">
-      <span class="form-item-label">确认单名称</span>
-      <yy-input :maxlength="50" v-model:value="currentTableName" placeholder="请输入确认单名称" @change="handleChangeTableName"></yy-input>
+      <span class="form-item-label"> {{ $t('secondSetting.confirmName') }}</span>
+      <yy-input :maxlength="50" v-model:value="currentTableName" :placeholder="$t('secondSetting.confirmNameTip')" @change="handleChangeTableName"></yy-input>
     </div>
 
     <signType class="sign-type-content" />
@@ -17,21 +17,21 @@
       <yy-select class="yy-fs-from-item" :class="{'yy-fs-from-item-error': checkPhoneFieldFlag }" placeholder="请选择手机号列" :showArrow="true" :options="phoneFields" v-model:value="fromData.mdnFieldId" ></yy-select>
     </div> -->
     <div class="form-item form-item-row">
-      <span class="form-item-label">表中新增数据是否同步创建确认单&nbsp;
-        <yy-tooltip :overlayStyle="{'width': '200px'}" content="开启后，当数据表新增一行记录时，自动创建一个确认单。"></yy-tooltip>
+      <span class="form-item-label"> {{ $t('secondSetting.confirmSync') }}&nbsp;
+        <yy-tooltip :overlayStyle="{'width': '200px'}" :content="$t('secondSetting.confirmSyncTip') "></yy-tooltip>
       </span>
       <yy-switch :disabled="isEditVisible" v-model:checked="fromData.isNewRecordConfirm"></yy-switch>
     </div>
     <div class="form-item" v-if="fromData.isNewRecordConfirm">
-      <span class="form-item-labelTitle">多维表授权码
-        <div class="link-btn" @click="handleGetAuth">如何获得授权码？</div>
+      <span class="form-item-labelTitle">{{ $t('secondSetting.tableAuthCode') }}
+        <div class="link-btn" @click="handleGetAuth">{{ $t('secondSetting.tableAuthCodeTip2') }}</div>
       </span>
-      <yy-input :maxlength="100" v-model:value="fromData.personalBaseToken" placeholder="请填写授权码"></yy-input>
+      <yy-input :maxlength="100" v-model:value="fromData.personalBaseToken" :placeholder="$t('secondSetting.tableAuthCodeTip')"></yy-input>
     </div>
 
     <div class="form-item form-item-row" style="justify-content: flex-start;" v-if="fromData.isNewRecordConfirm">
-      <a-checkbox v-model:checked="fromData.formulaLink">增加自动化签字链接列</a-checkbox>
-      <yy-tooltip :overlayStyle="{'width': '200px'}" content="勾选后创建多维表自动化流程，可以实现飞书推送签字消息"></yy-tooltip>
+      <a-checkbox v-model:checked="fromData.formulaLink">{{ $t('secondSetting.addFormalField') }}</a-checkbox>
+      <yy-tooltip :overlayStyle="{'width': '200px'}" :content="$t('secondSetting.addFormalField')"></yy-tooltip>
     </div>
 
     <getAuthCode ref="getAuthCodeInstance" />

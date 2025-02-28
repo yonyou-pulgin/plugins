@@ -1,5 +1,5 @@
 <template>
-  <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleAddGroup">
+  <yy-button class="steps-action-button yy-custom-btn-operate add-group-operate" @click="handleAddGroup">
     <div class="fire-icon">
       <svg width="15px" height="18px" viewBox="0 0 15 18" version="1.1" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -23,9 +23,9 @@
           </g>
         </g>
       </svg>
+       </div>
+      {{ $t('baseSetting.addGroup') }}
 
-      加入交流群
-    </div>
   </yy-button>
 </template>
 
@@ -55,5 +55,9 @@ const handleAddGroup = () => {
   svg{
     margin-top: -5px;
   }
+}
+.add-group-operate{
+  display: flex;
+  align-items: center;
 }
 </style>

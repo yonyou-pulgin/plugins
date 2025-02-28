@@ -76,7 +76,7 @@ const props = defineProps({
         color: #f7f8fa;
         text-align: center;
         line-height: 18px;
-
+        min-width: 18px;
       }
       .steps-title {
         display: inline-block;

@@ -35,7 +35,7 @@
   </div>
 </template>
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import minSteps from './steps.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { debounce } from 'lodash'
@@ -123,7 +123,7 @@ const finish = debounce(() => {
   emit('finish')
 }, 500)
 
-const items = props.steps.map(item => ({ key: item.title, title: item.title }))
+const items = computed(() => props.steps.map(item => ({ key: item.title, title: item.title })))
 
 watch(() => props.indes, (newVal) => {
   if (props.isSetRouteStep) {

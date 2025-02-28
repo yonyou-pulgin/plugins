@@ -1,38 +1,38 @@
 <template>
   <div class="loading-container" v-if="loading">
     <div class="loading-gif"></div>
-    <span>创建中，请稍等</span>
+    <span>{{ $t('baseSetting.createLoading') }}</span>
   </div>
   <div class="create-container">
     <div class="create-container-title">
-      <span>创建手写签字确认单</span>
+      <span>{{ $t('confirmTitle') }}</span>
     </div>
     <yySteps class="plugins-steps" :steps="stepList"
       :indes="current" @next="handleNext" @prev="handlePrev">
       <addGroup />
       <yy-button v-if="current && current < stepList.length - 1 && current != stepList.length - 1"
-        class="steps-action-button yy-custom-btn-operate" @click="handlePrev">上一步</yy-button>
+        class="steps-action-button yy-custom-btn-operate" @click="handlePrev">{{ $t('baseSetting.prevBtn') }}</yy-button>
       <yy-button v-if="current == 0 && current != stepList.length - 1" class="steps-action-button yy-custom-btn-operate"
-        @click="handlePreview">在线预览</yy-button>
+        @click="handlePreview">{{ $t('baseSetting.previewBtn') }}</yy-button>
       <yy-button :disabled="nextStepDisabled" v-if="current < stepList.length - 1" type="primary"
-        @click="handleNext">下一步</yy-button>
+        @click="handleNext">{{ $t('baseSetting.nextBtn') }}</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
-          <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">复制链接</yy-button>
-          <yy-button type="primary" @click="handleDownQr">下载二维码</yy-button>
+          <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">{{ $t('baseSetting.previewBtn') }}</yy-button>
+          <yy-button type="primary" @click="handleDownQr">{{ $t('baseSetting.previewBtn') }}</yy-button>
         </template>
         <!-- <yy-button v-else type="primary" @click="closePlugin">完成</yy-button> -->
       </template>
     </yySteps>
   </div>
-  <yy-modal customClass="edit-confirm-modal" :width="280" title="是否修改当前确认单？" v-model:open="editVisible" 
+  <yy-modal customClass="edit-confirm-modal" :width="280" :title="$t('editSetting.editTitle')" v-model:open="editVisible" 
   :isHeaderBottomBorder="false" :footer="null" @cancel="handleVisible" >
     <div class="edit-content">
       <div class="edit-content-desc">
-        历史已签字数据无法修改，只能对未签字确认单数据进行修改编辑！
+        {{ $t('editSetting.editContent') }}
       </div>
-      <yy-button type="primary" @click="getConfirmDetails">修改编辑</yy-button>
-      <yy-button @click="handleClick">批量下载当前确认单</yy-button>
+      <yy-button type="primary" @click="getConfirmDetails">   {{ $t('editSetting.editBtn') }}</yy-button>
+      <yy-button @click="handleClick">   {{ $t('editSetting.downBtn') }}</yy-button>
     </div>
   </yy-modal>
 </template>
@@ -42,7 +42,7 @@ import { bitable } from '@lark-base-open/js-sdk';
 import { ref, reactive, onMounted, watch, computed, nextTick, onBeforeUnmount} from 'vue'
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3'
-import { createConfirm, confirmUpdate, getConfirmInfo, confirmOperate } from '@/api/api.js';
+import { createConfirm, confirmUpdate, getConfirmInfo, confirmOperate, confirmPreview } from '@/api/api.js';
 import yySteps from '@/antDesignComponents/business-components/yySteps/yy-steps.vue'
 import yyButton from '@/antDesignComponents/yyButton/yy-button.vue';
 import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
@@ -56,7 +56,9 @@ import useTableBase from '@/hooks/useTableBase.js';
 import { detail } from './data';
 import jslog from 'jsLog';
 import addGroup from './components/addGroup.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const { toClipboard } = useClipboard()
 const { setTableInfo, tableInfo, tenantKey, addField, userId, fieldList, tableData, tableName, addImgField, getCellUrlResult, checkHasAttachment,
   addFormulaField, addSingleSelectField, closePlugin, addFormulaLinkField, setUserField, findFieldIndex, tableIdChangeFlag, confirmId:currentConfirm,
@@ -128,7 +130,7 @@ const handleClick = () => {
     console.log(error);
   }
   message.info({
-    content: '程序员小哥正在开发中，请耐心等待',
+    content: t('baseSetting.downBtnTip'),
     class: 'yy-message-error',
   })
 }
@@ -199,6 +201,8 @@ const arrToObj = (arr) => {
 const getParams = () => {
   errorMessages.value = ''
   const params = Object.assign({}, formData.value)
+  params.env = tableInfo.value.env
+  params.lang = tableInfo.value.lang
   params.baseId = tableInfo.value.baseId
   params.tableId = tableInfo.value.tableId
   params.tenantId = tableInfo.value.tenantId || tenantKey.value
@@ -281,6 +285,50 @@ const handleSubmit = async () => {
     }
 
   }
+
+  const myNextTick = async () => {
+    
+    let observerOption = {
+      childList: true,
+      attributes: true,
+      subTree: true
+    }
+
+    const observer = new MutationObserver(() => {
+      cb()
+    })
+
+
+    observer.observe(document.querySelector('.ant-modal-body'), observerOption)
+  }
+
+  const loop = (arr) => {
+    let result = [[]]
+
+    for (item of arr){
+      const length = result.length 
+
+      for(let i = 0 ; i < length; i++){
+        result[i].push([item])
+      }
+    }
+  }
+
+
+function combinations(nums) { // [1,2,3]
+  const result = [];
+  function backtrack(currentSubset, startIndex) { 
+    result.push([...currentSubset]); // [[]] [[], [1]]
+    for (let i = startIndex; i < nums.length; i++) {
+      currentSubset.push(nums[i]); // [1]
+      backtrack(currentSubset, i + 1); // [1] , 1
+      currentSubset.pop();[]
+    }
+  }
+  backtrack([], 0);
+  return result;
+}
+  console.log(combinations([1,2,3]));
   confirmOperate(params).then(async (res) => {
     if (res.success) {
       // 创建成功 清楚缓存数据
@@ -508,6 +556,10 @@ const handleVisible = () => {
 
 getCacheFormData()
 onMounted(async () => {
+  stepList.value = stepList.value.map((item, index) => {
+    item.title = t('baseSetting.step' + (index + 1))
+    return item
+  })
   // 比较当前表格和缓存表格是否一致  切换baseId 清空授权码
   const cacheBaseId = await bitable.bridge.getData('yy-baseId')
   const currentBaseId = tableInfo.value.baseId

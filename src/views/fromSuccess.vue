@@ -2,12 +2,12 @@
     <div class="success" :class="{'success-isVerifyIdentity': !confrimInfo.isVerifyIdentity}">
       <div class="success-head">
         <img src="@/assets/img/success.png" width="16px" alt="">
-      创建完成</div>
-      <div class="success-desc" v-if="confrimInfo.isVerifyIdentity">创建的是「有校验身份」确认单
+      {{ $t('thirdSetting.confirmSuccess') }}</div>
+      <div class="success-desc" v-if="confrimInfo.isVerifyIdentity"> {{ $t('thirdSetting.verifyConfirm') }}
         <br/>
-        可将二维码/链接发给对方进行签字确认</div>
-      <div class="success-desc" v-else>创建的是「无校验身份」确认单<br/>
-       可将链接发给对方进行签字确认</div>
+       {{ $t('thirdSetting.verifyConfirm1') }}</div>
+      <div class="success-desc" v-else> {{ $t('thirdSetting.noVerifyConfirm') }}<br/>
+        {{ $t('thirdSetting.noVerifyConfirm1') }}</div>
       <div class="success-qr" v-if="qrUrl && confrimInfo.isVerifyIdentity">
         <img :src="qrUrl" alt="" width="280px">
       </div>
