@@ -7,7 +7,7 @@
     </div>
 
     <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5, 'sign-type-switch-disabled':isEditVisible}">
-      <a-checkbox class="checkbox-plugin" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity"> {{ $t('secondSetting.isVerify') }}</a-checkbox>
+      <a-checkbox class="checkbox-plugin" :disabled="isZHLang" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity"> {{ $t('secondSetting.isVerify') }}</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
         <div class="sign-type-item-label" v-if="signType">
@@ -19,7 +19,7 @@
         <div class="sign-type-item-label" v-if="isVerifyIdentity">
           <span class="sign-type-item-title">{{ $t('secondSetting.selectPhone') }}</span>
         </div>
-        <yy-select v-if="isVerifyIdentity" class="yy-fs-from-item"  :placeholder="$t('secondSetting.selectPhoneTip')" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
+        <yy-select :disabled="isZHLang" v-if="isVerifyIdentity" class="yy-fs-from-item"  :placeholder="$t('secondSetting.selectPhoneTip')" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
       <div v-if="signType && configFields.length < 5 && !isEditVisible" class="sign-type-add" @click="handleSignTypeAdd">
@@ -88,6 +88,10 @@ const userFields = computed(() => {
 const allFieldId = computed(() => {
   return fieldList.value.map(item => item.id) || []
 })
+
+const isZHLang = computed(() => {
+  return tableInfo.value.lang != 'zh'
+})
 const handleEditToast = () => {
   message.error({
     content: '不可修改！如需修改，请重新创建确认单',
@@ -143,6 +147,15 @@ onMounted(() => {
 const handleSignType = (val) => {
   signType.value = val
   isVerifyIdentity.value = false
+  if(val == 0){
+    singleConfigFields.value = [
+      {
+        key: +Date.now(),
+        mdnFieldId: null,
+        mdnFieldName: null
+      }
+    ]
+  }
 }
 const handleSignTypeAdd = () => {
   configFields.value.push({
