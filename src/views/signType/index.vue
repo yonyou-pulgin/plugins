@@ -130,9 +130,7 @@ watch(() => [signType.value, isVerifyIdentity.value, configFields.value, singleC
 
 onMounted(() => {
   isVerifyIdentity.value = cacheFormData.value.isVerifyIdentity
-  if(tableInfo.value.lang!= 'zh'){
-    isVerifyIdentity.value = false
-  }
+
   signType.value = cacheFormData.value.signType || 0
   if(cacheFormData.value.configFields && cacheFormData.value.configFields.length) {
     if(signType.value){
@@ -143,6 +141,9 @@ onMounted(() => {
   }
   nextTick(() => {
     initFlag.value = true
+    if(tableInfo.value.lang != 'zh'){
+      isVerifyIdentity.value = false
+    }
     getPhoneField()
   })
 })
