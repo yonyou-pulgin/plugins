@@ -80,5 +80,23 @@
 		"verifyConfirm1": "可将二维码/链接发给对方进行签字确认",
 		"noVerifyConfirm": "创建的是「无校验身份」确认单",
 		"noVerifyConfirm1": "可将链接发给对方进行签字确认"
-	}
+	},
+  "field": {
+    "signUser": "签字人",
+    "result": "签字确认结果",
+    "signStatus": "签字状态",
+    "signQr": "签字二维码【发给签字人员】",
+    "formarlLink": "自动化签字链接",
+    "sign": "签字确认",
+    "onlineSign": "在线签字确认",
+    "viewSign": "查看签字结果",
+    "sendLink": "如何通过飞书自动化推送签字消息",
+    "status1": "未查看/未签字",
+    "status2": "已查看/已签字",
+    "status3": "已查看/未签字",
+    "sendDesc": "请把链接发给签字人员：",
+    "copyLink": "链接已复制，点击链接后可签字确认",
+    "qrDown": "二维码已下载，扫码后可签字确认",
+    "sortDesc": "排序字段不存在"
+  }
 }

@@ -225,7 +225,7 @@ const getParams = () => {
   } else {
     params.configFields = [{ mdnFieldName: null, mdnFieldId: null, sort: 1}]
   }
-  if (params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = '请填写授权码'
+  if (params.isNewRecordConfirm && !params.personalBaseToken) errorMessages.value = t('secondSetting.tableAuthCodeTip')
   return params
 }
 // 校验排序字段是否存在
@@ -246,7 +246,7 @@ const handleSubmit = async () => {
   const checkResult = await checkSortField(params.fieldSort)
   if (params.confirmType ==2 && (!params.fieldSort ||!params.fieldSort.length || checkResult)) {
     message.error({
-      content: '排序字段不存在',
+      content: t('field.sortDesc') || '排序字段不存在',
       class: 'yy-message-error',
     })
     current.value = 0
@@ -277,7 +277,7 @@ const handleSubmit = async () => {
     params.operate = 'update'
     if(!params.personalBaseToken && editDetail.value.personalBaseToken){
       message.error({
-        content: '请输入授权码',
+        content: t('secondSetting.tableAuthCodeTip'),
         class: 'yy-message-error',
       })
       loading.value = false
@@ -476,20 +476,20 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     // 无身份、无授权插入链接
     if (!isNewRecordConfirm && !isVerifyIdentity) {
     
-      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认'))
+      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.sign')))
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
-      fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
+      fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.result'), t('field.sendDesc')`${loginUrl}`))
       fieldArr.push(addImgField(insertIndex, currentTableId, qrUrl, successRecords))
     } else {
       // 有授权  插入公式、状态
       if (isVerifyIdentity) {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
-        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, '签字确认结果', `请把链接发给签字人员：${loginUrl}`))
-        if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, '自动化签字链接', false))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.sign'), t('field.sendDesc')`${loginUrl}`))
+        if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.formarlLink'), false))
       } else {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
-        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, '签字确认'))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, ))
         if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`,))
       }
     }
@@ -500,9 +500,9 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
 
 const handleCopyLink = async () => {
   try {
-    await toClipboard(`邀请您对【${confirmResult.value.confirmName || '数据表'}】签字确认点击链接：` + confirmResult.value.userViewUrl)
+    await toClipboard(`${t(fieldList.invite1)}${confirmResult.value.confirmName || '数据表'}${t(fieldList.invite2)}` + confirmResult.value.userViewUrl)
     message.success({
-      content: '链接已复制，点击链接后可签字确认',
+      content: t('field.copyLink'),
       class: 'yy-message-success',
     })
   } catch (e) {
@@ -511,7 +511,7 @@ const handleCopyLink = async () => {
 
 const handleDownQr = () => {
   message.success({
-    content: '二维码已下载，扫码后可签字确认',
+    content: t('field.qrDown'),
     class: 'yy-message-success',
   })
   setTimeout(() => {

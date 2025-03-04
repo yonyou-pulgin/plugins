@@ -2,7 +2,21 @@ import { ref, nextTick, toRaw } from 'vue'
 import { bitable } from '@lark-base-open/js-sdk';
 import { confirmImgDown } from '@/api/api.js'
 import { urltoBlob } from 'image-conversion'
+import ja from '@/locales/ja.json'
+import en from '@/locales/en.json'
+import zh from '@/locales/zh.json'
 
+
+const getLanguageField = (fieldTitle) => {
+  const lang = tableInfo.value.lang
+  if(lang === 'zh'){
+    return zh.field[fieldTitle]
+  } else if(lang === 'ja'){
+    return ja.field[fieldTitle]
+  } else {
+    return en.field[fieldTitle]
+  }
+}
 const FieldType = {
   Text: 1, // 多行文本
   Number: 2, // 数字
@@ -55,9 +69,9 @@ const dataURLtoFile = (dataurl, filename) =>{
 
 // 查找最大的下标
 const findFieldIndex = (fieldList) => {
-  const findHasFieldName = fieldList.filter(item => item.name.indexOf('签字人') > -1 ||  item.name.indexOf('签字确认结果') > -1 || item.name.indexOf('签字状态') > -1
-    || item.name.indexOf('签字二维码【发给签字人员】') > -1 || item.name.indexOf('自动化签字链接') > -1 || item.name.indexOf('签字确认结果') > -1 || 
-    item.name.indexOf('签字确认') > -1
+  const findHasFieldName = fieldList.filter(item => item.name.indexOf(getLanguageField('signUser')) > -1 ||  item.name.indexOf(getLanguageField('result')) > -1 || item.name.indexOf(getLanguageField('signStatus')) > -1
+    || item.name.indexOf(getLanguageField('signQr')) > -1 || item.name.indexOf(getLanguageField('formarlLink')) > -1 || item.name.indexOf(getLanguageField('result')) > -1 || 
+    item.name.indexOf(getLanguageField('sign')) > -1
   ).map(item => +item.name.replace(/\D/g, ''))
   insetFieldIndex.value =  0;
   if(findHasFieldName.length){
@@ -99,6 +113,7 @@ const setTableInfo = async(selection, type = '') => {
       selection.tableId = selection.id
     }
     tableInfo.value = selection
+    // console.log($t('field.qrDown'))
     // 获取表格实例
     const table = await getTableInstance(selection.tableId)
     const Product = await bridge.getEnv();
@@ -361,7 +376,7 @@ const getWindowTableInstance = async(tableId) => {
   return window.tableInstance
 }
 // 新增字段
-const addField = async (insertIndex, tableId, content, successRecords, fieldTitle='签字确认结果', isDesc = '') => {
+const addField = async (insertIndex, tableId, content, successRecords, fieldTitle= getLanguageField('result'), isDesc = '') => {
   return new Promise(async(resolve, reject) => {
     const setRecords = []
     const table = await getWindowTableInstance(tableId)
@@ -384,7 +399,7 @@ const addField = async (insertIndex, tableId, content, successRecords, fieldTitl
     const field = await table.getField(fieldId);
     // 获取所有列
     const recordIdList = await table.getRecordIdList();
-    let text = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
+    let text = fieldTitle == getLanguageField('result') ? getLanguageField('result') : getLanguageField('onlineSign')
     recordIdList.forEach(item => {
       if(successRecords.includes(item)) {
         setRecords.push({
@@ -425,7 +440,7 @@ const addImgField = async (insertIndex, tableId, url, successRecords) => {
       const table = await getWindowTableInstance(tableId);
       // 创建字段~获取字段 id
       const imgFieldLen =  insetFieldIndex.value + insertIndex || 0
-      let name = imgFieldLen ? `签字二维码【发给签字人员】${imgFieldLen}` : '签字二维码【发给签字人员】'
+      let name = imgFieldLen ? `${getLanguageField('signQr')}${imgFieldLen}` : getLanguageField('signQr')
       const fieldId = await table.addField({type: FieldType.Attachment, name});
       resolve({
         qrFieldId: fieldId,
@@ -460,7 +475,7 @@ const addImgField = async (insertIndex, tableId, url, successRecords) => {
 
 }
 
-const addFormulaField = async (insertIndex, tableId, content, fieldTitle = '签字确认结果', isDesc = '') => {
+const addFormulaField = async (insertIndex, tableId, content, fieldTitle = getLanguageField('result'), isDesc = '') => {
   return new Promise(async(resolve, reject) => {
     const table = await getWindowTableInstance(tableId);
     const formulaFieldLen = insetFieldIndex.value + insertIndex || 0
@@ -476,16 +491,16 @@ const addFormulaField = async (insertIndex, tableId, content, fieldTitle = '签�
     // 公式字段
     const formulaField = await table.getField(fieldId);
     let url = content + `&recordId=`  || 'https://www.baidu.com/'
-    let  titleVal = fieldTitle == '签字确认结果' ? '查看签字结果' : '在线签字确认'
+    let  titleVal = fieldTitle == getLanguageField('result') ? getLanguageField('viewSign') : getLanguageField('onlineSign')
     let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
     await formulaField.setFormula(contentUrl);
   })
 
 }
 
-const addFormulaLinkField = async (insertIndex, tableId, content, fieldTitle = '自动化签字链接', isRecord = true) => {
+const addFormulaLinkField = async (insertIndex, tableId, content, fieldTitle = getLanguageField('formarlLink'), isRecord = true) => {
   return new Promise(async(resolve, reject) => {
-    let isDesc = `如何通过飞书自动化推送签字消息https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
+    let isDesc = `${getLanguageField('sendLink')}https://yygongzi.feishu.cn/docx/EUdEdozAVobHQ2x4YcXcRakTnmh`
     const table = await getWindowTableInstance(tableId);
     const formulaFieldLinkLen = insetFieldIndex.value + insertIndex || 0
     let name = formulaFieldLinkLen ? `${fieldTitle}${formulaFieldLinkLen}` : fieldTitle
@@ -513,7 +528,7 @@ const addSingleSelectField = async (insertIndex, tableId, url, successRecords) =
  return new Promise(async(resolve, reject) => {
     const table = await getWindowTableInstance(tableId);
     const singleSelectLen = insetFieldIndex.value + insertIndex || 0
-    let name = singleSelectLen ? `签字状态${singleSelectLen}` : '签字状态'
+    let name = singleSelectLen ? `${getLanguageField('signStatus')}${singleSelectLen}` : getLanguageField('signStatus')
     const fieldId = await table.addField({type: FieldType.SingleSelect, name});
     resolve({
       statusFieldId: fieldId,
@@ -524,18 +539,18 @@ const addSingleSelectField = async (insertIndex, tableId, url, successRecords) =
     // //0-未查看/未签字 1-已查看/已签字 2-已查看/未签字
     await singleSelectField.addOptions([
       {
-        name: '未查看/未签字',
+        name: getLanguageField('status1'),
       },
       {
-        name: '已查看/已签字',
+        name: getLanguageField('status2'),
       },
       {
-        name: '已查看/未签字',
+        name: getLanguageField('status3'),
       },
     ]);
     const recordIdList = await table.getRecordIdList();
     recordIdList.forEach(item => {
-      singleSelectField.setValue(item, '未查看/未签字'); // 传入选项 id   
+      singleSelectField.setValue(item, getLanguageField('status1')); // 传入选项 id   
     })
  })
 }
@@ -551,7 +566,7 @@ const setUserField = async(insertIndex, tableId, selectUserFieldId, successRecor
   const table = await getWindowTableInstance(tableId);
   
   const userFieldLen = insetFieldIndex.value + insertIndex || 0
-  let name = userFieldLen ? `签字人${userFieldLen}`: '签字人'
+  let name = userFieldLen ? `${getLanguageField('signUser')}${userFieldLen}`: getLanguageField('signUser')
   const addUserFieldId = await table.addField({type: FieldType.Text, name });
   resolve({
     userField: addUserFieldId
