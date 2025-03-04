@@ -90,7 +90,7 @@ const allFieldId = computed(() => {
 })
 
 const isZHLang = computed(() => {
-  return tableInfo.value.lang != 'zh'
+  return tableInfo.value.lang != 'zh' && tableInfo.value.env == 'lark'
 })
 const handleEditToast = () => {
   message.error({

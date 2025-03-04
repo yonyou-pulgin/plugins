@@ -21,6 +21,6 @@ bitable.bridge.getLanguage().then((lang) =>
   if (!['zh', 'ja'].includes(lang)) {
     return i18n.global.locale = 'en'
   }
-  i18n.global.locale = 'en'
+  i18n.global.locale = lang
 })
 
