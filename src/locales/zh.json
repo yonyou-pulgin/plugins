@@ -34,7 +34,7 @@
 		"downBtn": "批量下载当前确认单",
 		"downBtnTip": "程序员小哥正在开发中，请耐心等待"
 	},
-
+  "selectAll": "全选",
 	"confirmTitle": "创建手写签字确认单",
 	"selectTable": "选择数据表",
 	"selectTableTip": "请选择数据表",

@@ -34,6 +34,7 @@
 		"downBtn": "Batch download",
 		"downBtnTip": "The programmer is currently developing. Please wait patiently."
 	},
+  "selectAll": "Select All",
 	"confirmTitle": "Create a signature confirmation form.",
 	"selectTable": "Select data table",
 	"selectTableTip": "Please select the data table.",

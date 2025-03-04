@@ -32,7 +32,8 @@
         <template v-else>
           <a-checkbox-group class="form-item-checkbox-group" v-model:value="hiddenCheckedList" :options="plainOptions" @change="handleGroupChange" />
           <div class="drag-all">
-              <a-checkbox :class="{'yy-field-checked': selectFields.length && selectFields.length != fieldsSortListLenth }" v-model:checked="fieldAllChecked" @click="handleAllClick">全选</a-checkbox>
+              <a-checkbox :class="{'yy-field-checked': selectFields.length && selectFields.length != fieldsSortListLenth }" v-model:checked="fieldAllChecked" @click="handleAllClick">{{$t(
+              'selectAll')}}</a-checkbox>
           </div>
           <VueDraggable
             :key="draggableKey"
@@ -695,10 +696,17 @@ const handleEditToast = () => {
 
 }
 .icon-svg-container{
-  margin-top: 2px;
-      margin-top: 4px;
-    float: left;
-    margin-right: 4px;
+  float: left;
+  margin-right: 4px;
+  margin-top: 4px;
+}
+.ant-checkbox-wrapper{
+  max-width: 93%;
+  display: inline-flex;
+  .ant-checkbox{
+    align-self: flex-start;
+    margin-top: 2px;
+  }
 }
 
 .plugin-form-radio{

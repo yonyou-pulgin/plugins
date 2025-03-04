@@ -34,6 +34,7 @@
 		"downBtn": "一括ダウンロード",
 		"downBtnTip": "プログラマーのお兄さんが現在開発中ですので、しばらくお待ちください。"
 	},
+  "selectAll": "すべて選択",
 	"confirmTitle": "手書き署名確認書を作成する",
 	"selectTable": "データテーブルを選択する",
 	"selectTableTip": "データテーブルを選択してください。",
