@@ -36,5 +36,6 @@ defineExpose({open})
 <style lang="scss" scoped>
 .auth-container{
   padding: 16px 0;
+  text-align: center;
 }
 </style>
