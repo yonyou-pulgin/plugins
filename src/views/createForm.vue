@@ -479,13 +479,13 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
       fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.sign')))
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
-      fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.result'), t('field.sendDesc')`${loginUrl}`))
+      fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.result'), `${t('field.sendDesc')}${loginUrl}`))
       fieldArr.push(addImgField(insertIndex, currentTableId, qrUrl, successRecords))
     } else {
       // 有授权  插入公式、状态
       if (isVerifyIdentity) {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
-        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.sign'), t('field.sendDesc')`${loginUrl}`))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.sign'), `${t('field.sendDesc')}${loginUrl}`))
         if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.formarlLink'), false))
       } else {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
