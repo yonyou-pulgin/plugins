@@ -6,7 +6,9 @@
     <div class="modal-container">
       <div class="modal-head">
         <div class="modal-head-title">{{ data && data.confirmName }}</div>
-        <span>未确认</span>
+        <span>{{
+                  $t('mobileSetting.status2')
+        }}</span>
       </div>
       <div class="flex-1">
         <div class="modal-cotent" v-if='data.confirmType == 2'>
@@ -17,7 +19,9 @@
             </template>
             <template v-else>
               <div class="attachment-field" v-if="item.propertyData && item.propertyData.attachmentUrls && item.propertyData.attachmentUrls.length">
-                <div class="modal-content-item-label item-name">{{ item.name }} <span>（图片点击放大）</span></div>
+                <div class="modal-content-item-label item-name">{{ item.name }} <span>{{
+                  $t('mobileSetting.scale')
+                }}</span></div>
                 <div class="modal-content-item-content item-value">
                   <a-image-preview-group>
                     <a-image :width="80" :height="80" v-for="(itemUrl, index) in item.propertyData.attachmentUrls" :key="index" :src="itemUrl" />
@@ -29,12 +33,20 @@
         </div>
 
         <div class="sign-content">
-          <div class="sign-content-head">签字确认</div>
-          <div class="sign-content-desc">请在下方灰色区域内签字</div>
+          <div class="sign-content-head">{{
+                  $t('mobileSetting.desc1')
+                }}</div>
+          <div class="sign-content-desc">{{
+                  $t('mobileSetting.desc2')
+                }}</div>
           <div class="sign-content-box"></div>
           <div class="sign-content-btn">
-            <div class="btn-reset">清除重写</div>
-            <div class="btn-sign">签好了，提交</div>
+            <div class="btn-reset">{{
+                  $t('mobileSetting.cancelBtn')
+                }}</div>
+            <div class="btn-sign">{{
+                  $t('mobileSetting.confirmBtn')
+                }}</div>
           </div>
         </div>
         </div>
@@ -46,7 +58,9 @@
 import { ref, watchEffect, onMounted, nextTick, watch } from 'vue';
 import yyModal from '@/antDesignComponents/yyModal/yy-modal.vue';
 import { image, imagePreviewGroup } from 'ant-design-vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const hasTitleLen = ref(10) // 标题最大长度
 const props = defineProps({
   data: {

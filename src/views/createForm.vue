@@ -557,7 +557,9 @@ const handleVisible = () => {
 getCacheFormData()
 onMounted(async () => {
   stepList.value = stepList.value.map((item, index) => {
-    item.title = t('baseSetting.step' + (index + 1))
+    if(tableInfo.value.lang != 'zh'){
+      item.title = t('baseSetting.step' + (index + 1))
+    }
     return item
   })
   // 比较当前表格和缓存表格是否一致  切换baseId 清空授权码

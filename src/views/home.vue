@@ -379,8 +379,10 @@ const sleep = (time) => {
 }
 onMounted(async()=>{
   plainOptions.value.forEach((item, index) => { 
-    item.label = t('isHiddenZero')
-    if(index == 1) item.label = t('isHiddenEmpty')
+    if(tableInfo.value.lang != 'zh'){
+      item.label = t('isHiddenZero')
+      if(index == 1) item.label = t('isHiddenEmpty')
+    }
   })
   bus.on('preview', () => {
     handlePreview()
@@ -565,7 +567,7 @@ const handleEditToast = () => {
     }
 
     .required{
-      padding-left: 4px;
+      // padding-left: 4px;
       &::before{
         // content: '*';
         color: #FD3B3A;
