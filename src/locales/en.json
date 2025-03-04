@@ -14,13 +14,13 @@
   },
   "baseSetting": {
     "createLoading": "Creating, please wait a moment.",
-    "step1": "Select data",
-    "step2": "Setting Confirmation Form",
-    "step3": "Creation completed",
-    "addGroup": "Join the communication group",
+    "step1": "",
+    "step2": "",
+    "step3": "",
+    "addGroup": "Consult",
     "prevBtn": "Previous step",
     "nextBtn": "Next step",
-    "previewBtn": "Online preview"
+    "previewBtn": "Preview"
   },
   "editSetting": {
     "editTitle": "Do you want to modify the current confirmation form?",
@@ -29,13 +29,13 @@
     "downBtn": "Batch download the current confirmation form",
     "downBtnTip": "The programmer is currently developing. Please wait patiently."
   },
-  "confirmTitle": "Create a handwritten signature confirmation form.",
+  "confirmTitle": "Create a signature confirmation form.",
   "selectTable": "Select data table",
   "selectTableTip": "Please select the data table.",
   "confirmType": "Select the confirmation form type",
   "confirmTypeRadio1": "Signature content + Signature box",
   "confirmTypeRadio2": "Signature box only",
-  "confirmContent": "Select the signed content",
+  "confirmContent": "Select content",
   "confirmContentEmpty": "Automatically identify after selecting the data table.",
   "isHiddenEmpty": "Hide empty data items",
   "isHiddenZero": "Hide data items with a value of 0",
@@ -43,7 +43,7 @@
   "attachmentType" : "Currently, only images are supported, and other file formats are not supported.",
   "previewLoading": "Data preview is being generated. Please wait a moment.",
   "allCount" : "Total",
-  "count": "piece",
+  "count": "",
   "selectCount": "Selected",
   "secondSetting": {
     "confirmName": "Confirmation form name",
@@ -58,11 +58,11 @@
     "selectPersonTip": "Please select the signatory.",
     "addSelectPerson": "Add a signatory",
     "deleteSelectPerson": "Delete",
-    "confirmSync": "Whether to synchronously create a confirmation form for the newly added data in the table?",
+    "confirmSync": "Add new data and create forms",
     "confirmSyncTip": "After enabling, when a new row of records is added to the data table, a confirmation form will be automatically created.",
-    "tableAuthCode": "Multi-dimensional table authorization code",
+    "tableAuthCode": "Authorization code",
     "tableAuthCodeTip": "Please enter the authorization code.",
-    "tableAuthCodeTip2": "How can I obtain the authorization code?",
+    "tableAuthCodeTip2": "How to obtain？",
     "addFormalField": "Add an automated signing link column",
     "addFormalFieldTip": "After checking, create a multi-dimensional table automation process, which can achieve Feishu push of signature messages."
   },
@@ -72,10 +72,10 @@
     "confirmSuccess": "Creation completed",
     "confirmSuccessTip": "For the confirmation form with \"identity verification\" created, \t you can send the QR code/link to the other party for signature confirmation.",
     "confirmSuccessTip2": "The created confirmation form with \"no identity verification\" allows you to send the link to the other party for signature confirmation.",
-    "verifyConfirm": "The created confirmation form is the one with 'identity verification'",
-    "verifyConfirm1": "You can send the QR code/link to the other party for signature confirmation.",
-    "noVerifyConfirm":  "The created confirmation form is for 'no identity verification'",
-    "noVerifyConfirm1": "You can send the link to the other party for signature confirmation."
+    "verifyConfirm": "The confirmation form is 'identity verification'",
+    "verifyConfirm1": "You can send the QR code/link to the others.",
+    "noVerifyConfirm":  "The confirmation form is 'no identity verification'",
+    "noVerifyConfirm1": "You can send the link to the others."
 
   }
 }

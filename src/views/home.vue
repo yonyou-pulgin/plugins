@@ -13,7 +13,7 @@
         <div class="form-item-label required">{{ $t('confirmType') }}
           <yy-tooltip style="margin-top: 4px;" overlayClassName="type-tooltips" placement="bottom" :arrowPointAtCenter="false"	isWhite :autoAdjustOverflow="true">
             <template #title>
-              <img src="@/assets/img/tips.png" width="306" />
+              <img :src="tipsUrl" width="306" />
             </template>
           </yy-tooltip>
         </div>
@@ -125,6 +125,7 @@ const fieldTypeMap = {
 const MyComponent = ref('icon-text')
 const router = useRouter()
 const cacheFormData = ref(null)
+const tipsUrl = ref('')
 // 第一步数据
 const formStep1Data = ref({
   baseId: '',
@@ -166,7 +167,7 @@ const allFields = computed(() => {
 })
 // 确认单选择文案
 const fieldTitle = computed(() => {
-  return `(${t('allCount')}：${fieldsSortListLenth.value}${t('count')}，：${t('selectCount')}${selectFields.value.length}${t('count')})`
+  return ` (${t('allCount')}：${fieldsSortListLenth.value}${t('count')}，${t('selectCount')}：${selectFields.value.length}${t('count')})`
 })
 
 const selectFields = computed(() => {
@@ -384,6 +385,7 @@ onMounted(async()=>{
   bus.on('preview', () => {
     handlePreview()
   })
+  tipsUrl.value = require(`@/assets/img/tips-${tableInfo.value.lang}.png`)
 })
 onBeforeUnmount(()=> {
   bus.off('preview')
