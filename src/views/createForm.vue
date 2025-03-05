@@ -130,7 +130,7 @@ const handleClick = () => {
     console.log(error);
   }
   message.info({
-    content: t('baseSetting.downBtnTip'),
+    content: t('editSetting.downBtnTip'),
     class: 'yy-message-error',
   })
 }
