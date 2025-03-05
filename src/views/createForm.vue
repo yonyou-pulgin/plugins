@@ -500,7 +500,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
 
 const handleCopyLink = async () => {
   try {
-    await toClipboard(`${t(fieldList.invite1)}${confirmResult.value.confirmName || '数据表'}${t(fieldList.invite2)}` + confirmResult.value.userViewUrl)
+    await toClipboard(`${t('fieldList.invite1')}${confirmResult.value.confirmName || '数据表'}${t('fieldList.invite2')}` + confirmResult.value.userViewUrl)
     message.success({
       content: t('field.copyLink'),
       class: 'yy-message-success',
