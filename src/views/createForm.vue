@@ -18,8 +18,8 @@
         @click="handleNext">{{ $t('baseSetting.nextBtn') }}</yy-button>
       <template v-if="current == 2">
         <template v-if="confirmResult.isVerifyIdentity">
-          <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">{{ $t('baseSetting.previewBtn') }}</yy-button>
-          <yy-button type="primary" @click="handleDownQr">{{ $t('baseSetting.previewBtn') }}</yy-button>
+          <yy-button class="steps-action-button yy-custom-btn-operate" @click="handleCopyLink">{{ $t('thirdSetting.copyLink') }}</yy-button>
+          <yy-button type="primary" @click="handleDownQr">{{ $t('thirdSetting.downCode') }}</yy-button>
         </template>
         <!-- <yy-button v-else type="primary" @click="closePlugin">完成</yy-button> -->
       </template>
