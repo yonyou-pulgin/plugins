@@ -21,9 +21,13 @@ const visible = ref(false)
 const tipUrl = ref('')
 
 
+watch(() => tableInfo.value && tableInfo.value.lang, (val) => {
+  if (val) {
+    tipUrl.value = require(`@/assets/img/authTips-${tableInfo.value.lang}.png`)
+  }
+}, { deep: true, immediate: true })
+
 onMounted(async() => {
-  await bitable.bridge.setData('yy-authCode', 'hello world');
-   tipUrl.value = require(`@/assets/img/authTips-${tableInfo.value.lang}.png`)
 })
 const open = async() => {
   visible.value = true

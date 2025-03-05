@@ -519,6 +519,17 @@ const handleDownQr = () => {
   })
 }
 
+watch(() => tableInfo.value && tableInfo.value.lang, (val) => {
+  if (val) {
+    stepList.value = stepList.value.map((item, index) => {
+      if(tableInfo.value.lang != 'zh'){
+        item.title = t('baseSetting.step' + (index + 1))
+      }
+      return item
+    })
+  }
+}, { deep: true, immediate: true })
+
 watch(() => formData.value, async(val) => {
   if(!initFlag.value) current.value = val.currentStep || 0
   const currentTableId = tableInfo.value.tableId
@@ -556,14 +567,6 @@ const handleVisible = () => {
 
 getCacheFormData()
 onMounted(async () => {
-
-handleCopyLink()
-  stepList.value = stepList.value.map((item, index) => {
-    if(tableInfo.value.lang != 'zh'){
-      item.title = t('baseSetting.step' + (index + 1))
-    }
-    return item
-  })
   // 比较当前表格和缓存表格是否一致  切换baseId 清空授权码
   const cacheBaseId = await bitable.bridge.getData('yy-baseId')
   const currentBaseId = tableInfo.value.baseId

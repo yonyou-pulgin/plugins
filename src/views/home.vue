@@ -262,6 +262,7 @@ watch(() => selectFields.value, (val) => {
 // 监听缓存数据
 watch(() => formData.value, async(val) => {
   if(!val || initFlag.value) return false
+  tipsUrl.value = require(`@/assets/img/tips-${tableInfo.value.lang}.png`)
   const selection = val.selection || tableInfo.value// 读取cache
   if(val.confirmId){
     formData.value.dataSheet = val.tableId
@@ -388,7 +389,6 @@ onMounted(async()=>{
   bus.on('preview', () => {
     handlePreview()
   })
-  tipsUrl.value = require(`@/assets/img/tips-${tableInfo.value.lang}.png`)
 })
 onBeforeUnmount(()=> {
   bus.off('preview')
