@@ -139,7 +139,7 @@ defineExpose({ open })
     }
     span {
       display: inline-block;
-      width: 48px;
+      padding: 0 4px;
       height: 20px;
       background: #ff8b00;
       font-weight: initial!important;
