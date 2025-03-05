@@ -73,8 +73,8 @@
 		"addFormalFieldTip": "チェックを入れると多次元表の自動化フローが作成され、飛書で署名メッセージをプッシュすることができます。"
 	},
 	"thirdSetting": {
-		"copyLink": "リンクをコピーする",
-		"downCode": "ダウンロード用QRコード",
+		"copyLink": "リンクコピー",
+		"downCode": "QR コード DL",
 		"confirmSuccess": "作成完了",
 		"verifyConfirm": "作成したのは「身元検証あり」確認書です。",
 		"verifyConfirm1": "QRコードやリンクを相手に送り、サインで確認させることができます。",

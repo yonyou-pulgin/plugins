@@ -99,6 +99,8 @@
 		"sendDesc": "Please send the link to the signatory:",
 		"copyLink": "The link has been copied. You can click the link to sign and confirm.",
     "qrDown": "The QR code has been downloaded. You can sign for confirmation after scanning the code.",
-    "sortDesc": "The sorting field does not exist"
+    "sortDesc": "The sorting field does not exist",
+    "invite1": "You are invited to provide your feedback on 【",
+    "invite2": "] Sign and confirm. Click the link:"
 	}
 }
