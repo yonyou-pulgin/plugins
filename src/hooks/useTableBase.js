@@ -118,7 +118,9 @@ const setTableInfo = async(selection, type = '') => {
     const table = await getTableInstance(selection.tableId)
     const Product = await bridge.getEnv();
     tableInfo.value.env = Product.product;
-    tableInfo.value.lang = await bridge.getLanguage();
+    const lang = await bridge.getLanguage();
+    tableInfo.value.lang = ['zh', 'ja' , 'en'].includes(lang) ? lang : 'en';
+    console.log(tableInfo.value.lang)
     // 获取当前多维表格下所有的数据表
     getTableName(selection.tableId)
     getTableSheetList(selection.tableId)
