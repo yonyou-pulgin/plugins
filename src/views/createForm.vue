@@ -283,52 +283,7 @@ const handleSubmit = async () => {
       loading.value = false
       return false
     }
-
   }
-
-  const myNextTick = async () => {
-    
-    let observerOption = {
-      childList: true,
-      attributes: true,
-      subTree: true
-    }
-
-    const observer = new MutationObserver(() => {
-      cb()
-    })
-
-
-    observer.observe(document.querySelector('.ant-modal-body'), observerOption)
-  }
-
-  const loop = (arr) => {
-    let result = [[]]
-
-    for (item of arr){
-      const length = result.length 
-
-      for(let i = 0 ; i < length; i++){
-        result[i].push([item])
-      }
-    }
-  }
-
-
-function combinations(nums) { // [1,2,3]
-  const result = [];
-  function backtrack(currentSubset, startIndex) { 
-    result.push([...currentSubset]); // [[]] [[], [1]]
-    for (let i = startIndex; i < nums.length; i++) {
-      currentSubset.push(nums[i]); // [1]
-      backtrack(currentSubset, i + 1); // [1] , 1
-      currentSubset.pop();[]
-    }
-  }
-  backtrack([], 0);
-  return result;
-}
-  console.log(combinations([1,2,3]));
   confirmOperate(params).then(async (res) => {
     if (res.success) {
       // 创建成功 清楚缓存数据
@@ -476,7 +431,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     // 无身份、无授权插入链接
     if (!isNewRecordConfirm && !isVerifyIdentity) {
     
-      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.sign')))
+      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.onlineSign')))
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
       fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.result'), `${t('field.sendDesc')}${loginUrl}`))
