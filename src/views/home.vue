@@ -300,13 +300,19 @@ const initField = () => {
   if(draggableKey.value){
      cacheFieldSort = editFieldSort.value || []
   }
-
   fieldsSortList.value = fieldsSortList.value.filter(item => ![0, 7, 15].includes(item.type) && !item.isHidden).map(item => {
     if((tableChangeFlag.value || !cacheFieldSort.length) && !draggableKey.value){
       item.checked = true
     } else {
       item.checked = cacheFieldSort.includes(item.id)
-      item.sort = editFieldSort.value.indexOf(item.id) > -1 ? editFieldSort.value.indexOf(item.id) : allFields.value.length -1
+      // 排序
+      if(editFieldSort.value && editFieldSort.value.length){
+        let index = editFieldSort.value.indexOf(item.id)
+        item.sort = index > -1? index : allFields.value.length -1
+      } else {
+        let index = cacheFieldSort.indexOf(item.id)
+        item.sort = index > -1? index : allFields.value.length -1
+      }
     }
     return item
   })
