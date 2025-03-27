@@ -418,8 +418,9 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
   for (const item of configFieldsPromise) {
     let insertIndex = index++
     let fieldArr = []
+    console.log(insertIndex)
         // 延迟1秒，等字段创建完保证顺序执行
-    let time = 2000
+    let time = insertIndex ? isNewRecordConfirm ? 3000 : 2000 : 0
     await delay(time)
     // 处理多级签字人
     if (signType) {
@@ -431,7 +432,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
     // 无身份、无授权插入链接
     if (!isNewRecordConfirm && !isVerifyIdentity) {
     
-      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.onlineSign')))
+      fieldArr.push(addField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.sign')))
     } else if (!isNewRecordConfirm && isVerifyIdentity) {
       // 有身份 、无授权 插入链接、二维码
       fieldArr.push(addField(insertIndex, currentTableId, `${createUserViewUrl}&field_id=${routeFieldId}&sort=${sort}`, successRecords, t('field.result'), `${t('field.sendDesc')}${loginUrl}`))
@@ -444,7 +445,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
         if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.formarlLink'), false))
       } else {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
-        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, ))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`, t('field.sign') ))
         if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${formulaUrlEmp}&field_id=${routeFieldId}&sort=${sort}`,))
       }
     }
