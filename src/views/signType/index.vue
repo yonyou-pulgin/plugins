@@ -22,7 +22,7 @@
         <yy-select :disabled="isZHLang" v-if="isVerifyIdentity" class="yy-fs-from-item"  :placeholder="$t('secondSetting.selectPhoneTip')" :showArrow="true" :options="phoneFields" v-model:value="item.mdnFieldId" @change="handleChange(index, $event, 'phone')"></yy-select>
       </div>
 
-      <span v-if="signType && configFields.length < 5 && !isEditVisible" class="sign-type-add" @click="handleSignTypeAdd">
+      <span v-if="signType && configFields.length < 8 && !isEditVisible" class="sign-type-add" @click="handleSignTypeAdd">
         {{ $t('secondSetting.addSelectPerson') }}
       </span>
     </div>

@@ -440,7 +440,7 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
       // 有授权  插入公式、状态
       if (isVerifyIdentity) {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
-        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.sign'), `${t('field.sendDesc')}${loginUrl}`))
+        fieldArr.push(addFormulaField(insertIndex, currentTableId, `${formulaUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.result'), `${t('field.sendDesc')}${loginUrl}`))
         if (formulaLink) fieldArr.push(addFormulaLinkField(insertIndex, currentTableId, `${loginUrl}&field_id=${routeFieldId}&sort=${sort}`, t('field.formarlLink'), false))
       } else {
         fieldArr.push(addSingleSelectField(insertIndex, currentTableId))
