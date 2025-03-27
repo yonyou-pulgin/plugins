@@ -6,7 +6,7 @@
       <span :class="{'is-active': signType == 1}" @click="handleSignType(1)"> {{ $t('secondSetting.confirmNameSignType2') }}</span>
     </div>
 
-    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 5, 'sign-type-switch-disabled':isEditVisible}">
+    <div class="sign-type-list" :class="{'sign-list-all': currentConfigFields.length == 8, 'sign-type-switch-disabled':isEditVisible}">
       <a-checkbox class="checkbox-plugin" :disabled="isZHLang" :class="{'checkbox-margin': !signType && !isVerifyIdentity }" v-model:checked="isVerifyIdentity"> {{ $t('secondSetting.isVerify') }}</a-checkbox>
 
       <div class="sign-type-item" v-for="(item, index) in currentConfigFields" :key="item.key || index">
