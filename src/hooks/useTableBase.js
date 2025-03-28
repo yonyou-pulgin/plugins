@@ -120,7 +120,6 @@ const setTableInfo = async(selection, type = '') => {
     tableInfo.value.env = Product.product;
     const lang = await bridge.getLanguage();
     tableInfo.value.lang = ['zh', 'ja' , 'en'].includes(lang) ? lang : 'en';
-    console.log(tableInfo.value.lang)
     // 获取当前多维表格下所有的数据表
     getTableName(selection.tableId)
     getTableSheetList(selection.tableId)
@@ -129,8 +128,8 @@ const setTableInfo = async(selection, type = '') => {
     getCellList(selection.tableId)
     getTenantKey()
     getUserId()
+    
     // 监听 field 变化
-
     table.onFieldAdd((event) => {
       console.log('add tableId:' + tableInfo.value.tableId)
       getTableFieldList(tableInfo.value.tableId)
@@ -371,11 +370,23 @@ const deleteField = async (tableId, fieldId) => {
   // 或者传递 fieldId
   await table.deleteField(fieldId);
 }
-
+// 获取当前table实例
 const getWindowTableInstance = async(tableId) => {
   if(window.tableInstance) return window.tableInstance
   else window.tableInstance = await getTableInstance(tableId);
   return window.tableInstance
+}
+
+// 获取当前table recordId
+const getWindowRecordIdList = async(tableId) => {
+  if(window.recordId) return window.recordId
+  else {
+    const table = await getTableInstance(tableId);
+    // 获取所有列
+    const recordIdList = await table.getRecordIdList();
+    window.recordId = recordIdList
+    return recordIdList
+  }
 }
 // 新增字段
 const addField = async (insertIndex, tableId, content, successRecords, fieldTitle= getLanguageField('result'), isDesc = '') => {
@@ -400,7 +411,7 @@ const addField = async (insertIndex, tableId, content, successRecords, fieldTitl
     // 通过字段 id 获取字段实例
     const field = await table.getField(fieldId);
     // 获取所有列
-    const recordIdList = await table.getRecordIdList();
+    const recordIdList = await getWindowRecordIdList(tableId);
     let text = fieldTitle == getLanguageField('result') ? getLanguageField('result') : getLanguageField('onlineSign')
     recordIdList.forEach(item => {
       if(successRecords.includes(item)) {
@@ -451,7 +462,7 @@ const addImgField = async (insertIndex, tableId, url, successRecords) => {
       const field = await table.getField(fieldId);
 
       // 获取所有列
-      const recordIdList = await table.getRecordIdList();
+      const recordIdList = await getWindowRecordIdList(tableId);
 
       recordIdList.forEach(item => {
         if(successRecords.includes(item)) {
@@ -495,7 +506,7 @@ const addFormulaField = async (insertIndex, tableId, content, fieldTitle = getLa
     let url = content + `&recordId=`  || 'https://www.baidu.com/'
     let  titleVal = fieldTitle == getLanguageField('result') ? getLanguageField('viewSign') : getLanguageField('onlineSign')
     let contentUrl = `HYPERLINK(CONCATENATE("${url}",RECORD_ID()),"${titleVal}")`
-    await formulaField.setFormula(contentUrl);
+    formulaField.setFormula(contentUrl);
   })
 
 }
@@ -521,7 +532,7 @@ const addFormulaLinkField = async (insertIndex, tableId, content, fieldTitle = g
     let  contentUrl = ''
     if(isRecord) contentUrl = `CONCATENATE("${url}", RECORD_ID())`
     else contentUrl = `CONCATENATE("${url}&rowId=", RECORD_ID())`
-    await formulaField.setFormula(contentUrl);
+    formulaField.setFormula(contentUrl);
   })
 
 }
@@ -539,7 +550,7 @@ const addSingleSelectField = async (insertIndex, tableId, url, successRecords) =
     // 获取单选实力
     const singleSelectField = await table.getField(fieldId);
     // //0-未查看/未签字 1-已查看/已签字 2-已查看/未签字
-    await singleSelectField.addOptions([
+    singleSelectField.addOptions([
       {
         name: getLanguageField('status1'),
       },
@@ -549,19 +560,79 @@ const addSingleSelectField = async (insertIndex, tableId, url, successRecords) =
       {
         name: getLanguageField('status3'),
       },
-    ]);
-    const recordIdList = await table.getRecordIdList();
-    recordIdList.forEach(item => {
-      singleSelectField.setValue(item, getLanguageField('status1')); // 传入选项 id   
+    ]).then(async (res) => {
+      const options = await singleSelectField.getOptions();
+      setSingleSelectValue(tableId, [fieldId], options[0].id)
     })
+    // const recordIdList = await table.getRecordIdList();
+    // recordIdList.forEach(item => {
+    //   singleSelectField.setValue(item, getLanguageField('status1')); // 传入选项 id   
+    // })
  })
+}
+// 设置单选值
+/**
+ * @param {*} tableId 表格id
+ * @param {*} singleFields  单选字段id 数组
+ * @returns
+ */
+const setSingleSelectValue = async (tableId, singleFields = [], optionId = '') => {
+  const table = await getWindowTableInstance(tableId);
+  const recordIdList = await getWindowRecordIdList(tableId);
+  // let singleFiledArr  = currentSingleSelectField.value.map(item => 
+  //   table.getField(toRaw(item))
+  // )
+  // const singleFieldsInstance = await Promise.all(singleFiledArr)
+  // recordIdList.forEach(item => {
+  //   for (let fieldItem of singleFieldsInstance){
+  //     fieldItem.setValue(item, getLanguageField('status1'));
+  //   }
+  // })
+  // 批量赋值 
+  let singleFieldsVal = {}
+  for (let i = 0; i < singleFields.length; i++) {
+    singleFieldsVal[singleFields[i]] =  {
+      id: optionId || ''
+    }
+  }
+  const obj = recordIdList.map(item => ({
+    recordId: item,
+    fields: singleFieldsVal
+  }))
+  table.setRecords(obj)
 }
 
 const closePlugin = async () => {
-   console.log(bitable.ui)
-  // await bitable.ui.closeHostContainer()
+  bitable.ui.closeHostContainer()
 }
 
+const getAddUser = (tableId, selectUserFieldId, addUserFieldId) => {
+  return new Promise(async(resolve, reject) => {
+    const table = await getWindowTableInstance(tableId);
+    const recordList = await getWindowRecordIdList(tableId);
+    let arr = []
+    recordList.map(async item => {
+      let cellValue = await table.getCellValue(selectUserFieldId, item);
+      if(Array.isArray(cellValue) && cellValue[0]){    
+        let currentField = cellValue[0]
+          currentField = Object.assign({
+          "type": "mention",
+          "mentionType": "User",
+          "token": currentField.id,
+          "text": `@${currentField.name}`
+        }, currentField)
+        cellValue = [currentField]
+      }
+      arr.push({
+        recordId: item,
+        fields: {
+          [addUserFieldId] : cellValue
+        }
+      })
+      resolve(arr)
+    })
+  })
+}
 // 设置人员
 const setUserField = async(insertIndex, tableId, selectUserFieldId, successRecords) => {
  return new Promise(async(resolve, reject) => {
@@ -573,33 +644,35 @@ const setUserField = async(insertIndex, tableId, selectUserFieldId, successRecor
   resolve({
     userField: addUserFieldId
   })
-  // 获取对应列的字段
-  const userField = await table.getField(selectUserFieldId);
+  // 批量设置人员
+  const userResult = await getAddUser(tableId, selectUserFieldId, addUserFieldId)
+  table.setRecords(userResult)
+
   // 获取行数据
-  const recordList = await table.getRecordList();
-  recordList.recordIdList.map(async item => {
-    if(successRecords.includes(item)) {
-      // 获取对应的人员
-      let cellValue = await table.getCellValue(selectUserFieldId, item);
-      // const cellValue = await userField.getValue(item);
-      if(Array.isArray(cellValue) && cellValue[0]){
-        // 人员字段赋值
-        let currentField = cellValue[0]
-        if(!currentField.type && currentField.name && currentField.id ){
-          currentField = Object.assign({
-            "type": "mention",
-            "mentionType": "User",
-            "token": currentField.id,
-            "text": `@${currentField.name}`
-          }, currentField)
-          cellValue = [currentField]
-        }
-        const modifiedUserField = await table.getField(addUserFieldId);
-        // 设置人员
-        await modifiedUserField.setValue(item, cellValue);
-      }
-    }
-  })
+  // const recordList = await getWindowRecordIdList(tableId);
+  // recordList.map(async item => {
+  //   if(successRecords.includes(item)) {
+  //     // 获取对应的人员
+  //     let cellValue = await table.getCellValue(selectUserFieldId, item);
+  //     // const cellValue = await userField.getValue(item);
+  //     if(Array.isArray(cellValue) && cellValue[0]){
+  //       // 人员字段赋值
+  //       let currentField = cellValue[0]
+  //       if(!currentField.type && currentField.name && currentField.id ){
+  //         currentField = Object.assign({
+  //           "type": "mention",
+  //           "mentionType": "User",
+  //           "token": currentField.id,
+  //           "text": `@${currentField.name}`
+  //         }, currentField)
+  //         cellValue = [currentField]
+  //       }
+  //       const modifiedUserField = await table.getField(addUserFieldId);
+  //       // 设置人员
+  //       modifiedUserField.setValue(item, cellValue);
+  //     }
+  //   }
+  // })
 
  })
 }

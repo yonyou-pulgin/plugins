@@ -328,6 +328,7 @@ const handleSubmit = async () => {
           loading.value = false
         }, 1000 * params.configFields.length);
       }
+    
       // 更新字段
       handleUpdateField(params, confirmId)
     } else {
@@ -396,7 +397,6 @@ const handleUpdateField = async (params, confirmId) => {
 
   // 准备更新参数
   const updateParams = { confirmId, configFields: fieldArr };
-
   // 执行更新操作
   try {
     await confirmUpdate(updateParams);
@@ -418,9 +418,10 @@ const insertField = async (isNewRecordConfirm, isVerifyIdentity, configFields = 
   for (const item of configFieldsPromise) {
     let insertIndex = index++
     let fieldArr = []
-    console.log(insertIndex)
+
         // 延迟1秒，等字段创建完保证顺序执行
-    let time = insertIndex ? isNewRecordConfirm ? 3000 : 2000 : 0
+    let time = insertIndex ? 2000 + 300 * insertIndex : 0
+    console.log(time)
     await delay(time)
     // 处理多级签字人
     if (signType) {
